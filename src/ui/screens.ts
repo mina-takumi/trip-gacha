@@ -70,7 +70,7 @@ export function mainScreen(v: MainView): string {
   const od = (r: Rarity, cls = '') => `<div class="od panel ${cls}"><b>${pct(v.odds[r])}<small>%</small></b><span><i class="dot ${r}"></i>${RARITY_LABEL[r]}</span></div>`;
   return `
     ${v.storageOk ? '' : '<div class="notice panel warn"><b>記録が、残せません。</b>このブラウザでは端末に記録を保存できないため、閉じると集めたカードが消えます。プライベートブラウズなら、通常のモードで開いてください。</div>'}
-    <div class="top"><span class="logo">トリップガチャ</span><span class="shard"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</span></div>
+    <div class="top"><span class="logo">トリップガチャ</span><span class="top-r"><button class="reload" data-act="reload" aria-label="最新版に更新">${icon('reload')}<span class="reload-t">更新</span></button><span class="shard"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</span></span></div>
     <div class="lead">今日、歩いた。</div>
     <div class="huge">${km(v.distanceM)}<small>km</small></div>
     <div class="feet" role="img" aria-label="${km(MAX_M)}kmまでのうち${km(v.distanceM)}km">${feet}</div>

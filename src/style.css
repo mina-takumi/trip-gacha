@@ -70,9 +70,25 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 /* ---------- メイン ---------- */
 .top { display: flex; justify-content: space-between; align-items: center; }
 .logo { font: 400 22px var(--hand); }
+.top-r { display: flex; align-items: center; gap: 14px; }
+.reload { display: flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 12px; border: 2px solid var(--line); border-radius: 22px;
+  background: var(--paper); box-shadow: 2px 2px 0 var(--line); font-weight: 900; font-size: 13px; color: var(--navy); }
+.reload:active { transform: translate(2px, 2px); box-shadow: none; }
+.reload:disabled { opacity: .55; }
+.logo, .reload, .shard { white-space: nowrap; }
+.reload svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .shard { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 15px; }
 .shard .ic { width: 26px; height: 26px; border: 2px solid var(--line); background: var(--mustard); }
 .shard .ic svg { width: 13px; height: 13px; stroke: var(--navy); }
+/* 幅の狭いスマホ(iPhone SE 初代など)では、更新ボタンを絵だけにして1行に収める */
+@media (max-width: 359px) {
+  .logo { font-size: 19px; }
+  .top-r { gap: 8px; }
+  .reload { width: 44px; padding: 0; justify-content: center; }
+  .reload-t { display: none; }
+  .shard { font-size: 13px; gap: 4px; }
+  .shard .ic { width: 22px; height: 22px; }
+}
 .lead { font-weight: 900; font-size: 14px; margin-top: 18px; color: var(--ink-soft); letter-spacing: .06em; }
 .huge { font: 400 108px/0.95 var(--hand); color: var(--navy); text-shadow: 4px 4px 0 rgba(232, 85, 47, .55); letter-spacing: -.02em; }
 .huge small { font-size: 32px; text-shadow: none; margin-left: 6px; letter-spacing: 0; }

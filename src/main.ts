@@ -19,7 +19,7 @@ import {
   detailScreen, mainScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearStation, type Tab,
 } from './ui/screens.ts';
 
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 
 // ベータ版は駅だけ
 const stations: Spot[] = spotsJson.spots
@@ -156,6 +156,28 @@ function showToast(text: string): void {
 }
 
 // ---------- 操作 ----------
+// 端末に保存した古い版ではなく、公開中の最新版で開き直す。記録は端末に保存してあるので消えない
+async function reloadLatest(): Promise<void> {
+  showToast('最新版を確かめています。');
+  render();
+  const reg = await navigator.serviceWorker?.getRegistration().catch(() => undefined);
+  try {
+    await reg?.update();
+  } catch {
+    // 電波がないときは、保存してある今の版で開き直す
+  }
+  const next = reg?.installing ?? reg?.waiting;
+  if (next) {
+    await new Promise<void>((resolve) => {
+      const check = () => { if (next.state === 'activated' || next.state === 'redundant') resolve(); };
+      next.addEventListener('statechange', check);
+      check();
+      setTimeout(resolve, 10_000);
+    });
+  }
+  location.reload();
+}
+
 function spin(spotId: string): void {
   const now = Date.now();
   if (!geofence.insideStopIds().includes(spotId) || cooldownRemainingMs(state.save, spotId, now) > 0) return;
@@ -210,6 +232,7 @@ app.addEventListener('click', (e) => {
       break;
     case 'import-cancel': state.pendingImport = null; break;
     case 'map-center': mapView?.center(); return;
+    case 'reload': (el as HTMLButtonElement).disabled = true; reloadLatest(); return;
     default: return;
   }
   render();

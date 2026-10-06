@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>トリップガチャ UI見本 v1</title>
+<style>
+  :root {
+    --sys: -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
+    --mincho: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif;
+    --maru: ui-rounded, "Hiragino Maru Gothic ProN", "BIZ UDPGothic", "Yu Gothic UI", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #DADDE3; font-family: var(--sys); color: #222; padding: 32px 24px 64px; }
+  .page-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .page-note { font-size: 13px; color: #555; margin-bottom: 28px; }
+  .row-head { display: flex; align-items: baseline; gap: 14px; margin: 40px 0 14px; }
+  .row-head h2 { font-size: 20px; }
+  .row-head p { font-size: 13px; color: #555; }
+  .row { display: flex; gap: 36px; flex-wrap: wrap; }
+  .cap { font-size: 12px; color: #555; margin: 0 0 8px 6px; }
+
+  /* ---------- 電話の枠 ---------- */
+  .phone { width: 390px; height: 844px; border-radius: 48px; overflow: hidden; position: relative;
+    box-shadow: 0 0 0 10px #17181C, 0 24px 50px rgba(0,0,0,.28); }
+  .status { height: 50px; display: flex; justify-content: space-between; align-items: center; padding: 6px 30px 0 34px;
+    font: 600 15px var(--sys); }
+  .status i { width: 25px; height: 12px; border: 1.5px solid currentColor; border-radius: 4px; position: relative; opacity: .8; }
+  .status i::after { content: ""; position: absolute; inset: 1.5px 6px 1.5px 1.5px; background: currentColor; border-radius: 1.5px; }
+  .body { position: absolute; top: 50px; left: 0; right: 0; bottom: 84px; overflow: hidden; padding: 8px 20px 0; }
+  .tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; display: grid; grid-template-columns: repeat(4, 1fr);
+    padding: 8px 8px 26px; }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; }
+  .tab b { width: 22px; height: 22px; display: block; border: 2px solid currentColor; }
+  .tab.home b { border-radius: 50%; }
+  .tab.book b { border-radius: 3px; width: 18px; }
+  .tab.map b { border-radius: 50% 50% 50% 0; transform: rotate(-45deg); width: 18px; height: 18px; margin: 2px 0; }
+  .tab.set b { border-radius: 50%; border-style: dotted; border-width: 3px; }
+
+  /* ---------- カード(3案共通) ---------- */
+  .card { border-radius: 10px; padding: 5px; background: var(--frame); box-shadow: 0 6px 16px rgba(10, 18, 40, .25); }
+  .card .in { background: #131A31; border-radius: 6px; padding: 7px 7px 0; text-align: center; }
+  .card .num { font: 600 12px/1 var(--mincho); letter-spacing: .14em; color: #E7CF8E; padding: 2px 0 7px; }
+  .card img { width: 100%; aspect-ratio: 1; display: block; border-radius: 3px; }
+  .card .nm { font: 600 14px/1.35 var(--mincho); color: #F2E6C2; padding: 9px 4px 11px; }
+  .r-N { --frame: linear-gradient(135deg, #7C3F1A, #D9935C 42%, #8A4A22 70%, #C47C47); }
+  .r-R { --frame: linear-gradient(135deg, #7F8891, #F1F4F6 42%, #8C959E 70%, #D6DCE1); }
+  .r-SR { --frame: linear-gradient(135deg, #8E6210, #FBE08A 42%, #A7761C 70%, #EDC860); }
+  .card.sm { padding: 3px; border-radius: 7px; box-shadow: 0 3px 8px rgba(10, 18, 40, .2); }
+  .card.sm .in { padding: 4px 4px 4px; border-radius: 4px; }
+  .card.sm .num { font-size: 9px; padding: 1px 0 4px; }
+  .card.sm .nm { display: none; }
+  /* まだ持っていないカード。画面の地の色になじませ、持っているカードを目立たせる */
+  .card.back { --frame: var(--back-line); box-shadow: none; }
+  .card.back .in { background: var(--back-bg); }
+  .card.back .num { color: var(--back-ink); }
+  .card.back .q { aspect-ratio: 1; border-radius: 3px; display: grid; place-items: center; color: var(--back-ink); font: 600 22px var(--mincho);
+    border: 1.5px dashed var(--back-line); }
+  .big { width: 262px; margin: 0 auto; }
+
+  /* 確率のバー(3案共通の形、色は案ごと) */
+  .odds { display: flex; height: 10px; border-radius: 5px; overflow: hidden; }
+  .odds span:nth-child(1) { flex: 65; background: #C58A5A; }
+  .odds span:nth-child(2) { flex: 25; background: #AEB8C2; }
+  .odds span:nth-child(3) { flex: 10; background: #E2B23E; }
+  .odds-legend { display: flex; gap: 14px; font-size: 12px; margin-top: 8px; }
+  .odds-legend em { font-style: normal; font-weight: 700; }
+  .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: 0; }
+  .sw.n { background: #C58A5A; } .sw.r { background: #AEB8C2; } .sw.s { background: #E2B23E; }
+
+  /* =========================================================
+     案A すっきり白: 白地に濃紺。移動距離を「路線図」で見せる
+     ========================================================= */
+  .tA { background: #FFFFFF; color: #15203B; --back-bg: #F4F6F9; --back-line: #D5DAE3; --back-ink: #9AA2B4; }
+  .tA .tabbar { background: rgba(255,255,255,.96); border-top: 1px solid #E5E8EE; color: #8A92A6; }
+  .tA .tab.on { color: #15203B; font-weight: 700; }
+  .tA .label { font-size: 12px; color: #5D6680; letter-spacing: .06em; }
+  .tA .dist { font: 700 40px/1.1 var(--sys); letter-spacing: -.01em; margin: 2px 0 14px; }
+  .tA .dist small { font-size: 18px; font-weight: 600; margin-left: 3px; }
+  .route { position: relative; height: 22px; margin: 0 4px; }
+  .route::before { content: ""; position: absolute; left: 0; right: 0; top: 9px; height: 4px; border-radius: 2px; background: #E3E7EE; }
+  .route .done { position: absolute; left: 0; top: 9px; height: 4px; border-radius: 2px; background: #15203B; width: 37.3%; }
+  .route .stops { position: absolute; inset: 0; display: flex; justify-content: space-between; }
+  .route .stops i { width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: #fff; border: 2px solid #C9CFDA; }
+  .route .stops i.p { border-color: #15203B; background: #15203B; }
+  .route .me { position: absolute; top: 2px; left: 37.3%; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%;
+    background: #fff; border: 4px solid #A87A1E; }
+  .route-ends { display: flex; justify-content: space-between; font-size: 11px; color: #8A92A6; margin: 6px 0 4px; }
+  .tA .hint { font-size: 13px; color: #A87A1E; font-weight: 600; margin-bottom: 18px; }
+  .tA .rule { height: 1px; background: #E5E8EE; margin: 18px -20px; }
+  .tA h3 { font-size: 15px; margin-bottom: 10px; }
+  .tA .st { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #EEF0F4; }
+  .tA .st .n { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid #15203B; display: grid; place-items: center;
+    font: 600 12px var(--mincho); }
+  .tA .st .t { flex: 1; } .tA .st .t b { display: block; font-size: 16px; } .tA .st .t span { font-size: 12px; color: #5D6680; }
+  .tA .btn { height: 44px; min-width: 84px; padding: 0 18px; border-radius: 12px; border: 0; background: #15203B; color: #fff;
+    font: 700 15px var(--sys); }
+  .tA .btn.wait { background: #EEF0F4; color: #5D6680; font-weight: 600; font-size: 13px; }
+  .tA .btn.ghost { background: #fff; color: #15203B; border: 1.5px solid #15203B; }
+  .tA .empty { margin-top: 18px; padding: 14px; border: 1px dashed #C9CFDA; border-radius: 12px; font-size: 13px; color: #5D6680; line-height: 1.6; }
+  .tA .res-top { text-align: center; padding: 18px 0 22px; }
+  .tA .res-top .kind { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .14em; color: #8E6210;
+    border: 1.5px solid #D9B45A; border-radius: 99px; padding: 4px 14px; }
+  .tA .res-top h2 { font-size: 22px; margin-top: 10px; }
+  .tA .actions { display: flex; gap: 10px; margin-top: 24px; } .tA .actions .btn { flex: 1; }
+  .tA .dup { margin-top: 16px; font-size: 12.5px; color: #5D6680; text-align: center; }
+  .tA .z-head { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 0 16px; }
+  .tA .z-head h2 { font-size: 26px; } .tA .z-head span { font-size: 13px; color: #5D6680; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 12px; }
+  .tile .sn { font-size: 11.5px; text-align: center; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dots { display: flex; justify-content: center; gap: 4px; margin-top: 4px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid #C9CFDA; }
+  .dots i.N { background: #C58A5A; border-color: #C58A5A; } .dots i.R { background: #AEB8C2; border-color: #AEB8C2; } .dots i.SR { background: #E2B23E; border-color: #E2B23E; }
+
+  /* =========================================================
+     案B 駅スタンプ帳: 切符の薄緑。駅を回すと朱色のスタンプ
+     ========================================================= */
+  .tB { background: #E6EFE7; color: #1E3A2F; --back-bg: #EEF5EF; --back-line: #B7CBBD; --back-ink: #8BA394; }
+  .tB .tabbar { background: #F4F8F3; border-top: 1px dashed #9FB8A8; color: #7C9187; }
+  .tB .tab.on { color: #C2362B; font-weight: 700; }
+  .tB .title { font: 600 24px var(--mincho); margin: 4px 0 14px; letter-spacing: .04em; }
+  .ticket { position: relative; background: #F7FBF6; border-radius: 6px; padding: 14px 16px;
+    -webkit-mask: radial-gradient(circle 8px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+                  radial-gradient(circle 8px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+            mask: radial-gradient(circle 8px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+                  radial-gradient(circle 8px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat; }
+  .tB .ticket + .ticket { margin-top: 10px; }
+  .tB .tk-label { font-size: 11px; color: #587064; letter-spacing: .1em; }
+  .tB .tk-dist { font: 600 34px/1.15 var(--mincho); margin: 2px 0 10px; }
+  .tB .tk-dist small { font-size: 16px; margin-left: 2px; }
+  .tB .tk-hint { font-size: 12.5px; color: #587064; margin-top: 8px; }
+  .tB h3 { font: 600 16px var(--mincho); margin: 20px 0 10px; }
+  .tB .st { display: flex; align-items: center; gap: 0; padding: 0; }
+  .tB .st .t { flex: 1; padding: 14px 14px 14px 16px; border-right: 1.5px dashed #9FB8A8; }
+  .tB .st .t .n { font: 600 11px var(--mincho); color: #587064; letter-spacing: .12em; }
+  .tB .st .t b { display: block; font: 600 19px var(--mincho); margin: 2px 0; }
+  .tB .st .t span { font-size: 12px; color: #587064; }
+  .tB .st .act { width: 104px; display: grid; place-items: center; padding: 10px 0; }
+  .stamp-btn { width: 64px; height: 64px; border-radius: 50%; border: 3px solid #C2362B; color: #C2362B; background: transparent;
+    font: 700 17px var(--mincho); box-shadow: inset 0 0 0 3px #F7FBF6, inset 0 0 0 4.5px #C2362B; }
+  .stamp-btn.wait { border-color: #A9B9AF; color: #7C9187; box-shadow: inset 0 0 0 3px #F7FBF6, inset 0 0 0 4.5px #A9B9AF; font-size: 12px; line-height: 1.25; }
+  .tB .st.ticket { padding: 0; }
+  .tB .empty { margin-top: 12px; font-size: 12.5px; color: #587064; line-height: 1.6; border-top: 1.5px dashed #9FB8A8; padding-top: 12px; }
+  .tB .res { text-align: center; padding-top: 14px; }
+  .tB .res .kind { font: 600 13px var(--mincho); letter-spacing: .3em; color: #8E6210; }
+  .tB .res h2 { font: 600 22px var(--mincho); margin: 6px 0 20px; }
+  .tB .res .wrap { position: relative; width: 262px; margin: 0 auto; }
+  .seal { position: absolute; right: -28px; top: 46px; width: 86px; height: 86px; border-radius: 50%; border: 3px solid #C2362B;
+    color: #C2362B; display: grid; place-items: center; text-align: center; transform: rotate(-14deg); background: rgba(247, 251, 246, .55);
+    font: 700 11px/1.3 var(--mincho); box-shadow: inset 0 0 0 4px rgba(247,251,246,.55), inset 0 0 0 5.5px #C2362B; }
+  .seal b { display: block; font-size: 18px; letter-spacing: .1em; }
+  .tB .btn { height: 46px; border-radius: 6px; border: 0; background: #1E3A2F; color: #F7FBF6; font: 600 15px var(--mincho); width: 100%; margin-top: 22px; }
+  .tB .dup { margin-top: 12px; font-size: 12.5px; color: #587064; }
+  .tB .z-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .tB .z-head span { font: 600 14px var(--mincho); color: #587064; }
+  .tB .grid { gap: 10px; }
+  .tB .tile { background: #F7FBF6; border: 1.5px dashed #9FB8A8; border-radius: 6px; padding: 8px 8px 7px; position: relative; }
+  .tB .tile.got { border-style: solid; border-color: #C9D9CE; }
+  .tB .tile .sn { font-family: var(--mincho); font-weight: 600; }
+  .mini-seal { position: absolute; right: -4px; top: -6px; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #C2362B;
+    color: #C2362B; font: 700 9px/1 var(--mincho); display: grid; place-items: center; transform: rotate(-14deg); background: rgba(247,251,246,.7); }
+  .tB .dots i { border-color: #A9B9AF; }
+
+  /* =========================================================
+     案C 空色の散歩: 空のグラデーション、丸くて大きいボタン
+     ========================================================= */
+  .tC { --back-bg: #F2F8FE; --back-line: #C3DAEE; --back-ink: #8FB0CC; background: linear-gradient(180deg, #A9D8FF 0%, #DDF0FF 38%, #FFFFFF 78%); color: #0F2E4A; font-family: var(--maru); }
+  .tC .status { font-family: var(--sys); }
+  .tC .tabbar { background: rgba(255,255,255,.92); color: #6B85A0; border-radius: 26px 26px 0 0; box-shadow: 0 -4px 18px rgba(30, 80, 130, .1); }
+  .tC .tab.on { color: #0F2E4A; font-weight: 700; }
+  .tC .tab.on b { background: #FFC93C; border-color: #0F2E4A; }
+  .tC .hello { font-size: 15px; font-weight: 700; color: #2C5478; margin: 8px 0 2px; }
+  .tC .dist { font: 800 52px/1.05 var(--maru); letter-spacing: -.02em; }
+  .tC .dist small { font-size: 20px; font-weight: 700; margin-left: 4px; }
+  .walk { position: relative; height: 22px; background: rgba(255,255,255,.75); border-radius: 11px; margin: 14px 0 6px; overflow: hidden; }
+  .walk span { position: absolute; left: 0; top: 0; bottom: 0; width: 37.3%; background: #FFC93C; border-radius: 11px; }
+  .walk em { position: absolute; left: calc(37.3% - 20px); top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 3px solid #0F2E4A; }
+  .tC .walk-cap { display: flex; justify-content: space-between; font-size: 12px; color: #2C5478; font-weight: 600; }
+  .tC .panel { background: #fff; border-radius: 22px; padding: 16px; box-shadow: 0 8px 22px rgba(30, 80, 130, .1); margin-top: 16px; }
+  .tC .panel .odds-legend { font-family: var(--sys); }
+  .tC h3 { font-size: 16px; margin: 20px 4px 10px; }
+  .tC .st { background: #fff; border-radius: 22px; padding: 14px 14px 14px 16px; box-shadow: 0 8px 22px rgba(30, 80, 130, .1); }
+  .tC .st + .st { margin-top: 10px; }
+  .tC .st .top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .tC .st .n { min-width: 36px; height: 26px; padding: 0 8px; border-radius: 13px; background: #E6F3FF; font: 700 12px var(--mincho); display: grid; place-items: center; }
+  .tC .st b { font-size: 18px; flex: 1; } .tC .st .d { font-size: 13px; color: #4F6B85; font-weight: 700; }
+  .tC .pill { width: 100%; height: 52px; border-radius: 26px; border: 0; background: #FFC93C; color: #2B1F00; font: 800 18px var(--maru);
+    box-shadow: 0 4px 0 #E0A916; }
+  .tC .pill.wait { background: #EEF3F8; color: #4F6B85; box-shadow: none; font-size: 14px; font-weight: 700; }
+  .tC .pill.light { background: #fff; color: #0F2E4A; box-shadow: 0 4px 0 #CFE0EE; border: 2px solid #0F2E4A; }
+  .tC .empty { margin-top: 12px; font-size: 13px; color: #4F6B85; text-align: center; line-height: 1.6; }
+  .tC .res { text-align: center; position: relative; padding-top: 14px; }
+  .tC .res::before { content: ""; position: absolute; left: 50%; top: 120px; width: 460px; height: 460px; margin-left: -230px; border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, rgba(255, 201, 60, .35) 0 8deg, rgba(255, 201, 60, 0) 8deg 20deg);
+    -webkit-mask: radial-gradient(circle, #000 30%, #0000 70%); mask: radial-gradient(circle, #000 30%, #0000 70%); }
+  .tC .res > * { position: relative; }
+  .tC .res .kind { display: inline-block; background: #FFC93C; color: #2B1F00; font-weight: 800; font-size: 14px; border-radius: 99px; padding: 6px 18px; }
+  .tC .res h2 { font-size: 24px; margin: 8px 0 18px; }
+  .tC .res .big { transform: rotate(-3deg); }
+  .tC .res .pill { margin-top: 26px; }
+  .tC .res .pill + .pill { margin-top: 12px; }
+  .tC .dup { font-size: 12.5px; color: #4F6B85; margin-top: 12px; font-weight: 600; }
+  .tC .z-head { display: flex; align-items: center; gap: 14px; margin: 6px 0 16px; }
+  .ring { width: 64px; height: 64px; border-radius: 50%; background: conic-gradient(#FFC93C 0 18%, rgba(255,255,255,.8) 18%);
+    display: grid; place-items: center; }
+  .ring span { width: 48px; height: 48px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+  .tC .z-head h2 { font-size: 26px; } .tC .z-head p { font-size: 13px; color: #2C5478; font-weight: 700; }
+  .tC .tile { background: #fff; border-radius: 16px; padding: 8px 8px 7px; box-shadow: 0 6px 16px rgba(30, 80, 130, .1); }
+  .tC .tile.none { background: rgba(255,255,255,.55); box-shadow: none; border: 2px dashed #B9D3EA; }
+  .tC .tile .sn { font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="page-title">トリップガチャ ベータ版 UI見本</div>
+<div class="page-note">iPhoneの画面の大きさ(390×844)。3つの案を、メイン・結果・図鑑の3画面で比べる。カード自体は3案とも同じで、周りの画面だけが違う。動きは入っていない。</div>
+<div id="app"></div>
+
+<script>
+// [ローマ数字, 駅名, 物, 絵, 持っている珍しさ]
+const STATIONS = [
+  ['0', '八王子みなみ野', '門', 'gate', ['N']], ['I', '片倉', '羅針盤', null, []], ['II', '狭間', '橋', null, []],
+  ['III', 'めじろ台', '船', 'ship', ['N', 'R']], ['IV', '山田', '階段', null, []], ['V', '京王片倉', '山', null, []],
+  ['VI', '北八王子', '仮面', null, []], ['VII', '小宮', '風車', null, []], ['VIII', '清滝', '樹', 'tree', ['N']],
+  ['IX', '高尾山', '窓', null, []], ['X', '八王子', '指輪', null, []], ['XI', '西八王子', '巻物', null, []],
+  ['XII', '高尾', '旗', 'banner', ['N']], ['XIII', '高尾山口', '歯車', null, []], ['XIV', '京王八王子', '灯台', 'lighthouse', ['N', 'R', 'SR']],
+  ['XV', '中央大学・明星大学', '竪琴', 'harp', ['R']], ['XVI', '大塚・帝京大学', '書', null, []], ['XVII', '松が谷', '泉', 'fountain', ['N']],
+  ['XVIII', '長沼', '松明', 'torch', ['N']], ['XIX', '北野', '燭台', 'candlestick', ['N', 'R']], ['XX', '南大沢', '宝珠', null, []],
+  ['XXI', '京王堀之内', '印章', null, []],
+];
+const owned = STATIONS.reduce((n, s) => n + s[4].length, 0);
+const best = (s) => ['SR', 'R', 'N'].find((r) => s[4].includes(r));
+const card = (s, r, cls = '') => `<div class="card r-${r} ${cls}"><div class="in"><div class="num">${s[0]}</div><img src="img/${s[3]}.jpg" alt="${s[1]}の${s[2]}"><div class="nm">${s[1]}の${s[2]}</div></div></div>`;
+const back = (s) => `<div class="card back sm"><div class="in"><div class="num">${s[0]}</div><div class="q">?</div></div></div>`;
+const dots = (s) => `<div class="dots">${['N', 'R', 'SR'].map((r) => `<i class="${s[4].includes(r) ? r : ''}"></i>`).join('')}</div>`;
+const lighthouse = STATIONS[14];
+
+const phone = (theme, body, tab) => `
+  <div class="phone ${theme}">
+    <div class="status"><span>9:41</span><i></i></div>
+    <div class="body">${body}</div>
+    <nav class="tabbar">${[['home', 'ホーム'], ['book', '図鑑'], ['map', '地図'], ['set', '設定']]
+      .map(([k, l]) => `<div class="tab ${k} ${k === tab ? 'on' : ''}"><b></b>${l}</div>`).join('')}</nav>
+  </div>`;
+const odds = `<div class="odds"><span></span><span></span><span></span></div>
+  <div class="odds-legend"><span><i class="sw n"></i>ノーマル <em>65%</em></span><span><i class="sw r"></i>レア <em>25%</em></span><span><i class="sw s"></i>スーパーレア <em>10%</em></span></div>`;
+
+// ---------- 案A ----------
+const A = {
+  main: `
+    <div class="label">今日の移動</div>
+    <div class="dist">2.8<small>km</small></div>
+    <div class="route"><div class="done"></div><div class="stops">${Array.from({ length: 16 }, (_, i) => `<i class="${i <= 5 ? 'p' : ''}"></i>`).join('')}</div><div class="me"></div></div>
+    <div class="route-ends"><span>0</span><span>500mごとに1駅</span><span>7.5km</span></div>
+    <div class="hint">あと200mでスーパーレアが1%上がります</div>
+    ${odds}
+    <div class="rule"></div>
+    <h3>近くの駅</h3>
+    <div class="st"><div class="n">XIV</div><div class="t"><b>京王八王子</b><span>120m</span></div><button class="btn">回す</button></div>
+    <div class="st"><div class="n">X</div><div class="t"><b>八王子</b><span>180m</span></div><button class="btn wait">あと12分</button></div>
+    <div class="empty">(圏内に駅がないときの表示)<br>近くに駅がありません。いちばん近い駅は北野(1.2km)です。</div>`,
+  result: `
+    <div class="res-top"><span class="kind">スーパーレア</span><h2>新しいカードを手に入れました</h2></div>
+    ${card(lighthouse, 'SR', 'big')}
+    <div class="actions"><button class="btn ghost">図鑑で見る</button><button class="btn">メインに戻る</button></div>
+    <div class="dup">(持っているカードだったときの表示)<br>持っているカードでした。かけら +10(合計 24)</div>`,
+  book: `
+    <div class="z-head"><h2>図鑑</h2><span>${owned} / 66 枚</span></div>
+    <div class="grid">${STATIONS.slice(0, 15).map((s) => `<div class="tile">${s[3] ? card(s, best(s), 'sm') : back(s)}<div class="sn">${s[1]}</div>${dots(s)}</div>`).join('')}</div>`,
+};
+
+// ---------- 案B ----------
+const B = {
+  main: `
+    <div class="title">トリップガチャ</div>
+    <div class="ticket">
+      <div class="tk-label">本日の移動距離</div>
+      <div class="tk-dist">2.8<small>km</small></div>
+      ${odds}
+      <div class="tk-hint">あと200mでスーパーレアが1%上がります</div>
+    </div>
+    <h3>近くの駅</h3>
+    <div class="st ticket"><div class="t"><div class="n">XIV</div><b>京王八王子</b><span>ここから120m</span></div><div class="act"><button class="stamp-btn">回す</button></div></div>
+    <div class="st ticket"><div class="t"><div class="n">X</div><b>八王子</b><span>ここから180m</span></div><div class="act"><button class="stamp-btn wait">あと<br>12分</button></div></div>
+    <div class="empty">(圏内に駅がないときの表示)<br>近くに駅がありません。いちばん近い駅は北野(1.2km)です。</div>`,
+  result: `
+    <div class="res">
+      <div class="kind">スーパーレア</div>
+      <h2>新しいカードを手に入れました</h2>
+      <div class="wrap">${card(lighthouse, 'SR')}<div class="seal"><span>京王八王子<b>入手</b>10.02</span></div></div>
+      <button class="btn">図鑑で見る</button>
+      <div class="dup">(持っているカードだったときの表示)<br>持っているカードでした。かけら +10(合計 24)</div>
+    </div>`,
+  book: `
+    <div class="z-head"><div class="title">図鑑</div><span>${owned} / 66 枚</span></div>
+    <div class="grid">${STATIONS.slice(0, 12).map((s) => `<div class="tile ${s[3] ? 'got' : ''}">${s[3] ? card(s, best(s), 'sm') + '<div class="mini-seal">済</div>' : back(s)}<div class="sn">${s[1]}</div>${dots(s)}</div>`).join('')}</div>`,
+};
+
+// ---------- 案C ----------
+const C = {
+  main: `
+    <div class="hello">今日の移動</div>
+    <div class="dist">2.8<small>km</small></div>
+    <div class="walk"><span></span><em></em></div>
+    <div class="walk-cap"><span>0km</span><span>あと200mで次の段階</span><span>7.5km</span></div>
+    <div class="panel">${odds}</div>
+    <h3>近くの駅</h3>
+    <div class="st"><div class="top"><span class="n">XIV</span><b>京王八王子</b><span class="d">120m</span></div><button class="pill">回す</button></div>
+    <div class="st"><div class="top"><span class="n">X</span><b>八王子</b><span class="d">180m</span></div><button class="pill wait">あと12分で回せます</button></div>
+    <div class="empty">(圏内に駅がないときの表示)<br>近くに駅がありません。いちばん近い駅は北野(1.2km)です。</div>`,
+  result: `
+    <div class="res">
+      <span class="kind">スーパーレア</span>
+      <h2>新しいカードを手に入れました</h2>
+      ${card(lighthouse, 'SR', 'big')}
+      <button class="pill">図鑑で見る</button>
+      <button class="pill light">メインに戻る</button>
+      <div class="dup">(持っているカードだったときの表示)<br>持っているカードでした。かけら +10(合計 24)</div>
+    </div>`,
+  book: `
+    <div class="z-head"><div class="ring"><span>${owned}</span></div><div><h2>図鑑</h2><p>66枚中 ${owned}枚 集めた</p></div></div>
+    <div class="grid">${STATIONS.slice(0, 12).map((s) => `<div class="tile ${s[3] ? '' : 'none'}">${s[3] ? card(s, best(s), 'sm') : back(s)}<div class="sn">${s[1]}</div>${dots(s)}</div>`).join('')}</div>`,
+};
+
+const rows = [
+  ['tA', A, '案A すっきり白', '白地に濃紺の文字。移動距離を路線図のように見せる(500mごとに駅が1つ進む)。カードが一番目立つ。'],
+  ['tB', B, '案B 駅スタンプ帳', '切符の薄い緑。近くの駅は切符の形で、回すボタンはスタンプ。手に入れたカードに朱色の印が押される。'],
+  ['tC', C, '案C 空色の散歩', '空のグラデーション。丸くて大きいボタンと黄色。歩く楽しさを前に出す、いちばんポップな案。'],
+];
+document.getElementById('app').innerHTML = rows.map(([t, s, name, note]) => `
+  <div class="row-head"><h2>${name}</h2><p>${note}</p></div>
+  <div class="row">
+    <div><div class="cap">メイン</div>${phone(t, s.main, 'home')}</div>
+    <div><div class="cap">結果</div>${phone(t, s.result, 'home')}</div>
+    <div><div class="cap">図鑑</div>${phone(t, s.book, 'book')}</div>
+  </div>`).join('');
+</script>
+</body>
+</html>

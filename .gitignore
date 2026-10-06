@@ -1,0 +1,10 @@
+# 裏アイテムは存在を知らせない隠し要素なので、名前の一覧は公開しない
+docs/card-names-secret.md
+
+# 部品(npm install で入れ直せる)と、組み立てた結果(npm run build で作り直せる)
+node_modules/
+dist/
+dev-dist/
+
+# 使わなくなった古いファイル(TypeScriptに移す前のJS)。手元に控えとして残すだけ
+old/

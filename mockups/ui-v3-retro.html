@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>トリップガチャ UI見本 v3(レトロ)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F4EDE0;
+    --paper: #FBF6EC;
+    --orange: #E8552F;
+    --mustard: #F2B233;
+    --teal: #2FA9A0;
+    --navy: #22303C;
+    --ink-soft: #5B6670;
+    --line: #22303C;
+    --hand: "Yusei Magic", "Zen Maru Gothic", sans-serif;
+    --maru: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+    --mincho: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    /* 版画のような紙の粒子 */
+    --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.13  0 0 0 0 0.19  0 0 0 0 0.24  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.22'/></svg>");
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #D9D4CB; font-family: var(--maru); color: var(--navy); padding: 32px 24px 64px; }
+  .page-title { font: 400 24px var(--hand); margin-bottom: 4px; }
+  .page-note { font-size: 13px; font-weight: 700; color: #4A4A4A; margin-bottom: 28px; line-height: 1.7; }
+  .row { display: flex; gap: 36px; flex-wrap: wrap; }
+  .cap { font-size: 12px; font-weight: 700; color: #555; margin: 0 0 8px 6px; }
+
+  .phone { width: 390px; height: 844px; border-radius: 48px; overflow: hidden; position: relative; background: var(--cream);
+    box-shadow: 0 0 0 10px #17181C, 0 24px 50px rgba(0,0,0,.28); }
+  .phone::after { content: ""; position: absolute; inset: 0; background: var(--grain); mix-blend-mode: multiply; pointer-events: none; z-index: 50; }
+  .phone.dark { background: var(--navy); color: var(--cream); }
+  .phone.dark::after { mix-blend-mode: screen; opacity: .5; }
+  .bar4 { position: absolute; top: 0; left: 0; right: 0; height: 8px; display: flex; z-index: 40; }
+  .bar4 i { flex: 1; } .bar4 i:nth-child(1) { background: var(--orange); } .bar4 i:nth-child(2) { background: var(--mustard); }
+  .bar4 i:nth-child(3) { background: var(--teal); } .bar4 i:nth-child(4) { background: var(--navy); }
+  .dark .bar4 i:nth-child(4) { background: var(--cream); }
+  .status { height: 54px; display: flex; justify-content: space-between; align-items: center; padding: 12px 30px 0 34px; font: 700 15px var(--maru); }
+  .status i { width: 25px; height: 12px; border: 1.5px solid currentColor; border-radius: 4px; position: relative; opacity: .8; }
+  .status i::after { content: ""; position: absolute; inset: 1.5px 6px 1.5px 1.5px; background: currentColor; border-radius: 1.5px; }
+  .body { position: absolute; top: 54px; left: 0; right: 0; bottom: 86px; overflow: hidden; padding: 6px 22px 0; }
+
+  /* 下のタブ: アイコンは丸い色面の中 */
+  .tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 86px; display: grid; grid-template-columns: repeat(4, 1fr);
+    padding: 10px 8px 24px; background: var(--paper); border-top: 2px solid var(--line); z-index: 30; }
+  .dark .tabbar { background: #2B3B49; border-color: var(--cream); }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; font-weight: 900; color: var(--ink-soft); }
+  .dark .tab { color: #C9C2B4; }
+  .tab .ic { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; border: 2px solid transparent; opacity: .45; }
+  .tab .ic svg { width: 18px; height: 18px; }
+  .tab.on { color: var(--navy); } .dark .tab.on { color: var(--cream); }
+  .tab.on .ic { opacity: 1; border-color: var(--line); box-shadow: 2px 2px 0 var(--line); }
+  .dark .tab.on .ic { border-color: var(--cream); box-shadow: 2px 2px 0 var(--cream); }
+  .ic.o { background: var(--orange); } .ic.m { background: var(--mustard); } .ic.t { background: var(--teal); } .ic.n { background: var(--navy); }
+  .ic svg { stroke: #FBF6EC; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .ic.m svg { stroke: var(--navy); }
+
+  /* 共通部品 */
+  .hand { font-family: var(--hand); font-weight: 400; }
+  .mark { background: linear-gradient(transparent 58%, rgba(242, 178, 51, .6) 58%, rgba(242, 178, 51, .6) 92%, transparent 92%); padding: 0 2px; }
+  .mark.o { background: linear-gradient(transparent 58%, rgba(232, 85, 47, .45) 58%, rgba(232, 85, 47, .45) 92%, transparent 92%); }
+  .panel { background: var(--paper); border: 2px solid var(--line); border-radius: 22px; box-shadow: 4px 4px 0 var(--line); }
+  .btn { display: block; width: 100%; height: 54px; border: 2px solid var(--line); border-radius: 27px; background: var(--orange); color: var(--paper);
+    font: 900 19px var(--maru); letter-spacing: .08em; box-shadow: 3px 3px 0 var(--line); display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .btn svg { width: 22px; height: 22px; stroke: var(--paper); fill: none; stroke-width: 2.2; }
+  .btn.wait { background: transparent; color: var(--ink-soft); border-style: dashed; box-shadow: none; font-size: 15px; letter-spacing: 0; }
+  .btn.cream { background: var(--cream); color: var(--navy); }
+  .btn.mustard { background: var(--mustard); color: var(--navy); }
+  .btn.mustard svg { stroke: var(--navy); }
+  .dark .btn { border-color: var(--cream); box-shadow: 3px 3px 0 var(--cream); }
+
+  /* カード(これまでの見本と同じ) */
+  .card { border-radius: 10px; padding: 5px; background: var(--frame); box-shadow: 0 6px 16px rgba(10, 18, 40, .25); }
+  .card .in { background: #131A31; border-radius: 6px; padding: 7px 7px 0; text-align: center; }
+  .card .num { font: 600 12px/1 var(--mincho); letter-spacing: .14em; color: #E7CF8E; padding: 2px 0 7px; }
+  .card img { width: 100%; aspect-ratio: 1; display: block; border-radius: 3px; }
+  .card .nm { font: 600 14px/1.35 var(--mincho); color: #F2E6C2; padding: 9px 4px 11px; }
+  .r-N { --frame: linear-gradient(135deg, #7C3F1A, #D9935C 42%, #8A4A22 70%, #C47C47); }
+  .r-R { --frame: linear-gradient(135deg, #7F8891, #F1F4F6 42%, #8C959E 70%, #D6DCE1); }
+  .r-SR { --frame: linear-gradient(135deg, #8E6210, #FBE08A 42%, #A7761C 70%, #EDC860); }
+  .card.sm { padding: 3px; border-radius: 7px; box-shadow: none; }
+  .card.sm .in { padding: 4px; border-radius: 4px; }
+  .card.sm .num { font-size: 9px; padding: 1px 0 4px; }
+  .card.sm .nm { display: none; }
+
+  /* ---------- メイン ---------- */
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font: 400 22px var(--hand); }
+  .shard { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 15px; }
+  .shard .ic { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--line); }
+  .shard .ic svg { width: 13px; height: 13px; }
+  .lead { font-weight: 900; font-size: 14px; margin-top: 18px; color: var(--ink-soft); letter-spacing: .06em; }
+  .huge { font: 400 108px/0.95 var(--hand); color: var(--navy); text-shadow: 4px 4px 0 rgba(232, 85, 47, .55); letter-spacing: -.02em; }
+  .huge small { font-size: 32px; text-shadow: none; margin-left: 6px; letter-spacing: 0; }
+  .feet { display: flex; gap: 2px; margin: 16px 0 8px; }
+  .feet svg { width: 21px; height: 30px; }
+  .feet svg:nth-child(odd) { transform: translateY(5px) rotate(-8deg); }
+  .feet svg:nth-child(even) { transform: rotate(8deg); }
+  .feet .on { fill: var(--orange); stroke: var(--line); }
+  .feet .off { fill: none; stroke: #B9AE9C; stroke-dasharray: 2 2; }
+  .feet-cap { font-weight: 900; font-size: 14px; }
+  .odds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+  .od { text-align: center; padding: 10px 4px 9px; }
+  .od b { display: block; font: 400 30px/1 var(--hand); }
+  .od span { font-size: 11px; font-weight: 900; color: var(--ink-soft); }
+  .od .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; border: 1.5px solid var(--line); vertical-align: 0; }
+  .sec { font: 400 20px var(--hand); margin: 18px 0 10px; display: flex; align-items: center; justify-content: space-between; }
+  .sec .deco { width: 40px; height: 40px; stroke: var(--navy); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .st { padding: 14px 14px 14px 14px; }
+  .st + .st { margin-top: 12px; }
+  .st .t { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .st .no { width: 44px; height: 44px; border-radius: 50%; background: var(--teal); color: var(--paper); border: 2px solid var(--line);
+    display: grid; place-items: center; font: 700 13px var(--mincho); flex: none; }
+  .st .no.mute { background: #CFC6B6; color: var(--navy); }
+  .st .name { font: 400 23px var(--hand); flex: 1; }
+  .st .d { font-weight: 900; font-size: 14px; }
+  .empty-ex { margin-top: 14px; display: flex; gap: 12px; align-items: center; font-size: 13px; font-weight: 700; color: var(--ink-soft); line-height: 1.6; }
+  .empty-ex svg { width: 54px; height: 54px; flex: none; stroke: var(--navy); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ---------- 結果(濃紺で締める) ---------- */
+  .res { text-align: center; position: relative; }
+  .res .stamp { position: absolute; right: -4px; top: 0; width: 104px; height: 104px; border-radius: 50%; background: var(--mustard); color: var(--navy);
+    border: 2px solid var(--cream); box-shadow: 3px 3px 0 var(--cream); transform: rotate(10deg); display: grid; place-items: center;
+    font: 400 15px/1.2 var(--hand); z-index: 2; }
+  .res .stamp b { display: block; font: 400 17px/1.2 var(--hand); }
+  .res h2 { font: 400 64px/1 var(--hand); text-align: left; margin-top: 6px; color: var(--cream); text-shadow: 4px 4px 0 rgba(232, 85, 47, .7); }
+  .res .sub { text-align: left; font-weight: 900; font-size: 15px; margin: 10px 0 18px; }
+  .res .sub .mark { color: var(--cream); }
+  .rays { position: relative; padding: 10px 0 6px; }
+  .rays::before { content: ""; position: absolute; left: 50%; top: 50%; width: 520px; height: 520px; margin: -260px 0 0 -260px; border-radius: 50%;
+    background: repeating-conic-gradient(rgba(242, 178, 51, .32) 0 7deg, transparent 7deg 18deg);
+    -webkit-mask: radial-gradient(circle, #000 25%, #0000 66%); mask: radial-gradient(circle, #000 25%, #0000 66%); }
+  .rays .card { position: relative; width: 236px; margin: 0 auto; transform: rotate(-3deg); }
+  .res .acts { display: grid; gap: 12px; margin-top: 22px; }
+  .res .dup { margin-top: 14px; font-size: 12.5px; font-weight: 700; color: #C9C2B4; }
+
+  /* ---------- 図鑑 ---------- */
+  .z-top { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 8px; }
+  .z-top h2 { font: 400 26px var(--hand); }
+  .count { font: 400 76px/0.9 var(--hand); text-shadow: 4px 4px 0 rgba(47, 169, 160, .55); }
+  .count small { font-size: 22px; text-shadow: none; }
+  .z-lead { font-weight: 900; font-size: 13.5px; margin: 10px 0 16px; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 12px; }
+  .tile { background: var(--paper); border: 2px solid var(--line); border-radius: 16px; padding: 8px 8px 7px; box-shadow: 3px 3px 0 var(--line); }
+  .tile.none { background: transparent; border: 2px dashed #B9AE9C; box-shadow: none; }
+  .tile.none .ph { aspect-ratio: 0.82; border-radius: 10px; display: grid; place-items: center; background: rgba(34, 48, 60, .05); }
+  .tile.none .ph b { width: 46px; height: 46px; border-radius: 50%; border: 2px dashed #B9AE9C; display: grid; place-items: center;
+    font: 400 18px var(--hand); color: #9C9282; }
+  .tile .sn { font-size: 11.5px; font-weight: 900; text-align: center; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ox { display: flex; justify-content: center; gap: 5px; margin-top: 3px; font: 900 12px/1 var(--maru); }
+  .ox .o { color: var(--orange); } .ox .x { color: #B9AE9C; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- 足あと -->
+    <symbol id="foot" viewBox="0 0 21 30"><path d="M10.5 11c4 0 6.5 3.6 6 8.5-.5 5-2.8 9.5-6.2 9.5-3.6 0-5.5-4.5-5.8-9.3C4.2 14.8 6.6 11 10.5 11z" stroke-width="1.6"/><circle cx="4.3" cy="7.5" r="2" stroke-width="1.4"/><circle cx="8.6" cy="4.2" r="2.2" stroke-width="1.4"/><circle cx="13.4" cy="3.6" r="2.2" stroke-width="1.4"/><circle cx="17.4" cy="6.4" r="1.9" stroke-width="1.4"/></symbol>
+    <!-- カプセル -->
+    <symbol id="capsule" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M5.6 6.2A9 9 0 0 1 18.4 6.2"/></symbol>
+    <symbol id="home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/></symbol>
+    <symbol id="book" viewBox="0 0 24 24"><path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1z"/><path d="M12 6v14"/></symbol>
+    <symbol id="pin" viewBox="0 0 24 24"><path d="M12 21s-6-6.2-6-11a6 6 0 0 1 12 0c0 4.8-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></symbol>
+    <symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></symbol>
+    <symbol id="shard" viewBox="0 0 24 24"><path d="M12 3l6 7-6 11-6-11z"/><path d="M6 10h12"/></symbol>
+    <!-- ガチャガチャの機械(線画) -->
+    <symbol id="gachapon" viewBox="0 0 54 54"><circle cx="27" cy="18" r="13"/><circle cx="21" cy="15" r="3.5"/><circle cx="31" cy="21" r="3.5"/><circle cx="31" cy="12" r="2.5"/><path d="M13 30h28v18H13z"/><circle cx="27" cy="38" r="4"/><path d="M27 35v6"/><path d="M33 44h5"/></symbol>
+  </defs>
+</svg>
+
+<div class="page-title">トリップガチャ UI見本 v3: レトロ × 手作り感のポップ</div>
+<div class="page-note">生成りの下地(#F4EDE0)に4色(オレンジ・マスタード・ティール・濃紺)。見出しと大きな数字は Yusei Magic、本文は Zen Maru Gothic の太字。<br>移動距離は足あとの列(500mごとに1歩)、結果画面だけ濃紺で締める。駅がないときの文言は「近くに駅なし。北野まで、あと1.2km。」の調子。カード自体はこれまでと同じ。動きは入っていない。</div>
+<div id="app"></div>
+
+<script>
+const STATIONS = [
+  ['0', '八王子みなみ野', '門', 'gate', ['N']], ['I', '片倉', '羅針盤', null, []], ['II', '狭間', '橋', null, []],
+  ['III', 'めじろ台', '船', 'ship', ['N', 'R']], ['IV', '山田', '階段', null, []], ['V', '京王片倉', '山', null, []],
+  ['VI', '北八王子', '仮面', null, []], ['VII', '小宮', '風車', null, []], ['VIII', '清滝', '樹', 'tree', ['N']],
+  ['IX', '高尾山', '窓', null, []], ['X', '八王子', '指輪', null, []], ['XI', '西八王子', '巻物', null, []],
+  ['XII', '高尾', '旗', 'banner', ['N']], ['XIII', '高尾山口', '歯車', null, []], ['XIV', '京王八王子', '灯台', 'lighthouse', ['N', 'R', 'SR']],
+  ['XV', '中央大学・明星大学', '竪琴', 'harp', ['R']], ['XVI', '大塚・帝京大学', '書', null, []], ['XVII', '松が谷', '泉', 'fountain', ['N']],
+  ['XVIII', '長沼', '松明', 'torch', ['N']], ['XIX', '北野', '燭台', 'candlestick', ['N', 'R']], ['XX', '南大沢', '宝珠', null, []],
+  ['XXI', '京王堀之内', '印章', null, []],
+];
+const owned = STATIONS.reduce((n, s) => n + s[4].length, 0);
+const best = (s) => ['SR', 'R', 'N'].find((r) => s[4].includes(r));
+const use = (id, cls = '') => `<svg class="${cls}"><use href="#${id}"/></svg>`;
+const card = (s, r, cls = '') => `<div class="card r-${r} ${cls}"><div class="in"><div class="num">${s[0]}</div><img src="img/${s[3]}.jpg" alt=""><div class="nm">${s[1]}の${s[2]}</div></div></div>`;
+
+const phone = (body, tab, dark = false) => `
+  <div class="phone ${dark ? 'dark' : ''}">
+    <div class="bar4"><i></i><i></i><i></i><i></i></div>
+    <div class="status"><span>9:41</span><i></i></div>
+    <div class="body">${body}</div>
+    <nav class="tabbar">${[['home', 'ホーム', 'home', 'o'], ['book', '図鑑', 'book', 'm'], ['map', '地図', 'pin', 't'], ['set', '設定', 'gear', 'n']]
+      .map(([k, l, icon, c]) => `<div class="tab ${k === tab ? 'on' : ''}"><span class="ic ${c}">${use(icon)}</span>${l}</div>`).join('')}</nav>
+  </div>`;
+
+// 2.8km = 500mごとの5歩 + 途中。15歩で7.5km
+const feet = Array.from({ length: 15 }, (_, i) => `<svg class="${i < 5 ? 'on' : 'off'}" viewBox="0 0 21 30"><use href="#foot"/></svg>`).join('');
+
+const main = `
+  <div class="top"><span class="logo">トリップガチャ</span><span class="shard"><span class="ic" style="background:var(--mustard)">${use('shard')}</span>かけら 14</span></div>
+  <div class="lead">今日、歩いた。</div>
+  <div class="huge">2.8<small>km</small></div>
+  <div class="feet">${feet}</div>
+  <div class="feet-cap">あと<span class="mark o">200m</span>で、運がひとつ上がる。</div>
+  <div class="odds">
+    <div class="od panel"><b>65<small style="font-size:14px">%</small></b><span><i class="dot" style="background:#C58A5A"></i>ノーマル</span></div>
+    <div class="od panel"><b>25<small style="font-size:14px">%</small></b><span><i class="dot" style="background:#AEB8C2"></i>レア</span></div>
+    <div class="od panel" style="background:var(--mustard)"><b>10<small style="font-size:14px">%</small></b><span style="color:var(--navy)"><i class="dot" style="background:#E2B23E"></i>スーパーレア</span></div>
+  </div>
+  <div class="sec"><span>近くの駅</span>${use('gachapon', 'deco')}</div>
+  <div class="st panel"><div class="t"><span class="no">XIV</span><span class="name">京王八王子</span><span class="d">120m</span></div>
+    <button class="btn">${use('capsule')}回す</button></div>
+  <div class="st panel"><div class="t"><span class="no mute">X</span><span class="name">八王子</span><span class="d">180m</span></div>
+    <button class="btn wait">あと12分。少し、寄り道を。</button></div>
+`;
+
+const result = `
+  <div class="res">
+    <div class="stamp"><span><b>スーパー</b><b>レア</b></span></div>
+    <h2>出た。</h2>
+    <div class="sub"><span class="mark o">はじめての1枚。</span>図鑑に入りました。</div>
+    <div class="rays">${card(STATIONS[14], 'SR')}</div>
+    <div class="acts">
+      <button class="btn mustard">${use('book')}図鑑で見る</button>
+      <button class="btn cream">ホームに戻る</button>
+    </div>
+    <div class="dup">(持っているカードだったとき)「もう持ってた。かけら +10。」</div>
+  </div>`;
+
+const zukan = `
+  <div class="z-top"><h2>図鑑</h2><div class="count">${owned}<small> / 66枚</small></div></div>
+  <div class="z-lead">22駅 × 3段階。<span class="mark">まだ、たくさんある。</span></div>
+  <div class="grid">${STATIONS.slice(0, 12).map((s) => {
+    const marks = ['N', 'R', 'SR'].map((r) => s[4].includes(r) ? '<span class="o">○</span>' : '<span class="x">×</span>').join('');
+    const face = s[3] ? card(s, best(s), 'sm') : `<div class="ph"><b>${s[0]}</b></div>`;
+    return `<div class="tile ${s[3] ? '' : 'none'}">${face}<div class="sn">${s[1]}</div><div class="ox">${marks}</div></div>`;
+  }).join('')}</div>`;
+
+document.getElementById('app').innerHTML = `<div class="row">
+  <div><div class="cap">メイン</div>${phone(main, 'home')}</div>
+  <div><div class="cap">結果(濃紺で締める)</div>${phone(result, 'home', true)}</div>
+  <div><div class="cap">図鑑</div>${phone(zukan, 'book')}</div>
+</div>`;
+</script>
+</body>
+</html>

@@ -10,16 +10,16 @@ import { createCatalog, type Spot } from './items.ts';
 import { drawRarity, metersToNextStep, oddsFor, stationItemId } from './gacha.ts';
 import { addFix, distanceToday, localDate } from './walk.ts';
 import {
-  applySpin, cooldownRemainingMs, exportJson, load, parseSave, save, storageAvailable, type SaveData, type SpinResult,
+  applySpin, cooldownRemainingMs, exportJson, hasTicket, load, markVisited, parseSave, save, storageAvailable, type SaveData, type SpinResult,
 } from './store.ts';
-import { browserLocation, type LocationSource } from './location.ts';
+import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
 import { createMapView, type MapView } from './ui/map.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import {
   detailScreen, mainScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearStation, type Tab,
 } from './ui/screens.ts';
 
-const VERSION = '0.1.1';
+const VERSION = '0.1.2';
 
 // ベータ版は駅だけ
 const stations: Spot[] = spotsJson.spots
@@ -39,6 +39,7 @@ const state = {
   geo: 'starting' as GeoStatus,
   fix: null as Fix | null,
   accuracyM: null as number | null,
+  gpsMode: null as GpsMode | 'sim' | null,
   result: null as (SpinResult & { spotId: string }) | null,
   detailSpotId: null as string | null,
   pendingImport: null as { data: SaveData; fileName: string } | null,
@@ -71,16 +72,17 @@ const toastEl = document.getElementById('toast')!;
 let mapView: MapView | null = null;
 let onMapTap: ((lat: number, lon: number) => void) | undefined;
 
-function nearStations(now: number): NearStation[] {
-  if (!state.fix) return [];
-  return geofence.insideStopIds().map((id) => {
-    const spot = spotById.get(id)!;
-    return {
-      spot, card: cards[id],
-      distanceM: haversineDistanceM(state.fix!.lat, state.fix!.lon, spot.lat, spot.lon),
-      remainingMs: cooldownRemainingMs(state.save, id, now),
-    };
-  });
+/** 今日の回す権利がある駅。範囲の外にいても出す。回せる駅を先に、待ち時間の短い順 */
+function ticketStations(now: number): NearStation[] {
+  const fix = state.fix;
+  return stations
+    .filter((spot) => hasTicket(state.save, spot.id, now))
+    .map((spot) => ({
+      spot, card: cards[spot.id],
+      distanceM: fix ? haversineDistanceM(fix.lat, fix.lon, spot.lat, spot.lon) : null,
+      remainingMs: cooldownRemainingMs(state.save, spot.id, now),
+    }))
+    .sort((a, b) => a.remainingMs - b.remainingMs);
 }
 
 function nearestStation() {
@@ -105,7 +107,7 @@ function screenHtml(now: number): string {
       const distanceM = distanceToday(state.save.walk, now);
       return mainScreen({
         distanceM, odds: oddsFor(CONFIG.stationOddsBp, distanceM), nextStepM: metersToNextStep(distanceM), shards: state.save.shards,
-        geo: state.geo, accuracyM: state.accuracyM, near: nearStations(now), nearest: nearestStation(), storageOk,
+        geo: state.geo, accuracyM: state.accuracyM, near: ticketStations(now), nearest: nearestStation(), storageOk,
       });
     }
     case 'zukan':
@@ -114,7 +116,7 @@ function screenHtml(now: number): string {
         : zukanScreen(stations, cards, state.save.collection);
     case 'settings': {
       const cardCount = Object.keys(state.save.collection).filter((id) => id.startsWith('station:')).length;
-      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION);
+      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode);
     }
     case 'map':
       return '';
@@ -141,7 +143,7 @@ function render(): void {
     mapView.update(state.fix, ownedSpotIds());
     document.getElementById('map-msg')!.textContent = onMapTap
       ? '位置シミュレーター: 地図をタップした場所にいることにします'
-      : 'オレンジは、カードを持っている駅。点線の円に入ると、回せる。';
+      : 'オレンジは、カードを持っている駅。点線の円に入ると、その日のうちは、どこでも回せる。';
   }
   const tabs = tabbar(state.result ? 'main' : state.tab);
   if (tabbarEl.innerHTML !== tabs) tabbarEl.innerHTML = tabs;
@@ -180,7 +182,7 @@ async function reloadLatest(): Promise<void> {
 
 function spin(spotId: string): void {
   const now = Date.now();
-  if (!geofence.insideStopIds().includes(spotId) || cooldownRemainingMs(state.save, spotId, now) > 0) return;
+  if (!hasTicket(state.save, spotId, now) || cooldownRemainingMs(state.save, spotId, now) > 0) return;
   const rarity = drawRarity(oddsFor(CONFIG.stationOddsBp, distanceToday(state.save.walk, now)), Math.random);
   const { data, result } = applySpin(state.save, spotId, rarity, now);
   state.save = data;
@@ -256,8 +258,11 @@ app.addEventListener('change', async (e) => {
 function onFix(fix: Fix): void {
   state.fix = fix;
   state.accuracyM = fix.accuracyM;
-  state.geo = geofence.update(fix).accepted ? 'ok' : 'waiting-accuracy';
-  state.save = { ...state.save, walk: addFix(state.save.walk, fix) };
+  const accepted = geofence.update(fix).accepted;
+  state.geo = accepted ? 'ok' : 'waiting-accuracy';
+  // 範囲内にいた記録が、回す権利になる(この後は範囲の外でも回せる)
+  const visited = accepted ? markVisited(state.save, geofence.insideStopIds(), fix.t) : state.save;
+  state.save = { ...visited, walk: addFix(state.save.walk, fix) };
   persist();
   render();
 }
@@ -265,6 +270,8 @@ function onFix(fix: Fix): void {
 function onLocationError(kind: 'denied' | 'unavailable'): void {
   // 一度でも測れていれば、一時的な失敗(電波など)は表示を変えない
   if (kind === 'denied' || !state.fix) state.geo = kind;
+  // 許可がないと位置を取りに行くのをやめるので、取り方の表示も消す
+  if (kind === 'denied') state.gpsMode = null;
   render();
 }
 
@@ -275,10 +282,11 @@ async function startLocation(): Promise<void> {
     const hachioji = stations.find((s) => s.name === '八王子')!;
     const sim = createSimLocation({ lat: hachioji.lat, lon: hachioji.lon });
     source = sim.source;
+    state.gpsMode = 'sim';
     onMapTap = (lat, lon) => sim.moveTo(lat, lon);
     document.body.insertAdjacentHTML('beforeend', '<div class="sim-badge">位置シミュレーター</div>');
   }
-  source.start(onFix, onLocationError);
+  source.start(onFix, onLocationError, (mode) => { state.gpsMode = mode; render(); });
 }
 
 render();

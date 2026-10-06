@@ -1,6 +1,6 @@
 import { CONFIG } from './config.ts';
 import type { Rarity } from './items.ts';
-import { emptyWalk, type WalkState } from './walk.ts';
+import { emptyWalk, localDate, type WalkState } from './walk.ts';
 import { stationItemId } from './gacha.ts';
 
 export const SCHEMA_VERSION = 1;
@@ -12,6 +12,8 @@ export interface SaveData {
   collection: Record<string, { count: number; firstAcquiredAt: number }>;
   /** spotId -> 最後に回した日時と回数 */
   spots: Record<string, { lastSpunAt: number; spinCount: number }>;
+  /** spotId -> その駅の範囲内に最後にいた日時。回す権利の判定に使う(0.1.2 で追加。古い記録には無い) */
+  visitedAt: Record<string, number>;
   shards: number;
   totalSpins: number;
   walk: WalkState;
@@ -24,7 +26,7 @@ export interface StorageLike {
 }
 
 export const emptySave = (): SaveData => ({
-  schemaVersion: SCHEMA_VERSION, collection: {}, spots: {}, shards: 0, totalSpins: 0, walk: emptyWalk(),
+  schemaVersion: SCHEMA_VERSION, collection: {}, spots: {}, visitedAt: {}, shards: 0, totalSpins: 0, walk: emptyWalk(),
 });
 
 /** 端末に保存できるか(プライベートブラウズなどで使えないことがある) */
@@ -69,12 +71,14 @@ export function parseSave(text: string): SaveData {
   if (!isObj(raw)) throw new Error('記録の形が違います');
   if (raw.schemaVersion !== SCHEMA_VERSION) throw new Error('記録の版が違います');
   const { collection, spots, shards, totalSpins, walk } = raw;
+  const visitedAt = raw.visitedAt ?? {};
   if (!isObj(collection) || !Object.values(collection).every((e) => isObj(e) && isNum(e.count) && e.count >= 1 && isNum(e.firstAcquiredAt))) {
     throw new Error('カードの記録が壊れています');
   }
   if (!isObj(spots) || !Object.values(spots).every((e) => isObj(e) && isNum(e.lastSpunAt) && isNum(e.spinCount))) {
     throw new Error('駅の記録が壊れています');
   }
+  if (!isObj(visitedAt) || !Object.values(visitedAt).every(isNum)) throw new Error('駅に寄った記録が壊れています');
   if (!isNum(shards) || shards < 0 || !isNum(totalSpins) || totalSpins < 0) throw new Error('かけらか回した回数が壊れています');
   if (!isObj(walk) || !isNum(walk.dailyDistanceM) || typeof walk.distanceDate !== 'string') throw new Error('移動距離の記録が壊れています');
   const point = (v: unknown) => isObj(v) && isNum(v.lat) && isNum(v.lon) && isNum(v.accM) ? { lat: v.lat, lon: v.lon, accM: v.accM } : null;
@@ -82,6 +86,7 @@ export function parseSave(text: string): SaveData {
     schemaVersion: SCHEMA_VERSION,
     collection: collection as SaveData['collection'],
     spots: spots as SaveData['spots'],
+    visitedAt: visitedAt as SaveData['visitedAt'],
     shards, totalSpins,
     walk: { dailyDistanceM: walk.dailyDistanceM, distanceDate: walk.distanceDate, smooth: point(walk.smooth), anchor: point(walk.anchor) },
   };
@@ -92,6 +97,25 @@ export function cooldownRemainingMs(data: SaveData, spotId: string, now: number)
   const last = data.spots[spotId]?.lastSpunAt;
   if (last == null || last > now) return 0;
   return Math.max(0, last + CONFIG.cooldownMs - now);
+}
+
+/** 範囲内にいる駅に「いた」と記録した新しい記録を返す。範囲内の駅がなければ同じ記録を返す */
+export function markVisited(data: SaveData, spotIds: string[], now: number): SaveData {
+  if (spotIds.length === 0) return data;
+  const visitedAt = { ...data.visitedAt };
+  for (const id of spotIds) visitedAt[id] = now;
+  return { ...data, visitedAt };
+}
+
+/**
+ * 回す権利があるか。今日その駅の範囲内にいて、しかも最後に回した後にいたなら、ある(範囲の外でも回せる)。
+ * 端末の時計が戻されて最後に回した日時が未来なら、回したことがない扱いにする(cooldownRemainingMs と同じ)。
+ */
+export function hasTicket(data: SaveData, spotId: string, now: number): boolean {
+  const visited = data.visitedAt[spotId];
+  if (visited == null || localDate(visited) !== localDate(now)) return false;
+  const last = data.spots[spotId]?.lastSpunAt;
+  return last == null || last > now || visited > last;
 }
 
 export interface SpinResult {

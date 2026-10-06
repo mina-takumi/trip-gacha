@@ -8,6 +8,16 @@ export const CONFIG = {
   exitRadiusM: 250,
   /** 測位の精度(誤差の半径)がこれより悪い測定は使わない */
   accuracyLimitM: 100,
+  /** 止まっている・歩いているとき(gpsMediumKmh 未満)に位置を取りに行く間隔。GPSを休ませて電池を持たせる */
+  gpsSlowIntervalMs: 15_000,
+  /** 自転車ほどの速さ(gpsMediumKmh 以上 gpsFastKmh 未満)のときに位置を取りに行く間隔 */
+  gpsMediumIntervalMs: 5_000,
+  gpsMediumKmh: 10,
+  /** この時速以上(電車・バス)は測り続ける。範囲の端をかすめても取りこぼさないように */
+  gpsFastKmh: 40,
+  /** 測り続けている間は、この時速未満が gpsLeaveFastAfterMs 続いてから取りに行く方式に戻す */
+  gpsLeaveFastKmh: 30,
+  gpsLeaveFastAfterMs: 20_000,
   /** 同じ駅を次に回せるまでの時間 */
   cooldownMs: 20 * 60 * 1000,
   /** この距離ごとに、ノーマルの確率をスーパーレアへ移す */

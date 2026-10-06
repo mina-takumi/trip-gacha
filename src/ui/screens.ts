@@ -2,6 +2,7 @@ import { CONFIG, RARITIES, RARITY_LABEL } from '../config.ts';
 import type { Odds } from '../gacha.ts';
 import { stationItemId } from '../gacha.ts';
 import type { Rarity, Spot, StationCard } from '../items.ts';
+import type { GpsMode } from '../location.ts';
 import type { SaveData } from '../store.ts';
 import { cardHtml, placeholderHtml } from './card.ts';
 import { distanceLabel, esc, km } from './html.ts';
@@ -22,7 +23,8 @@ export function tabbar(tab: Tab): string {
     `<button class="tab ${t === tab ? 'on' : ''}" data-act="tab" data-tab="${t}" aria-current="${t === tab ? 'page' : 'false'}"><span class="ic ${color}">${icon(ic)}</span>${label}</button>`).join('');
 }
 
-export interface NearStation { spot: Spot; card: StationCard; distanceM: number; remainingMs: number }
+/** 回す権利がある駅。distanceM は現在地が分からなければ null */
+export interface NearStation { spot: Spot; card: StationCard; distanceM: number | null; remainingMs: number }
 
 export interface MainView {
   distanceM: number;
@@ -62,8 +64,10 @@ export function mainScreen(v: MainView): string {
     const button = ready
       ? `<button class="btn" data-act="spin" data-spot="${esc(n.spot.id)}">${icon('capsule')}回す</button>`
       : `<button class="btn wait" disabled>あと${Math.ceil(n.remainingMs / 60000)}分。少し、寄り道を。</button>`;
-    return `<div class="st panel"><div class="t"><span class="no ${ready ? '' : 'mute'}">${esc(n.card.number)}</span><span class="name">${esc(n.spot.name)}</span><span class="d">${distanceLabel(n.distanceM)}</span></div>${button}</div>`;
+    return `<div class="st panel"><div class="t"><span class="no ${ready ? '' : 'mute'}">${esc(n.card.number)}</span><span class="name">${esc(n.spot.name)}</span><span class="d">${n.distanceM == null ? '' : distanceLabel(n.distanceM)}</span></div>${button}</div>`;
   }).join('');
+  // 今日もらった権利は、位置が取れていなくても使える
+  const list = v.near.length > 0 ? `<div class="sec"><span>回せる駅</span>${icon('gachapon', 'deco')}</div>${near}` : '';
   const empty = v.geo === 'ok' && v.near.length === 0
     ? `<p class="say">近くに駅なし。${v.nearest ? `${esc(v.nearest.spot.name)}まで、あと${distanceLabel(v.nearest.distanceM)}。` : ''}</p>`
     : '';
@@ -77,7 +81,7 @@ export function mainScreen(v: MainView): string {
     <div class="feet-cap">${caption}</div>
     <div class="odds">${od('NORMAL')}${od('RARE')}${od('SUPER_RARE', 'sr')}</div>
     ${geoNotice(v)}
-    ${v.geo === 'ok' ? `<div class="sec"><span>近くの駅</span>${icon('gachapon', 'deco')}</div>${near}${empty}` : ''}`;
+    ${list}${empty}`;
 }
 
 export function resultScreen(card: StationCard, rarity: Rarity, isNew: boolean, shardsGained: number, totalShards: number): string {
@@ -133,7 +137,13 @@ export function detailScreen(spot: Spot, card: StationCard, collection: SaveData
   </div>`;
 }
 
-export function settingsScreen(save: SaveData, pendingImport: { data: SaveData; fileName: string } | null, cardCount: number, version: string): string {
+const GPS_MODE_LABEL: Record<GpsMode | 'sim', string> = {
+  slow: `${CONFIG.gpsSlowIntervalMs / 1000}秒ごと`, medium: `${CONFIG.gpsMediumIntervalMs / 1000}秒ごと`, continuous: '測り続ける', sim: 'シミュレーター',
+};
+
+export function settingsScreen(
+  save: SaveData, pendingImport: { data: SaveData; fileName: string } | null, cardCount: number, version: string, gpsMode: GpsMode | 'sim' | null,
+): string {
   const confirm = pendingImport
     ? `<div class="panel">
         <h4>この記録で、上書きしますか。</h4>
@@ -164,6 +174,6 @@ export function settingsScreen(save: SaveData, pendingImport: { data: SaveData; 
       <h4>データの出典</h4>
       <p>駅の位置と地図: © OpenStreetMap contributors。駅の位置のデータは ODbL(Open Database License)のもとで提供しています。<br>書体: Yusei Magic、Zen Maru Gothic(SIL Open Font License 1.1)。</p>
     </div>
-    <p class="ver">トリップガチャ ベータ版 ${esc(version)}</p>
+    <p class="ver">トリップガチャ ベータ版 ${esc(version)}${gpsMode ? `<br>位置の取り方: ${GPS_MODE_LABEL[gpsMode]}` : ''}</p>
   </div>`;
 }

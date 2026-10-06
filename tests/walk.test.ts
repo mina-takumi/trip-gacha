@@ -32,6 +32,22 @@ for (const sigma of [3, 5, 8]) {
   });
 }
 
+// 歩いているときは15秒ごとに位置を取りに行く(location.ts)。位置をならす割合は1秒ごと向けなので、
+// 数字が増えるのは遅れるが、止まれば追いつく
+for (const sigma of [3, 8]) {
+  const every15s = (fixes: F[]) => fixes.filter((_, i) => i % 15 === 0);
+
+  test(`15秒ごとの位置でも、1km歩いて止まるとほぼ1km数える(揺れ σ${sigma}m)`, () => {
+    const s = run(every15s(route(1.3, 770, sigma, 200 + sigma, 300)));
+    assert.ok(Math.abs(s.dailyDistanceM - 1001) < 60, `${s.dailyDistanceM.toFixed(1)}m`);
+  });
+
+  test(`15秒ごとの位置でも、止まっている間は増えない(揺れ σ${sigma}m)`, () => {
+    const s = run(every15s(route(0, 1800, sigma, 300 + sigma)));
+    assert.ok(s.dailyDistanceM < 20, `止まっているのに ${s.dailyDistanceM.toFixed(1)}m 増えた`);
+  });
+}
+
 test('乗り物の速さ(時速60km)の移動も数える', () => {
   const s = run(route(16.7, 300, 5, 7));
   assert.ok(Math.abs(s.dailyDistanceM - 5010) < 150, `${s.dailyDistanceM.toFixed(1)}m`);

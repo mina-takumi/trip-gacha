@@ -139,20 +139,20 @@ single antique key, the antique key is the main subject, large and clearly recog
 
 ## 作り直すカード(3枚)
 
-2回作っても名前の物が描かれなかったカード。縦に長く輪郭のはっきりした形として説明し直し、このカードだけ「描いてほしくないこと」を追加している。下の特別カードの一覧にも同じ内容が入っている。
+何度作っても名前の物が描かれなかったカード。4回目は、形のたとえに使った物(チェスの駒・金管楽器・立っている人)が描かれたため、たとえを外して物そのものだけで説明し直し、描かれた物を「描いてほしくないこと」に足している。角笛は描けなかったため、物を鎌(長い柄の大鎌)に差し替えた。下の特別カードの一覧にも同じ内容が入っている。
 
 ### X 八王子の指輪
 
 保存するファイル名: `art/special/ring.png` / 意味: 指輪(特別カード。装飾多め・後ろに光の輪)
 
 ```
-single gemstone ring, a single gemstone ring standing upright, the band seen as a tall narrow oval, a large pointed gemstone set on top, tall shape with a clear outline, the gemstone ring is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single diamond ring, a piece of jewelry, a plain gold ring band with one large faceted diamond set on top, the diamond ring is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only, hand, fingers
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only, hand, fingers, person, human figure, silhouette, cloak, hood, glossy, shiny reflections, realistic metal
 ```
 
 ### XXI 京王堀之内の印章
@@ -160,27 +160,27 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 保存するファイル名: `art/special/seal.png` / 意味: 印章(特別カード。装飾多め・後ろに光の輪)
 
 ```
-single seal stamp, a tall upright stamp shaped like a chess piece, a round knob handle on top, a slender neck and a wide flat base, standing on its base, tall shape with a clear outline, the seal stamp is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single ink stamp, an old ink stamp tool, a short wooden handle on top and a square stamp block at the bottom with an engraved flat face, the ink stamp is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only, chess piece, chess king, crown, glossy, shiny reflections, realistic metal
 ```
 
-### 特別カード(角笛)
+### 特別カード(鎌)
 
-保存するファイル名: `art/special/horn.png` / 意味: 角笛(特別カード。装飾多め・後ろに光の輪)
+保存するファイル名: `art/special/scythe.png` / 意味: 鎌(特別カード。装飾多め・後ろに光の輪)
 
 ```
-single horn, a large wind instrument made from a curved animal horn, placed diagonally, a small mouthpiece at the narrow tip and a wide open end at the thick end, long shape with a clear outline, the horn is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single scythe, a long straight wooden pole standing vertically with a large curved steel blade attached at the top, the blade sweeping out to one side, a small grip in the middle of the pole, the scythe is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only, sword, dagger, bell
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only, person, human figure, grim reaper, skeleton, skull, hood, cloak, hand, crescent moon, sickle, glossy, shiny reflections, realistic metal
 ```
 
 ## 特別カード(24枚)
@@ -380,13 +380,13 @@ single mask, warm muted gold lines, ornate art deco ornament, sunburst rays behi
 保存するファイル名: `art/special/ring.png` / 意味: 指輪(特別カード。装飾多め・後ろに光の輪)
 
 ```
-single gemstone ring, a single gemstone ring standing upright, the band seen as a tall narrow oval, a large pointed gemstone set on top, tall shape with a clear outline, the gemstone ring is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single diamond ring, a piece of jewelry, a plain gold ring band with one large faceted diamond set on top, the diamond ring is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only, hand, fingers
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only, hand, fingers, person, human figure, silhouette, cloak, hood, glossy, shiny reflections, realistic metal
 ```
 
 ### XX 南大沢の宝珠
@@ -402,27 +402,27 @@ single orb, warm muted gold lines, ornate art deco ornament, sunburst rays behin
 保存するファイル名: `art/special/seal.png` / 意味: 印章(特別カード。装飾多め・後ろに光の輪)
 
 ```
-single seal stamp, a tall upright stamp shaped like a chess piece, a round knob handle on top, a slender neck and a wide flat base, standing on its base, tall shape with a clear outline, the seal stamp is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single ink stamp, an old ink stamp tool, a short wooden handle on top and a square stamp block at the bottom with an engraved flat face, the ink stamp is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only, chess piece, chess king, crown, glossy, shiny reflections, realistic metal
 ```
 
-### 特別カード(角笛)
+### 特別カード(鎌)
 
-保存するファイル名: `art/special/horn.png` / 意味: 角笛(特別カード。装飾多め・後ろに光の輪)
+保存するファイル名: `art/special/scythe.png` / 意味: 鎌(特別カード。装飾多め・後ろに光の輪)
 
 ```
-single horn, a large wind instrument made from a curved animal horn, placed diagonally, a small mouthpiece at the narrow tip and a wide open end at the thick end, long shape with a clear outline, the horn is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single scythe, a long straight wooden pole standing vertically with a large curved steel blade attached at the top, the blade sweeping out to one side, a small grip in the middle of the pole, the scythe is the main subject, large and clearly recognizable, in front of the ornament, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only, sword, dagger, bell
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, compass rose, sun disc, clock hands, empty medallion, abstract ornament only, person, human figure, grim reaper, skeleton, skull, hood, cloak, hand, crescent moon, sickle, glossy, shiny reflections, realistic metal
 ```
 
 ### 特別カード(天球儀)

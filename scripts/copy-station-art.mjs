@@ -17,8 +17,6 @@ const FILE_OF = {
   '小宮の風車': '小宮の歯車.png', // ファイル名は歯車だが、中身は風車
   '中央大学・明星大学の竪琴': '中央大学・明星大学.png',
 };
-// まだ作り直し中で、名前の物が描かれていない絵。アプリでは仮の絵を出す
-const PENDING = new Set(['八王子の指輪', '京王堀之内の印章']);
 
 const { spots } = JSON.parse(readFileSync(join(root, 'data', 'spots.json'), 'utf8'));
 const stations = Object.values(createCatalog(spots).stations);
@@ -28,7 +26,6 @@ mkdirSync(ICONS, { recursive: true });
 let copied = 0;
 for (const st of stations) {
   const key = st.art.replace('special/', '');
-  if (PENDING.has(st.name)) { console.log(`作り直し中のため飛ばす: ${st.name}`); continue; }
   const file = join(SRC, FILE_OF[st.name] ?? `${st.name}.png`);
   if (!existsSync(file)) { console.log(`見つからない: ${st.name}(${file})`); continue; }
   await sharp(file).resize(512, 512).webp({ quality: 82 }).toFile(join(OUT, `${key}.webp`));

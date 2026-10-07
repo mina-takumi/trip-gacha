@@ -25,8 +25,8 @@ const NOUN_EN = {
   '門': 'ornate gate', '羅針盤': 'compass', '旗': 'banner flag', '灯台': 'lighthouse', '橋': 'arched bridge',
   '船': 'sailing ship', '燭台': 'candlestick with a candle', '竪琴': 'harp', '書': 'open book', '巻物': 'scroll',
   '松明': 'torch', '泉': 'fountain', '樹': 'tree', '山': 'mountain', '階段': 'staircase', '窓': 'arched window',
-  '歯車': 'gear', '風車': 'windmill', '仮面': 'mask', '指輪': 'gemstone ring', '宝珠': 'orb', '印章': 'seal stamp',
-  '角笛': 'horn', '天球儀': 'armillary sphere',
+  '歯車': 'gear', '風車': 'windmill', '仮面': 'mask', '指輪': 'diamond ring', '宝珠': 'orb', '印章': 'ink stamp',
+  '鎌': 'scythe', '天球儀': 'armillary sphere',
 };
 
 // 試作で飾りに飲み込まれて物が描かれなかった特別カード(2026-09-29)。物の形を具体的に書き、主役であることを明記する
@@ -36,22 +36,31 @@ const EMPHASIS = {
   '階段': 'a straight flight of stone steps rising upward, seen from the front',
   '樹': 'a single large tree with a thick trunk, spreading branches and a round leafy crown',
   // 角笛・印章・指輪は2回目も描けず(2026-09-29)、縦に長く輪郭のはっきりした形として書き直した。
-  // 前回の bell(鐘が描かれた)・round wax seal(丸い飾りに溶けた)・finger(手が描かれた)は使わない
-  '角笛': 'a large wind instrument made from a curved animal horn, placed diagonally, a small mouthpiece at the narrow tip and a wide open end at the thick end, long shape with a clear outline',
+  // 前回の bell(鐘が描かれた)・round wax seal(丸い飾りに溶けた)・finger(手が描かれた)は使わない。
+  // 4回目(2026-10-07)は、形のたとえに使った言葉がそのまま描かれた(chess piece → チェスの駒、wind instrument → 金管楽器、
+  // standing upright → 立っている人)。別の物の名前や人を思わせる言葉を使わず、物そのものだけで書く
+  // 角笛は4回作っても描けず、2026-10-07 に物を鎌(長い柄の大鎌)へ差し替えた。死神を思わせるので人やフードは禁止に足す
+  '鎌': 'a long straight wooden pole standing vertically with a large curved steel blade attached at the top, the blade sweeping out to one side, a small grip in the middle of the pole',
   '橋': 'a stone arch bridge with one large arch spanning from left to right',
   '旗': 'a waving banner flag hanging from a tall vertical pole',
-  '印章': 'a tall upright stamp shaped like a chess piece, a round knob handle on top, a slender neck and a wide flat base, standing on its base, tall shape with a clear outline',
-  '指輪': 'a single gemstone ring standing upright, the band seen as a tall narrow oval, a large pointed gemstone set on top, tall shape with a clear outline',
+  '印章': 'an old ink stamp tool, a short wooden handle on top and a square stamp block at the bottom with an engraved flat face',
+  '指輪': 'a piece of jewelry, a plain gold ring band with one large faceted diamond set on top',
 };
 // 上の9枚だけに足す「描いてほしくないこと」。共通の欄に足すと羅針盤など他のカードまで描けなくなる
 const EMPHASIS_NEGATIVE = 'compass rose, sun disc, clock hands, empty medallion, abstract ornament only';
 // 共通の禁止のうち、主役そのものを打ち消してしまう言葉(旗 = banner)
 const NEGATIVE_EXCEPT = { '旗': ['title banner'] };
 // そのカードだけにさらに足す禁止。試作で主役の代わりに描かれた物
-const NEGATIVE_EXTRA = { '指輪': ['hand', 'fingers'], '角笛': ['sword', 'dagger', 'bell'] };
+// 4回目で写実的な光沢の絵になったので、3枚とも光沢も禁止する
+const REDO_GLOSS = ['glossy', 'shiny reflections', 'realistic metal'];
+const NEGATIVE_EXTRA = {
+  '指輪': ['hand', 'fingers', 'person', 'human figure', 'silhouette', 'cloak', 'hood', ...REDO_GLOSS],
+  '印章': ['chess piece', 'chess king', 'crown', ...REDO_GLOSS],
+  '鎌': ['person', 'human figure', 'grim reaper', 'skeleton', 'skull', 'hood', 'cloak', 'hand', 'crescent moon', 'sickle', ...REDO_GLOSS],
+};
 const negativeFor = (noun) => [NEGATIVE.split(', ').filter((w) => !(NEGATIVE_EXCEPT[noun] || []).includes(w)).join(', '), EMPHASIS_NEGATIVE, ...(NEGATIVE_EXTRA[noun] || [])].join(', ');
 // 指示書の「作り直すカード」の欄に並べるもの
-const REDO = ['角笛', '印章', '指輪'];
+const REDO = ['鎌', '印章', '指輪'];
 
 // バス停カードのうち、描かれなかった・別の物になった物の形(2026-09-30)
 const BUS_SHAPE = {
@@ -194,7 +203,7 @@ const lines = [
   ...busTrials.flatMap(commonEntry),
   `## 作り直すカード(${REDO.length}枚)`,
   '',
-  '2回作っても名前の物が描かれなかったカード。縦に長く輪郭のはっきりした形として説明し直し、このカードだけ「描いてほしくないこと」を追加している。下の特別カードの一覧にも同じ内容が入っている。',
+  '何度作っても名前の物が描かれなかったカード。4回目は、形のたとえに使った物(チェスの駒・金管楽器・立っている人)が描かれたため、たとえを外して物そのものだけで説明し直し、描かれた物を「描いてほしくないこと」に足している。角笛は描けなかったため、物を鎌(長い柄の大鎌)に差し替えた。下の特別カードの一覧にも同じ内容が入っている。',
   '',
   ...specials.filter((s) => REDO.includes(s.noun)).flatMap(specialEntry),
   `## 特別カード(${specials.length}枚)`,

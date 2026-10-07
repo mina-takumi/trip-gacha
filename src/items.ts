@@ -1,6 +1,6 @@
 // カードの名前をルールで生成する。items.js を TypeScript に移したもの。
 // 同じ itemId からは必ず同じ名前が出る(乱数・時刻を使わない)。
-// 名前は確定版 v1。言葉のリストを変えると所持カードの名前が変わる。変えていないことは
+// 名前は確定版 v2(2026-10-07 v1 の「角笛」を「鎌」に。描けなかったため)。言葉のリストを変えると所持カードの名前が変わる。変えていないことは
 // node scripts/export-card-names.mjs --check で確かめる。
 
 export type Rarity = 'NORMAL' | 'RARE' | 'SUPER_RARE';
@@ -17,7 +17,7 @@ export const NOUNS = [
 // 駅と裏アイテム専用。バス停のカードとは重ならない
 export const SPECIAL_NOUNS = [
   '門', '羅針盤', '旗', '灯台', '橋', '船', '燭台', '竪琴', '書', '巻物', '松明', '泉',
-  '樹', '山', '階段', '窓', '歯車', '風車', '仮面', '指輪', '宝珠', '印章', '角笛', '天球儀',
+  '樹', '山', '階段', '窓', '歯車', '風車', '仮面', '指輪', '宝珠', '印章', '鎌', '天球儀',
 ];
 // 絵のファイル名に使う英字。カードの名前には影響しない
 export const ART_KEYS: Record<string, string> = {
@@ -30,7 +30,7 @@ export const ART_KEYS: Record<string, string> = {
   '門': 'gate', '羅針盤': 'compass', '旗': 'banner', '灯台': 'lighthouse', '橋': 'bridge', '船': 'ship',
   '燭台': 'candlestick', '竪琴': 'harp', '書': 'book', '巻物': 'scroll', '松明': 'torch', '泉': 'fountain',
   '樹': 'tree', '山': 'mountain', '階段': 'staircase', '窓': 'window', '歯車': 'gear', '風車': 'windmill',
-  '仮面': 'mask', '指輪': 'ring', '宝珠': 'orb', '印章': 'seal', '角笛': 'horn', '天球儀': 'armillary',
+  '仮面': 'mask', '指輪': 'ring', '宝珠': 'orb', '印章': 'seal', '鎌': 'scythe', '天球儀': 'armillary',
 };
 
 export interface Spot {

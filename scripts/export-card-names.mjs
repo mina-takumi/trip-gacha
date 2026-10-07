@@ -20,9 +20,9 @@ function publicList() {
   const stations = Object.values(catalog.stations).map((s) => ({ ...s, station: spots.find((p) => p.id === s.spotId).name }));
   return [
     ...HEADER,
-    '# カードの名前一覧(確定版 v1)',
+    '# カードの名前一覧(確定版 v2)',
     '',
-    '言葉のリストは v1 で確定。公開後に変えると、所持しているカードの名前が変わってしまう。',
+    '言葉のリストは v2 で確定(v1 の「角笛」を「鎌」に変えた。駅カードの名前は v1 と同じ)。公開後に変えると、所持しているカードの名前が変わってしまう。',
     '',
     `## 駅カード(${stations.length}枚)`,
     '',
@@ -45,7 +45,7 @@ function secretList() {
   const bus = spots.filter((s) => s.kind === 'bus_stop');
   return [
     ...HEADER,
-    '# 裏アイテムの名前一覧(確定版 v1・非公開)',
+    '# 裏アイテムの名前一覧(確定版 v2・非公開)',
     '',
     '存在を知らせない隠し要素なので、このファイルは公開しない(.gitignore で除外)。',
     '',

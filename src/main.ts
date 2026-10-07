@@ -19,7 +19,7 @@ import {
   detailScreen, mainScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearStation, type Tab,
 } from './ui/screens.ts';
 
-const VERSION = '0.1.2';
+const VERSION = '0.1.3';
 
 // ベータ版は駅だけ
 const stations: Spot[] = spotsJson.spots

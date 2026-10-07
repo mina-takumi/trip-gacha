@@ -137,9 +137,21 @@ export function detailScreen(spot: Spot, card: StationCard, collection: SaveData
   </div>`;
 }
 
-const GPS_MODE_LABEL: Record<GpsMode | 'sim', string> = {
-  slow: `${CONFIG.gpsSlowIntervalMs / 1000}秒ごと`, medium: `${CONFIG.gpsMediumIntervalMs / 1000}秒ごと`, continuous: '測り続ける', sim: 'シミュレーター',
-};
+const GPS_MODES: [GpsMode, string, string][] = [
+  ['slow', `${CONFIG.gpsSlowIntervalMs / 1000}秒ごと`, `時速${CONFIG.gpsMediumKmh}km未満`],
+  ['medium', `${CONFIG.gpsMediumIntervalMs / 1000}秒ごと`, `${CONFIG.gpsMediumKmh}〜${CONFIG.gpsFastKmh}km`],
+  ['continuous', '測り続ける', `${CONFIG.gpsFastKmh}km以上`],
+];
+
+/** 今の位置の取り方。3つを並べ、今のものに色を付ける(iPhoneで切り替わるかを確かめる用) */
+function gpsModePanel(gpsMode: GpsMode | 'sim' | null): string {
+  if (!gpsMode) return '';
+  const body = gpsMode === 'sim'
+    ? '<p>位置シミュレーターを使っています。</p>'
+    : `<div class="gps-modes">${GPS_MODES.map(([m, label, pace]) =>
+      `<div class="gps-mode ${m === gpsMode ? 'on' : ''}" ${m === gpsMode ? 'aria-current="true"' : ''}><b>${label}</b><span>${pace}</span></div>`).join('')}</div>`;
+  return `<div class="panel"><h4>位置の取り方</h4>${body}</div>`;
+}
 
 export function settingsScreen(
   save: SaveData, pendingImport: { data: SaveData; fileName: string } | null, cardCount: number, version: string, gpsMode: GpsMode | 'sim' | null,
@@ -174,6 +186,7 @@ export function settingsScreen(
       <h4>データの出典</h4>
       <p>駅の位置と地図: © OpenStreetMap contributors。駅の位置のデータは ODbL(Open Database License)のもとで提供しています。<br>書体: Yusei Magic、Zen Maru Gothic(SIL Open Font License 1.1)。</p>
     </div>
-    <p class="ver">トリップガチャ ベータ版 ${esc(version)}${gpsMode ? `<br>位置の取り方: ${GPS_MODE_LABEL[gpsMode]}` : ''}</p>
+    ${gpsModePanel(gpsMode)}
+    <p class="ver">トリップガチャ ベータ版 ${esc(version)}</p>
   </div>`;
 }

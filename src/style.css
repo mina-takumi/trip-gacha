@@ -208,6 +208,12 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .stats span { font-size: 12px; font-weight: 900; color: var(--ink-soft); }
 .file-label { position: relative; }
 .file-label input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.gps-modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.gps-mode { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border: 2px dashed var(--mute);
+  border-radius: 14px; color: var(--ink-soft); text-align: center; }
+.gps-mode b { font-size: 14px; white-space: nowrap; }
+.gps-mode span { font-size: 11px; white-space: nowrap; }
+.gps-mode.on { border: 2px solid var(--line); background: var(--teal); color: var(--paper); box-shadow: 2px 2px 0 var(--line); }
 .ver { margin-top: 18px; text-align: center; font-size: 12px; color: var(--ink-soft); }
 .toast { position: fixed; left: 16px; right: 16px; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); z-index: 1100;
   max-width: 448px; margin: 0 auto; background: var(--navy); color: var(--cream); border: 2px solid var(--cream); border-radius: 16px;

@@ -67,7 +67,7 @@ test('端末の記録が壊れていても、空の記録で起動する', () =>
   assert.deepEqual(load(storage), emptySave());
 });
 
-// 回す権利: 範囲内にいたら、その日のうちは範囲の外でも回せる。回したら、また範囲内にいるまで回せない
+// 回す権利: 範囲内にいたら、その日のうちは範囲の外でも回せる。回したら、待ち時間が終わった後にまた範囲内にいるまで回せない
 const DAY = new Date(2026, 9, 6, 9, 0, 0).getTime(); // 2026-10-06 09:00(端末の時刻)
 
 test('範囲に入って出た後でも、権利があって回せる', () => {
@@ -77,21 +77,22 @@ test('範囲に入って出た後でも、権利があって回せる', () => {
   assert.equal(markVisited(d, [], DAY + MIN), d);
 });
 
-test('回すと権利が消え、また範囲内にいると戻る。クールタイム中に入ったら、権利はあっても待ち時間がある', () => {
+test('回した直後に範囲内にいても、離れたら20分たっても回せない', () => {
   let d = markVisited(emptySave(), ['n1'], DAY);
   ({ data: d } = applySpin(d, 'n1', 'NORMAL', DAY + 10 * MIN));
+  d = markVisited(d, ['n1'], DAY + 10 * MIN + 15_000); // 回した直後の測位はまだ範囲内
   assert.equal(hasTicket(d, 'n1', DAY + 11 * MIN), false);
-  d = markVisited(d, ['n1'], DAY + 15 * MIN);
-  assert.equal(hasTicket(d, 'n1', DAY + 16 * MIN), true);
-  assert.equal(cooldownRemainingMs(d, 'n1', DAY + 16 * MIN), 14 * MIN);
+  assert.equal(hasTicket(d, 'n1', DAY + 31 * MIN), false); // その後は範囲の外
 });
 
-test('範囲内にいたまま回しても、次の測位で権利が戻り、20分後に回せる', () => {
+test('待ち時間の間に範囲内にいても権利は戻らず、待ち時間が終わった後に範囲内にいると戻る', () => {
   let d = markVisited(emptySave(), ['n1'], DAY);
-  ({ data: d } = applySpin(d, 'n1', 'RARE', DAY + 1000));
-  d = markVisited(d, ['n1'], DAY + 2000);
-  assert.equal(hasTicket(d, 'n1', DAY + 20 * MIN + 1000), true);
-  assert.equal(cooldownRemainingMs(d, 'n1', DAY + 20 * MIN + 1000), 0);
+  ({ data: d } = applySpin(d, 'n1', 'NORMAL', DAY + 10 * MIN));
+  d = markVisited(d, ['n1'], DAY + 29 * MIN);
+  assert.equal(hasTicket(d, 'n1', DAY + 40 * MIN), false);
+  d = markVisited(d, ['n1'], DAY + 30 * MIN);
+  assert.equal(hasTicket(d, 'n1', DAY + 40 * MIN), true);
+  assert.equal(cooldownRemainingMs(d, 'n1', DAY + 40 * MIN), 0);
 });
 
 test('日付が変わると権利が消える', () => {

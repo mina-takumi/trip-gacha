@@ -108,14 +108,15 @@ export function markVisited(data: SaveData, spotIds: string[], now: number): Sav
 }
 
 /**
- * 回す権利があるか。今日その駅の範囲内にいて、しかも最後に回した後にいたなら、ある(範囲の外でも回せる)。
+ * 回す権利があるか。今日その駅の範囲内にいて、しかも最後に回してから待ち時間が終わった後にいたなら、ある(範囲の外でも回せる)。
+ * 待ち時間の間に範囲内にいただけでは戻らない(回した直後はまだ範囲内にいるため、それで戻すと離れても回せてしまう)。
  * 端末の時計が戻されて最後に回した日時が未来なら、回したことがない扱いにする(cooldownRemainingMs と同じ)。
  */
 export function hasTicket(data: SaveData, spotId: string, now: number): boolean {
   const visited = data.visitedAt[spotId];
   if (visited == null || localDate(visited) !== localDate(now)) return false;
   const last = data.spots[spotId]?.lastSpunAt;
-  return last == null || last > now || visited > last;
+  return last == null || last > now || visited >= last + CONFIG.cooldownMs;
 }
 
 export interface SpinResult {

@@ -19,7 +19,7 @@ import {
   detailScreen, mainScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearStation, type Tab,
 } from './ui/screens.ts';
 
-const VERSION = '0.1.3';
+const VERSION = '0.1.4';
 
 // ベータ版は駅だけ
 const stations: Spot[] = spotsJson.spots
@@ -72,11 +72,20 @@ const toastEl = document.getElementById('toast')!;
 let mapView: MapView | null = null;
 let onMapTap: ((lat: number, lon: number) => void) | undefined;
 
-/** 今日の回す権利がある駅。範囲の外にいても出す。回せる駅を先に、待ち時間の短い順 */
+/**
+ * 回せる駅かどうか。待ち時間が終わっていて、権利があるか、いま範囲内にいる。
+ * 範囲内なら、待ち時間が終わってから次に位置を取るまで(最長15秒)の間も押せる
+ */
+function canSpin(spotId: string, now: number, inside: Set<string>): boolean {
+  return cooldownRemainingMs(state.save, spotId, now) === 0 && (hasTicket(state.save, spotId, now) || inside.has(spotId));
+}
+
+/** 今日の回す権利がある駅と、いま範囲内にいる駅(待ち時間中ならその残りを出す)。回せる駅を先に、待ち時間の短い順 */
 function ticketStations(now: number): NearStation[] {
   const fix = state.fix;
+  const inside = new Set(geofence.insideStopIds());
   return stations
-    .filter((spot) => hasTicket(state.save, spot.id, now))
+    .filter((spot) => hasTicket(state.save, spot.id, now) || inside.has(spot.id))
     .map((spot) => ({
       spot, card: cards[spot.id],
       distanceM: fix ? haversineDistanceM(fix.lat, fix.lon, spot.lat, spot.lon) : null,
@@ -182,7 +191,7 @@ async function reloadLatest(): Promise<void> {
 
 function spin(spotId: string): void {
   const now = Date.now();
-  if (!hasTicket(state.save, spotId, now) || cooldownRemainingMs(state.save, spotId, now) > 0) return;
+  if (!canSpin(spotId, now, new Set(geofence.insideStopIds()))) return;
   const rarity = drawRarity(oddsFor(CONFIG.stationOddsBp, distanceToday(state.save.walk, now)), Math.random);
   const { data, result } = applySpin(state.save, spotId, rarity, now);
   state.save = data;

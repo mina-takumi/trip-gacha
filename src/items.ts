@@ -1,13 +1,13 @@
 // カードの名前をルールで生成する。items.js を TypeScript に移したもの。
 // 同じ itemId からは必ず同じ名前が出る(乱数・時刻を使わない)。
-// 名前は確定版 v2(2026-10-07 v1 の「角笛」を「鎌」に。描けなかったため)。言葉のリストを変えると所持カードの名前が変わる。変えていないことは
+// 名前は確定版 v3(v2: 2026-10-07 「角笛」を「鎌」に。v3: 2026-10-08 「双子の」を「鎖の」に。どちらも絵に描けなかったため)。言葉のリストを変えると所持カードの名前が変わる。変えていないことは
 // node scripts/export-card-names.mjs --check で確かめる。
 
 export type Rarity = 'NORMAL' | 'RARE' | 'SUPER_RARE';
 
 export const MODIFIERS = [
   '銀の', '金の', '黒い', '白い', '紅い', '蒼い',
-  '欠けた', '砕けた', '燃える', '凍てる', '逆さの', '双子の',
+  '欠けた', '砕けた', '燃える', '凍てる', '逆さの', '鎖の',
   '夜明けの', '真夜中の', '翼ある',
 ];
 export const NOUNS = [
@@ -23,7 +23,7 @@ export const SPECIAL_NOUNS = [
 export const ART_KEYS: Record<string, string> = {
   '銀の': 'silver', '金の': 'gold', '黒い': 'black', '白い': 'white', '紅い': 'crimson', '蒼い': 'azure',
   '欠けた': 'chipped', '砕けた': 'cracked', '燃える': 'burning', '凍てる': 'frozen', '逆さの': 'inverted',
-  '双子の': 'twin', '夜明けの': 'dawn', '真夜中の': 'midnight', '翼ある': 'winged',
+  '鎖の': 'chained', '夜明けの': 'dawn', '真夜中の': 'midnight', '翼ある': 'winged',
   '月': 'moon', '太陽': 'sun', '星': 'star', '鍵': 'key', '剣': 'sword', '杯': 'chalice', '杖': 'wand',
   '冠': 'crown', '扉': 'door', '天秤': 'scales', '砂時計': 'hourglass', '錨': 'anchor', '羽': 'feather',
   '目': 'eye', '炎': 'flame', '雫': 'droplet', '輪': 'wheel', '灯': 'lantern', '鐘': 'bell', '矢': 'arrow',
@@ -73,7 +73,7 @@ const commonArt = (noun: string, modifier: string) => 'bus/' + ART_KEYS[noun] + 
 const specialArt = (noun: string) => 'special/' + ART_KEYS[noun];
 
 // 意味が重なるため使わない組み合わせ
-const EXCLUDED = new Set(['翼ある羽', '燃える炎']);
+const EXCLUDED = new Set(['翼ある羽', '燃える炎', '鎖の輪']);
 const MODIFIERS_PER_NOUN = 6;
 const RARITY_COUNTS: [Rarity, number][] = [['SUPER_RARE', 15], ['RARE', 35], ['NORMAL', 70]];
 

@@ -74,7 +74,11 @@ const BUS_SHAPE = {
 };
 // バス停カードだけに足す禁止。共通の禁止(NEGATIVE)は特別カードと同じまま
 // 2回目(2026-10-07)で写実的な光沢の絵が出たので、光沢も禁止する
-const BUS_NEGATIVE = [NEGATIVE, 'circular frame, empty medallion, compass rose, tiny object, small object, object off center', ...REDO_GLOSS].join(', ');
+// 3回目(2026-10-08)も物を囲む大きな円が出たので、円の言葉を足す。もともと丸い物は物まで消えないよう、円の言葉を外す
+const BUS_CIRCLE_NEGATIVE = ['large circle around the object', 'round border', 'halo ring'];
+const ROUND_NOUNS = ['月', '太陽', '輪'];
+const BUS_NEGATIVE_BASE = [NEGATIVE, 'circular frame, empty medallion, compass rose, tiny object, small object, object off center', ...REDO_GLOSS].join(', ');
+const BUS_NEGATIVE = [BUS_NEGATIVE_BASE, ...BUS_CIRCLE_NEGATIVE].join(', ');
 
 // 物の線だけ色を変え、飾りは金のまま残す修飾。線ごと色を変えると金のカードと別のシリーズに見えた(2026-09-30)
 const TINTED = ['銀の', '金の', '白い', '紅い', '蒼い'];
@@ -89,15 +93,17 @@ const MOD = {
   '白い': ['pure white lines', '', '', '物を白に(飾りは金のまま)'],
   '紅い': ['crimson red lines', '', '', '物を紅色に(飾りは金のまま)'],
   '蒼い': ['azure blue lines', '', '', '物を蒼色に(飾りは金のまま)'],
-  // 2回目(2026-10-07)で、小さな欠け・細いひびは描かれなかった。大きく、はっきり書く
-  '欠けた': [`${GOLD} lines`, 'with one large wedge-shaped piece clearly broken off its edge, a visible missing chunk', '', '一部が大きく欠けている'],
-  '砕けた': [`${GOLD} lines`, 'split by large jagged cracks running across it, a few small broken fragments floating slightly apart', '', '大きなひびが入り、かけらが浮く'],
+  // 2回目(2026-10-07)の小さな欠け・細いひび、3回目(2026-10-08)のくさび形の欠け・大きなひびも描かれなかった。半分ない・2つに割れる、まで大きくする
+  '欠けた': [`${GOLD} lines`, 'with the whole right half missing, cut off along a jagged broken edge, only the left half remains', '', '右半分が無く、左半分だけ残る'],
+  '砕けた': [`${GOLD} lines`, 'broken into two separate pieces with a clear gap between them, the two pieces slightly apart', '', '2つに割れて、すき間があく'],
   '燃える': [`${GOLD} lines`, 'burning, wreathed in stylized flames', '', '炎に包まれている'],
   '凍てる': [`${GOLD} lines`, 'frozen, covered in frost crystals', '', '霜の結晶に覆われている'],
   '逆さの': [`${GOLD} lines`, 'upside down', '', '上下逆さま'],
-  '双子の': [`${GOLD} lines`, '', '', '同じものが2つ並ぶ'],
+  // 双子の(2つ並べる)は2本が重なる・3本になるで数がそろわず、2026-10-08 に鎖の へ差し替えた
+  '鎖の': [`${GOLD} lines`, 'wrapped tightly in a heavy chain, large chain links clearly visible coiled around it', '', '太い鎖が巻きつく'],
   // 2回目(2026-10-07)で、夜明けは物が橙になり帯が出ず、真夜中は背景が茶色になった。空の様子として書く
-  '夜明けの': [`${GOLD} lines, the object stays ${GOLD}`, '', 'very dark navy blue sky background, with a soft warm orange sunrise glow only on the horizon at the very bottom', '背景の下の地平線だけ朝焼けの光'],
+  // 3回目(2026-10-08)も地平線の光が出なかったので、下4分の1まで広げる
+  '夜明けの': [`${GOLD} lines, the object stays ${GOLD}`, '', 'very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient', '背景の下4分の1が朝焼けの橙'],
   '真夜中の': [`${GOLD} lines`, '', 'deep dark navy blue night sky background with many tiny white stars scattered', '背景が濃紺の夜空、白く小さな星'],
   '翼ある': [`${GOLD} lines`, 'with a pair of feathered wings', '', '翼が生えている'],
 };
@@ -107,26 +113,23 @@ const MOD_NEGATIVE = {
   '黒い': () => ['person', 'human figure', 'woman', 'hood', 'cloak'],
   '夜明けの': () => ['orange object', 'orange fill'],
   '真夜中の': () => ['brown background', 'sepia', 'orange background'],
-  '双子の': () => ['three objects', 'crossed', 'overlapping'],
   ...Object.fromEntries(Object.keys(RECOLOR).map((m) => [m, (noun) => [`golden ${noun}`]])),
 };
+// 共通の「バス停カード用」と違うときだけ、そのカードの禁止を返す
 const busNegativeFor = (card) => {
   const extra = MOD_NEGATIVE[card.modifier];
-  return extra ? [BUS_NEGATIVE, ...extra(NOUN_EN[card.noun])].join(', ') : undefined;
+  const round = ROUND_NOUNS.includes(card.noun);
+  if (!extra && !round) return undefined;
+  return [round ? BUS_NEGATIVE_BASE : BUS_NEGATIVE, ...(extra ? extra(NOUN_EN[card.noun]) : [])].join(', ');
 };
 
 function commonPrompt(card) {
   const noun = NOUN_EN[card.noun];
   const [color, objectMod, bgMod] = MOD[card.modifier];
-  const twin = card.modifier === '双子の';
   const recolor = RECOLOR[card.modifier];
-  const first = twin
-    ? `exactly two identical ${noun}, one on the left and one on the right, with a clear gap between them, not overlapping, only two`
-    : recolor ? `single ${recolor} ${noun}` : 'single ' + noun;
+  const first = recolor ? `single ${recolor} ${noun}` : 'single ' + noun;
   const subject = [first, BUS_SHAPE[card.noun], objectMod].filter(Boolean).join(', ');
-  const main = twin
-    ? `the two ${noun} are the main subject, large and clearly recognizable`
-    : `the ${noun} is the main subject, large and clearly recognizable`;
+  const main = `the ${noun} is the main subject, large and clearly recognizable`;
   const lines = recolor
     ? [`the whole ${noun} drawn in ${color}`, `only the short radiating lines behind it are ${GOLD}`]
     : TINTED.includes(card.modifier) ? [`the ${noun} drawn in ${color}`, `ornament in ${GOLD} lines`] : [color];
@@ -158,8 +161,8 @@ const specialEntry = (s) => entry(s.title, s.file, specialPrompt(s.noun), `${s.n
 
 const trials = ['蒼い月', '燃える鍵'].map((name) => catalog.common.find((c) => c.name === name));
 const trialSpecial = specials.find((s) => s.noun === '灯台');
-// 修飾ごとの指示を直した後(2026-10-07)、残りを作る前に試すカード。2回目で修飾が出なかった・使えなかったもの
-const busTrials = ['黒い冠', '蒼い扉', '白い鍵', '紅い目', '銀の砂時計', '夜明けの炎', '真夜中の星', '欠けた錨', '砕けた鍵', '双子の杖', '双子の剣', '凍てる天秤']
+// 指示を直した後(2026-10-08)、残りを作る前に試すカード。3回目で修飾が出なかった・円が出たものと、新しい「鎖の」
+const busTrials = ['欠けた錨', '欠けた鐘', '砕けた鍵', '砕けた鐘', '夜明けの炎', '黒い冠', '白い鍵', '紅い目', '鎖の剣', '鎖の錨']
   .map((name) => catalog.common.find((c) => c.name === name));
 
 const lines = [
@@ -226,7 +229,7 @@ const lines = [
   ...specialEntry(trialSpecial),
   `## バス停カードの試し(${busTrials.length}枚)`,
   '',
-  '2回目で修飾(黒い・色・夜明け・真夜中・欠けた・砕けた・双子)が絵に出なかったので、修飾ごとの書き方を直した。残りを作る前にこの12枚で試す。修飾によっては、このカードだけの「描いてほしくないこと」がある(各カードの下)。',
+  '3回目で、欠けた・砕けた・夜明けがまだ絵に出ず、物を囲む大きな円も残ったので、書き方を直した。「双子の」は「鎖の」に変えた。残りを作る前にこの10枚で試す。このカードだけの「描いてほしくないこと」があるものは、各カードの下に書いてある。',
   '',
   ...busTrials.flatMap(commonEntry),
   `## 作り直すカード(${REDO.length}枚)`,

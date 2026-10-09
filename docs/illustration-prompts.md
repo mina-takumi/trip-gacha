@@ -54,14 +54,14 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 特別カード用の文に、円の飾りや小さすぎる物を防ぐ言葉を足したもの。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring
 ```
 
 ## まず試す3枚
 
 色の修飾・効果の修飾・特別カードを1枚ずつ。この3枚が並べて同じシリーズに見えるモデルを選ぶ。
 
-### XLVII 蒼い月
+### XLVI 蒼い月
 
 保存するファイル名: `art/bus/moon-azure.png` / 意味: 月(物を蒼色に(飾りは金のまま))
 
@@ -75,7 +75,7 @@ single azure blue moon, a large crescent moon shape, the moon is the main subjec
 text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden moon
 ```
 
-### XLV 燃える鍵
+### XLIV 燃える鍵
 
 保存するファイル名: `art/bus/key-burning.png` / 意味: 鍵(炎に包まれている)
 
@@ -91,11 +91,57 @@ single antique key, burning, wreathed in stylized flames, the antique key is the
 single lighthouse, warm muted gold lines, ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-## バス停カードの試し(12枚)
+## バス停カードの試し(10枚)
 
-2回目で修飾(黒い・色・夜明け・真夜中・欠けた・砕けた・双子)が絵に出なかったので、修飾ごとの書き方を直した。残りを作る前にこの12枚で試す。修飾によっては、このカードだけの「描いてほしくないこと」がある(各カードの下)。
+3回目で、欠けた・砕けた・夜明けがまだ絵に出ず、物を囲む大きな円も残ったので、書き方を直した。「双子の」は「鎖の」に変えた。残りを作る前にこの10枚で試す。このカードだけの「描いてほしくないこと」があるものは、各カードの下に書いてある。
 
-### XVIII 黒い冠
+### XVI 欠けた錨
+
+保存するファイル名: `art/bus/anchor-chipped.png` / 意味: 錨(右半分が無く、左半分だけ残る)
+
+```
+single anchor, with the whole right half missing, cut off along a jagged broken edge, only the left half remains, the anchor is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+### XXXVIII 欠けた鐘
+
+保存するファイル名: `art/bus/bell-chipped.png` / 意味: 鐘(右半分が無く、左半分だけ残る)
+
+```
+single bell, with the whole right half missing, cut off along a jagged broken edge, only the left half remains, the bell is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+### XXV 砕けた鍵
+
+保存するファイル名: `art/bus/key-cracked.png` / 意味: 鍵(2つに割れて、すき間があく)
+
+```
+single antique key, broken into two separate pieces with a clear gap between them, the two pieces slightly apart, the antique key is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+### XLI 砕けた鐘
+
+保存するファイル名: `art/bus/bell-cracked.png` / 意味: 鐘(2つに割れて、すき間があく)
+
+```
+single bell, broken into two separate pieces with a clear gap between them, the two pieces slightly apart, the bell is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+### V 夜明けの炎
+
+保存するファイル名: `art/bus/flame-dawn.png` / 意味: 炎(背景の下4分の1が朝焼けの橙)
+
+```
+single flame, the flame is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient, subtle glow, generous empty margin, original design
+```
+
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, orange object, orange fill
+```
+
+### XVII 黒い冠
 
 保存するファイル名: `art/bus/crown-black.png` / 意味: 冠(黒く塗った物、ふちだけ金)
 
@@ -106,21 +152,7 @@ single crown, painted solid matte black, the crown is the main subject, large an
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, person, human figure, woman, hood, cloak
-```
-
-### XVI 蒼い扉
-
-保存するファイル名: `art/bus/door-azure.png` / 意味: 扉(物を蒼色に(飾りは金のまま))
-
-```
-single azure blue arched door, a tall arched door with two panels and a round handle, the arched door is the main subject, large and clearly recognizable, the whole arched door drawn in azure blue lines, only the short radiating lines behind it are warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
-
-```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden arched door
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, person, human figure, woman, hood, cloak
 ```
 
 ### VIII 白い鍵
@@ -134,7 +166,7 @@ single pure white antique key, the antique key is the main subject, large and cl
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden antique key
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden antique key
 ```
 
 ### X 紅い目
@@ -148,101 +180,23 @@ single crimson red eye, an open eye with an almond shaped outline and a round ir
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden eye
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden eye
 ```
 
-### XXXVII 銀の砂時計
+### CXIV 鎖の剣
 
-保存するファイル名: `art/bus/hourglass-silver.png` / 意味: 砂時計(物を銀色に(飾りは金のまま))
-
-```
-single silver hourglass, the hourglass is the main subject, large and clearly recognizable, the whole hourglass drawn in silver lines, only the short radiating lines behind it are warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+保存するファイル名: `art/bus/sword-chained.png` / 意味: 剣(太い鎖が巻きつく)
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden hourglass
+single sword, wrapped tightly in a heavy chain, large chain links clearly visible coiled around it, the sword is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### V 夜明けの炎
+### XXVII 鎖の錨
 
-保存するファイル名: `art/bus/flame-dawn.png` / 意味: 炎(背景の下の地平線だけ朝焼けの光)
-
-```
-single flame, the flame is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, with a soft warm orange sunrise glow only on the horizon at the very bottom, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+保存するファイル名: `art/bus/anchor-chained.png` / 意味: 錨(太い鎖が巻きつく)
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, orange object, orange fill
-```
-
-### XXIV 真夜中の星
-
-保存するファイル名: `art/bus/star-midnight.png` / 意味: 星(背景が濃紺の夜空、白く小さな星)
-
-```
-single star, the star is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, deep dark navy blue night sky background with many tiny white stars scattered, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
-
-```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, brown background, sepia, orange background
-```
-
-### XVII 欠けた錨
-
-保存するファイル名: `art/bus/anchor-chipped.png` / 意味: 錨(一部が大きく欠けている)
-
-```
-single anchor, with one large wedge-shaped piece clearly broken off its edge, a visible missing chunk, the anchor is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-### XXVII 砕けた鍵
-
-保存するファイル名: `art/bus/key-cracked.png` / 意味: 鍵(大きなひびが入り、かけらが浮く)
-
-```
-single antique key, split by large jagged cracks running across it, a few small broken fragments floating slightly apart, the antique key is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-### XXV 双子の杖
-
-保存するファイル名: `art/bus/wand-twin.png` / 意味: 杖(同じものが2つ並ぶ)
-
-```
-exactly two identical magic staff, one on the left and one on the right, with a clear gap between them, not overlapping, only two, the two magic staff are the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
-
-```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, three objects, crossed, overlapping
-```
-
-### XIV 双子の剣
-
-保存するファイル名: `art/bus/sword-twin.png` / 意味: 剣(同じものが2つ並ぶ)
-
-```
-exactly two identical sword, one on the left and one on the right, with a clear gap between them, not overlapping, only two, the two sword are the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
-
-```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, three objects, crossed, overlapping
-```
-
-### XXXV 凍てる天秤
-
-保存するファイル名: `art/bus/scales-frozen.png` / 意味: 天秤(霜の結晶に覆われている)
-
-```
-single balance scales, a balance scale with a central upright post, a horizontal beam on top and two pans hanging from both ends, frozen, covered in frost crystals, the balance scales is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single anchor, wrapped tightly in a heavy chain, large chain links clearly visible coiled around it, the anchor is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 ## 作り直すカード(3枚)
@@ -562,7 +516,7 @@ single pure white chalice, the chalice is the main subject, large and clearly re
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden chalice
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden chalice
 ```
 
 ### III 翼ある炎
@@ -584,21 +538,21 @@ single silver feather, the feather is the main subject, large and clearly recogn
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden feather
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden feather
 ```
 
 ### V 夜明けの炎
 
-保存するファイル名: `art/bus/flame-dawn.png` / 意味: 炎(背景の下の地平線だけ朝焼けの光)
+保存するファイル名: `art/bus/flame-dawn.png` / 意味: 炎(背景の下4分の1が朝焼けの橙)
 
 ```
-single flame, the flame is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, with a soft warm orange sunrise glow only on the horizon at the very bottom, subtle glow, generous empty margin, original design
+single flame, the flame is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, orange object, orange fill
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, orange object, orange fill
 ```
 
 ### VI 銀の冠
@@ -612,7 +566,7 @@ single silver crown, the crown is the main subject, large and clearly recognizab
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden crown
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden crown
 ```
 
 ### VII 紅い雫
@@ -626,7 +580,7 @@ single crimson red water droplet, a teardrop shape, round at the bottom and poin
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden water droplet
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden water droplet
 ```
 
 ### VIII 白い鍵
@@ -640,15 +594,15 @@ single pure white antique key, the antique key is the main subject, large and cl
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden antique key
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden antique key
 ```
 
 ### IX 砕けた杖
 
-保存するファイル名: `art/bus/wand-cracked.png` / 意味: 杖(大きなひびが入り、かけらが浮く)
+保存するファイル名: `art/bus/wand-cracked.png` / 意味: 杖(2つに割れて、すき間があく)
 
 ```
-single magic staff, split by large jagged cracks running across it, a few small broken fragments floating slightly apart, the magic staff is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single magic staff, broken into two separate pieces with a clear gap between them, the two pieces slightly apart, the magic staff is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 ### X 紅い目
@@ -662,7 +616,7 @@ single crimson red eye, an open eye with an almond shaped outline and a round ir
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden eye
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden eye
 ```
 
 ### XI 逆さの剣
@@ -681,6 +635,12 @@ single sword, upside down, the sword is the main subject, large and clearly reco
 single moon, a large crescent moon shape, the moon is the main subject, large and clearly recognizable, the moon drawn in radiant bright gold lines with a strong golden glow, ornament in warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
+```
+
 ### XIII 翼ある冠
 
 保存するファイル名: `art/bus/crown-winged.png` / 意味: 冠(翼が生えている)
@@ -689,29 +649,21 @@ single moon, a large crescent moon shape, the moon is the main subject, large an
 single crown, with a pair of feathered wings, the crown is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XIV 双子の剣
+### XIV 欠けた輪
 
-保存するファイル名: `art/bus/sword-twin.png` / 意味: 剣(同じものが2つ並ぶ)
+保存するファイル名: `art/bus/wheel-chipped.png` / 意味: 輪(右半分が無く、左半分だけ残る)
 
 ```
-exactly two identical sword, one on the left and one on the right, with a clear gap between them, not overlapping, only two, the two sword are the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single wheel, a spoked wagon wheel with a hub and a rim, with the whole right half missing, cut off along a jagged broken edge, only the left half remains, the wheel is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, three objects, crossed, overlapping
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
 ```
 
-### XV 欠けた輪
-
-保存するファイル名: `art/bus/wheel-chipped.png` / 意味: 輪(一部が大きく欠けている)
-
-```
-single wheel, a spoked wagon wheel with a hub and a rim, with one large wedge-shaped piece clearly broken off its edge, a visible missing chunk, the wheel is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-### XVI 蒼い扉
+### XV 蒼い扉
 
 保存するファイル名: `art/bus/door-azure.png` / 意味: 扉(物を蒼色に(飾りは金のまま))
 
@@ -722,18 +674,18 @@ single azure blue arched door, a tall arched door with two panels and a round ha
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden arched door
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden arched door
 ```
 
-### XVII 欠けた錨
+### XVI 欠けた錨
 
-保存するファイル名: `art/bus/anchor-chipped.png` / 意味: 錨(一部が大きく欠けている)
+保存するファイル名: `art/bus/anchor-chipped.png` / 意味: 錨(右半分が無く、左半分だけ残る)
 
 ```
-single anchor, with one large wedge-shaped piece clearly broken off its edge, a visible missing chunk, the anchor is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single anchor, with the whole right half missing, cut off along a jagged broken edge, only the left half remains, the anchor is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XVIII 黒い冠
+### XVII 黒い冠
 
 保存するファイル名: `art/bus/crown-black.png` / 意味: 冠(黒く塗った物、ふちだけ金)
 
@@ -744,24 +696,24 @@ single crown, painted solid matte black, the crown is the main subject, large an
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, person, human figure, woman, hood, cloak
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, person, human figure, woman, hood, cloak
 ```
 
-### XIX 夜明けの剣
+### XVIII 夜明けの剣
 
-保存するファイル名: `art/bus/sword-dawn.png` / 意味: 剣(背景の下の地平線だけ朝焼けの光)
+保存するファイル名: `art/bus/sword-dawn.png` / 意味: 剣(背景の下4分の1が朝焼けの橙)
 
 ```
-single sword, the sword is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, with a soft warm orange sunrise glow only on the horizon at the very bottom, subtle glow, generous empty margin, original design
+single sword, the sword is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, orange object, orange fill
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, orange object, orange fill
 ```
 
-### XX 真夜中の天秤
+### XIX 真夜中の天秤
 
 保存するファイル名: `art/bus/scales-midnight.png` / 意味: 天秤(背景が濃紺の夜空、白く小さな星)
 
@@ -772,10 +724,10 @@ single balance scales, a balance scale with a central upright post, a horizontal
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, brown background, sepia, orange background
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, brown background, sepia, orange background
 ```
 
-### XXI 逆さの杖
+### XX 逆さの杖
 
 保存するファイル名: `art/bus/wand-inverted.png` / 意味: 杖(上下逆さま)
 
@@ -783,15 +735,15 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single magic staff, upside down, the magic staff is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXII 砕けた扉
+### XXI 砕けた扉
 
-保存するファイル名: `art/bus/door-cracked.png` / 意味: 扉(大きなひびが入り、かけらが浮く)
+保存するファイル名: `art/bus/door-cracked.png` / 意味: 扉(2つに割れて、すき間があく)
 
 ```
-single arched door, a tall arched door with two panels and a round handle, split by large jagged cracks running across it, a few small broken fragments floating slightly apart, the arched door is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single arched door, a tall arched door with two panels and a round handle, broken into two separate pieces with a clear gap between them, the two pieces slightly apart, the arched door is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXIII 凍てる矢
+### XXII 凍てる矢
 
 保存するファイル名: `art/bus/arrow-frozen.png` / 意味: 矢(霜の結晶に覆われている)
 
@@ -799,7 +751,7 @@ single arched door, a tall arched door with two panels and a round handle, split
 single arrow, frozen, covered in frost crystals, the arrow is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXIV 真夜中の星
+### XXIII 真夜中の星
 
 保存するファイル名: `art/bus/star-midnight.png` / 意味: 星(背景が濃紺の夜空、白く小さな星)
 
@@ -810,46 +762,32 @@ single star, the star is the main subject, large and clearly recognizable, warm 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, brown background, sepia, orange background
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, brown background, sepia, orange background
 ```
 
-### XXV 双子の杖
+### XXIV 夜明けの灯
 
-保存するファイル名: `art/bus/wand-twin.png` / 意味: 杖(同じものが2つ並ぶ)
-
-```
-exactly two identical magic staff, one on the left and one on the right, with a clear gap between them, not overlapping, only two, the two magic staff are the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+保存するファイル名: `art/bus/lantern-dawn.png` / 意味: 灯(背景の下4分の1が朝焼けの橙)
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, three objects, crossed, overlapping
-```
-
-### XXVI 夜明けの灯
-
-保存するファイル名: `art/bus/lantern-dawn.png` / 意味: 灯(背景の下の地平線だけ朝焼けの光)
-
-```
-single lantern, the lantern is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, with a soft warm orange sunrise glow only on the horizon at the very bottom, subtle glow, generous empty margin, original design
+single lantern, the lantern is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, orange object, orange fill
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, orange object, orange fill
 ```
 
-### XXVII 砕けた鍵
+### XXV 砕けた鍵
 
-保存するファイル名: `art/bus/key-cracked.png` / 意味: 鍵(大きなひびが入り、かけらが浮く)
+保存するファイル名: `art/bus/key-cracked.png` / 意味: 鍵(2つに割れて、すき間があく)
 
 ```
-single antique key, split by large jagged cracks running across it, a few small broken fragments floating slightly apart, the antique key is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single antique key, broken into two separate pieces with a clear gap between them, the two pieces slightly apart, the antique key is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXVIII 燃える輪
+### XXVI 燃える輪
 
 保存するファイル名: `art/bus/wheel-burning.png` / 意味: 輪(炎に包まれている)
 
@@ -857,15 +795,35 @@ single antique key, split by large jagged cracks running across it, a few small 
 single wheel, a spoked wagon wheel with a hub and a rim, burning, wreathed in stylized flames, the wheel is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXIX 欠けた太陽
-
-保存するファイル名: `art/bus/sun-chipped.png` / 意味: 太陽(一部が大きく欠けている)
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-single sun, with one large wedge-shaped piece clearly broken off its edge, a visible missing chunk, the sun is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
 ```
 
-### XXX 燃える錨
+### XXVII 鎖の錨
+
+保存するファイル名: `art/bus/anchor-chained.png` / 意味: 錨(太い鎖が巻きつく)
+
+```
+single anchor, wrapped tightly in a heavy chain, large chain links clearly visible coiled around it, the anchor is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+### XXVIII 欠けた太陽
+
+保存するファイル名: `art/bus/sun-chipped.png` / 意味: 太陽(右半分が無く、左半分だけ残る)
+
+```
+single sun, with the whole right half missing, cut off along a jagged broken edge, only the left half remains, the sun is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
+```
+
+### XXIX 燃える錨
 
 保存するファイル名: `art/bus/anchor-burning.png` / 意味: 錨(炎に包まれている)
 
@@ -873,7 +831,7 @@ single sun, with one large wedge-shaped piece clearly broken off its edge, a vis
 single anchor, burning, wreathed in stylized flames, the anchor is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXXI 黒い羽
+### XXX 黒い羽
 
 保存するファイル名: `art/bus/feather-black.png` / 意味: 羽(黒く塗った物、ふちだけ金)
 
@@ -884,10 +842,10 @@ single feather, painted solid matte black, the feather is the main subject, larg
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, person, human figure, woman, hood, cloak
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, person, human figure, woman, hood, cloak
 ```
 
-### XXXII 金の灯
+### XXXI 金の灯
 
 保存するファイル名: `art/bus/lantern-gold.png` / 意味: 灯(物がいつもより強く輝く金)
 
@@ -895,7 +853,7 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single lantern, the lantern is the main subject, large and clearly recognizable, the lantern drawn in radiant bright gold lines with a strong golden glow, ornament in warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXXIII 金の杯
+### XXXII 金の杯
 
 保存するファイル名: `art/bus/chalice-gold.png` / 意味: 杯(物がいつもより強く輝く金)
 
@@ -903,7 +861,7 @@ single lantern, the lantern is the main subject, large and clearly recognizable,
 single chalice, the chalice is the main subject, large and clearly recognizable, the chalice drawn in radiant bright gold lines with a strong golden glow, ornament in warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXXIV 燃える杖
+### XXXIII 燃える杖
 
 保存するファイル名: `art/bus/wand-burning.png` / 意味: 杖(炎に包まれている)
 
@@ -911,7 +869,7 @@ single chalice, the chalice is the main subject, large and clearly recognizable,
 single magic staff, burning, wreathed in stylized flames, the magic staff is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXXV 凍てる天秤
+### XXXIV 凍てる天秤
 
 保存するファイル名: `art/bus/scales-frozen.png` / 意味: 天秤(霜の結晶に覆われている)
 
@@ -919,21 +877,7 @@ single magic staff, burning, wreathed in stylized flames, the magic staff is the
 single balance scales, a balance scale with a central upright post, a horizontal beam on top and two pans hanging from both ends, frozen, covered in frost crystals, the balance scales is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXXVI 双子の太陽
-
-保存するファイル名: `art/bus/sun-twin.png` / 意味: 太陽(同じものが2つ並ぶ)
-
-```
-exactly two identical sun, one on the left and one on the right, with a clear gap between them, not overlapping, only two, the two sun are the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
-
-```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, three objects, crossed, overlapping
-```
-
-### XXXVII 銀の砂時計
+### XXXV 銀の砂時計
 
 保存するファイル名: `art/bus/hourglass-silver.png` / 意味: 砂時計(物を銀色に(飾りは金のまま))
 
@@ -944,10 +888,10 @@ single silver hourglass, the hourglass is the main subject, large and clearly re
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden hourglass
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden hourglass
 ```
 
-### XXXVIII 逆さの太陽
+### XXXVI 逆さの太陽
 
 保存するファイル名: `art/bus/sun-inverted.png` / 意味: 太陽(上下逆さま)
 
@@ -955,7 +899,13 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single sun, upside down, the sun is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XXXIX 蒼い鐘
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
+```
+
+### XXXVII 蒼い鐘
 
 保存するファイル名: `art/bus/bell-azure.png` / 意味: 鐘(物を蒼色に(飾りは金のまま))
 
@@ -966,18 +916,26 @@ single azure blue bell, the bell is the main subject, large and clearly recogniz
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden bell
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden bell
 ```
 
-### XL 欠けた鐘
+### XXXVIII 欠けた鐘
 
-保存するファイル名: `art/bus/bell-chipped.png` / 意味: 鐘(一部が大きく欠けている)
+保存するファイル名: `art/bus/bell-chipped.png` / 意味: 鐘(右半分が無く、左半分だけ残る)
 
 ```
-single bell, with one large wedge-shaped piece clearly broken off its edge, a visible missing chunk, the bell is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single bell, with the whole right half missing, cut off along a jagged broken edge, only the left half remains, the bell is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XLI 燃える扉
+### XXXIX 鎖の天秤
+
+保存するファイル名: `art/bus/scales-chained.png` / 意味: 天秤(太い鎖が巻きつく)
+
+```
+single balance scales, a balance scale with a central upright post, a horizontal beam on top and two pans hanging from both ends, wrapped tightly in a heavy chain, large chain links clearly visible coiled around it, the balance scales is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+### XL 燃える扉
 
 保存するファイル名: `art/bus/door-burning.png` / 意味: 扉(炎に包まれている)
 
@@ -985,15 +943,15 @@ single bell, with one large wedge-shaped piece clearly broken off its edge, a vi
 single arched door, a tall arched door with two panels and a round handle, burning, wreathed in stylized flames, the arched door is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XLII 砕けた鐘
+### XLI 砕けた鐘
 
-保存するファイル名: `art/bus/bell-cracked.png` / 意味: 鐘(大きなひびが入り、かけらが浮く)
+保存するファイル名: `art/bus/bell-cracked.png` / 意味: 鐘(2つに割れて、すき間があく)
 
 ```
-single bell, split by large jagged cracks running across it, a few small broken fragments floating slightly apart, the bell is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single bell, broken into two separate pieces with a clear gap between them, the two pieces slightly apart, the bell is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XLIII 黒い砂時計
+### XLII 黒い砂時計
 
 保存するファイル名: `art/bus/hourglass-black.png` / 意味: 砂時計(黒く塗った物、ふちだけ金)
 
@@ -1004,18 +962,18 @@ single hourglass, painted solid matte black, the hourglass is the main subject, 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, person, human figure, woman, hood, cloak
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, person, human figure, woman, hood, cloak
 ```
 
-### XLIV 欠けた目
+### XLIII 欠けた目
 
-保存するファイル名: `art/bus/eye-chipped.png` / 意味: 目(一部が大きく欠けている)
+保存するファイル名: `art/bus/eye-chipped.png` / 意味: 目(右半分が無く、左半分だけ残る)
 
 ```
-single eye, an open eye with an almond shaped outline and a round iris, with one large wedge-shaped piece clearly broken off its edge, a visible missing chunk, the eye is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single eye, an open eye with an almond shaped outline and a round iris, with the whole right half missing, cut off along a jagged broken edge, only the left half remains, the eye is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XLV 燃える鍵
+### XLIV 燃える鍵
 
 保存するファイル名: `art/bus/key-burning.png` / 意味: 鍵(炎に包まれている)
 
@@ -1023,7 +981,7 @@ single eye, an open eye with an almond shaped outline and a round iris, with one
 single antique key, burning, wreathed in stylized flames, the antique key is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XLVI 白い羽
+### XLV 白い羽
 
 保存するファイル名: `art/bus/feather-white.png` / 意味: 羽(物を白に(飾りは金のまま))
 
@@ -1034,10 +992,10 @@ single pure white feather, the feather is the main subject, large and clearly re
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden feather
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden feather
 ```
 
-### XLVII 蒼い月
+### XLVI 蒼い月
 
 保存するファイル名: `art/bus/moon-azure.png` / 意味: 月(物を蒼色に(飾りは金のまま))
 
@@ -1051,7 +1009,7 @@ single azure blue moon, a large crescent moon shape, the moon is the main subjec
 text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden moon
 ```
 
-### XLVIII 銀の雫
+### XLVII 銀の雫
 
 保存するファイル名: `art/bus/droplet-silver.png` / 意味: 雫(物を銀色に(飾りは金のまま))
 
@@ -1062,10 +1020,10 @@ single silver water droplet, a teardrop shape, round at the bottom and pointed a
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden water droplet
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden water droplet
 ```
 
-### XLIX 翼ある矢
+### XLVIII 翼ある矢
 
 保存するファイル名: `art/bus/arrow-winged.png` / 意味: 矢(翼が生えている)
 
@@ -1073,7 +1031,7 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single arrow, with a pair of feathered wings, the arrow is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### L 逆さの輪
+### XLIX 逆さの輪
 
 保存するファイル名: `art/bus/wheel-inverted.png` / 意味: 輪(上下逆さま)
 
@@ -1081,7 +1039,13 @@ single arrow, with a pair of feathered wings, the arrow is the main subject, lar
 single wheel, a spoked wagon wheel with a hub and a rim, upside down, the wheel is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### LI 逆さの錨
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
+```
+
+### L 逆さの錨
 
 保存するファイル名: `art/bus/anchor-inverted.png` / 意味: 錨(上下逆さま)
 
@@ -1089,7 +1053,7 @@ single wheel, a spoked wagon wheel with a hub and a rim, upside down, the wheel 
 single anchor, upside down, the anchor is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### LII 金の羽
+### LI 金の羽
 
 保存するファイル名: `art/bus/feather-gold.png` / 意味: 羽(物がいつもより強く輝く金)
 
@@ -1097,7 +1061,7 @@ single anchor, upside down, the anchor is the main subject, large and clearly re
 single feather, the feather is the main subject, large and clearly recognizable, the feather drawn in radiant bright gold lines with a strong golden glow, ornament in warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### LIII 黒い杯
+### LII 黒い杯
 
 保存するファイル名: `art/bus/chalice-black.png` / 意味: 杯(黒く塗った物、ふちだけ金)
 
@@ -1108,10 +1072,10 @@ single chalice, painted solid matte black, the chalice is the main subject, larg
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, person, human figure, woman, hood, cloak
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, person, human figure, woman, hood, cloak
 ```
 
-### LIV 黒い灯
+### LIII 黒い灯
 
 保存するファイル名: `art/bus/lantern-black.png` / 意味: 灯(黒く塗った物、ふちだけ金)
 
@@ -1122,10 +1086,10 @@ single lantern, painted solid matte black, the lantern is the main subject, larg
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, person, human figure, woman, hood, cloak
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, person, human figure, woman, hood, cloak
 ```
 
-### LV 蒼い砂時計
+### LIV 蒼い砂時計
 
 保存するファイル名: `art/bus/hourglass-azure.png` / 意味: 砂時計(物を蒼色に(飾りは金のまま))
 
@@ -1136,7 +1100,21 @@ single azure blue hourglass, the hourglass is the main subject, large and clearl
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden hourglass
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden hourglass
+```
+
+### LV 夜明けの輪
+
+保存するファイル名: `art/bus/wheel-dawn.png` / 意味: 輪(背景の下4分の1が朝焼けの橙)
+
+```
+single wheel, a spoked wagon wheel with a hub and a rim, the wheel is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient, subtle glow, generous empty margin, original design
+```
+
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, orange object, orange fill
 ```
 
 ### LVI 凍てる輪
@@ -1145,6 +1123,12 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 
 ```
 single wheel, a spoked wagon wheel with a hub and a rim, frozen, covered in frost crystals, the wheel is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
 ```
 
 ### LVII 凍てる錨
@@ -1161,6 +1145,12 @@ single anchor, frozen, covered in frost crystals, the anchor is the main subject
 
 ```
 single sun, burning, wreathed in stylized flames, the sun is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
 ```
 
 ### LIX 凍てる杖
@@ -1182,24 +1172,10 @@ single crimson red arched door, a tall arched door with two panels and a round h
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden arched door
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden arched door
 ```
 
-### LXI 双子の炎
-
-保存するファイル名: `art/bus/flame-twin.png` / 意味: 炎(同じものが2つ並ぶ)
-
-```
-exactly two identical flame, one on the left and one on the right, with a clear gap between them, not overlapping, only two, the two flame are the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
-
-```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, three objects, crossed, overlapping
-```
-
-### LXII 翼ある星
+### LXI 翼ある星
 
 保存するファイル名: `art/bus/star-winged.png` / 意味: 星(翼が生えている)
 
@@ -1207,7 +1183,7 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single star, with a pair of feathered wings, the star is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### LXIII 真夜中の剣
+### LXII 真夜中の剣
 
 保存するファイル名: `art/bus/sword-midnight.png` / 意味: 剣(背景が濃紺の夜空、白く小さな星)
 
@@ -1218,7 +1194,15 @@ single sword, the sword is the main subject, large and clearly recognizable, war
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, brown background, sepia, orange background
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, brown background, sepia, orange background
+```
+
+### LXIII 鎖の矢
+
+保存するファイル名: `art/bus/arrow-chained.png` / 意味: 矢(太い鎖が巻きつく)
+
+```
+single arrow, wrapped tightly in a heavy chain, large chain links clearly visible coiled around it, the arrow is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 ### LXIV 蒼い雫
@@ -1232,7 +1216,7 @@ single azure blue water droplet, a teardrop shape, round at the bottom and point
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden water droplet
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden water droplet
 ```
 
 ### LXV 真夜中の灯
@@ -1246,7 +1230,7 @@ single lantern, the lantern is the main subject, large and clearly recognizable,
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, brown background, sepia, orange background
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, brown background, sepia, orange background
 ```
 
 ### LXVI 蒼い目
@@ -1260,21 +1244,21 @@ single azure blue eye, an open eye with an almond shaped outline and a round iri
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden eye
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden eye
 ```
 
 ### LXVII 夜明けの星
 
-保存するファイル名: `art/bus/star-dawn.png` / 意味: 星(背景の下の地平線だけ朝焼けの光)
+保存するファイル名: `art/bus/star-dawn.png` / 意味: 星(背景の下4分の1が朝焼けの橙)
 
 ```
-single star, the star is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, with a soft warm orange sunrise glow only on the horizon at the very bottom, subtle glow, generous empty margin, original design
+single star, the star is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, orange object, orange fill
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, orange object, orange fill
 ```
 
 ### LXVIII 金の冠
@@ -1296,7 +1280,7 @@ single pure white water droplet, a teardrop shape, round at the bottom and point
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden water droplet
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden water droplet
 ```
 
 ### LXX 白い砂時計
@@ -1310,23 +1294,29 @@ single pure white hourglass, the hourglass is the main subject, large and clearl
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden hourglass
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden hourglass
 ```
 
 ### LXXI 砕けた錨
 
-保存するファイル名: `art/bus/anchor-cracked.png` / 意味: 錨(大きなひびが入り、かけらが浮く)
+保存するファイル名: `art/bus/anchor-cracked.png` / 意味: 錨(2つに割れて、すき間があく)
 
 ```
-single anchor, split by large jagged cracks running across it, a few small broken fragments floating slightly apart, the anchor is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single anchor, broken into two separate pieces with a clear gap between them, the two pieces slightly apart, the anchor is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 ### LXXII 砕けた輪
 
-保存するファイル名: `art/bus/wheel-cracked.png` / 意味: 輪(大きなひびが入り、かけらが浮く)
+保存するファイル名: `art/bus/wheel-cracked.png` / 意味: 輪(2つに割れて、すき間があく)
 
 ```
-single wheel, a spoked wagon wheel with a hub and a rim, split by large jagged cracks running across it, a few small broken fragments floating slightly apart, the wheel is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single wheel, a spoked wagon wheel with a hub and a rim, broken into two separate pieces with a clear gap between them, the two pieces slightly apart, the wheel is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
 ```
 
 ### LXXIII 白い目
@@ -1340,10 +1330,18 @@ single pure white eye, an open eye with an almond shaped outline and a round iri
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden eye
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden eye
 ```
 
-### LXXIV 紅い鍵
+### LXXIV 鎖の炎
+
+保存するファイル名: `art/bus/flame-chained.png` / 意味: 炎(太い鎖が巻きつく)
+
+```
+single flame, wrapped tightly in a heavy chain, large chain links clearly visible coiled around it, the flame is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+### LXXV 紅い鍵
 
 保存するファイル名: `art/bus/key-crimson.png` / 意味: 鍵(物を紅色に(飾りは金のまま))
 
@@ -1354,10 +1352,10 @@ single crimson red antique key, the antique key is the main subject, large and c
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden antique key
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden antique key
 ```
 
-### LXXV 紅い杯
+### LXXVI 紅い杯
 
 保存するファイル名: `art/bus/chalice-crimson.png` / 意味: 杯(物を紅色に(飾りは金のまま))
 
@@ -1368,29 +1366,15 @@ single crimson red chalice, the chalice is the main subject, large and clearly r
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden chalice
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden chalice
 ```
 
-### LXXVI 逆さの矢
+### LXXVII 逆さの矢
 
 保存するファイル名: `art/bus/arrow-inverted.png` / 意味: 矢(上下逆さま)
 
 ```
 single arrow, upside down, the arrow is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-### LXXVII 双子の矢
-
-保存するファイル名: `art/bus/arrow-twin.png` / 意味: 矢(同じものが2つ並ぶ)
-
-```
-exactly two identical arrow, one on the left and one on the right, with a clear gap between them, not overlapping, only two, the two arrow are the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
-
-```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, three objects, crossed, overlapping
 ```
 
 ### LXXVIII 真夜中の炎
@@ -1404,7 +1388,7 @@ single flame, the flame is the main subject, large and clearly recognizable, war
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, brown background, sepia, orange background
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, brown background, sepia, orange background
 ```
 
 ### LXXIX 翼ある天秤
@@ -1417,16 +1401,16 @@ single balance scales, a balance scale with a central upright post, a horizontal
 
 ### LXXX 夜明けの矢
 
-保存するファイル名: `art/bus/arrow-dawn.png` / 意味: 矢(背景の下の地平線だけ朝焼けの光)
+保存するファイル名: `art/bus/arrow-dawn.png` / 意味: 矢(背景の下4分の1が朝焼けの橙)
 
 ```
-single arrow, the arrow is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, with a soft warm orange sunrise glow only on the horizon at the very bottom, subtle glow, generous empty margin, original design
+single arrow, the arrow is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, orange object, orange fill
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, orange object, orange fill
 ```
 
 ### LXXXI 紅い鐘
@@ -1440,7 +1424,7 @@ single crimson red bell, the bell is the main subject, large and clearly recogni
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden bell
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden bell
 ```
 
 ### LXXXII 白い月
@@ -1465,21 +1449,7 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single sword, frozen, covered in frost crystals, the sword is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### LXXXIV 双子の天秤
-
-保存するファイル名: `art/bus/scales-twin.png` / 意味: 天秤(同じものが2つ並ぶ)
-
-```
-exactly two identical balance scales, one on the left and one on the right, with a clear gap between them, not overlapping, only two, a balance scale with a central upright post, a horizontal beam on top and two pans hanging from both ends, the two balance scales are the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
-
-```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, three objects, crossed, overlapping
-```
-
-### LXXXV 銀の星
+### LXXXIV 銀の星
 
 保存するファイル名: `art/bus/star-silver.png` / 意味: 星(物を銀色に(飾りは金のまま))
 
@@ -1490,10 +1460,10 @@ single silver star, the star is the main subject, large and clearly recognizable
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden star
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden star
 ```
 
-### LXXXVI 紅い月
+### LXXXV 紅い月
 
 保存するファイル名: `art/bus/moon-crimson.png` / 意味: 月(物を紅色に(飾りは金のまま))
 
@@ -1507,7 +1477,7 @@ single crimson red moon, a large crescent moon shape, the moon is the main subje
 text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden moon
 ```
 
-### LXXXVII 白い鐘
+### LXXXVI 白い鐘
 
 保存するファイル名: `art/bus/bell-white.png` / 意味: 鐘(物を白に(飾りは金のまま))
 
@@ -1518,10 +1488,10 @@ single pure white bell, the bell is the main subject, large and clearly recogniz
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden bell
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden bell
 ```
 
-### LXXXVIII 真夜中の冠
+### LXXXVII 真夜中の冠
 
 保存するファイル名: `art/bus/crown-midnight.png` / 意味: 冠(背景が濃紺の夜空、白く小さな星)
 
@@ -1532,10 +1502,10 @@ single crown, the crown is the main subject, large and clearly recognizable, war
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, brown background, sepia, orange background
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, brown background, sepia, orange background
 ```
 
-### LXXXIX 銀の月
+### LXXXVIII 銀の月
 
 保存するファイル名: `art/bus/moon-silver.png` / 意味: 月(物を銀色に(飾りは金のまま))
 
@@ -1549,7 +1519,7 @@ single silver moon, a large crescent moon shape, the moon is the main subject, l
 text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden moon
 ```
 
-### XC 金の雫
+### LXXXIX 金の雫
 
 保存するファイル名: `art/bus/droplet-gold.png` / 意味: 雫(物がいつもより強く輝く金)
 
@@ -1557,7 +1527,7 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single water droplet, a teardrop shape, round at the bottom and pointed at the top, the water droplet is the main subject, large and clearly recognizable, the water droplet drawn in radiant bright gold lines with a strong golden glow, ornament in warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XCI 紅い砂時計
+### XC 紅い砂時計
 
 保存するファイル名: `art/bus/hourglass-crimson.png` / 意味: 砂時計(物を紅色に(飾りは金のまま))
 
@@ -1568,10 +1538,10 @@ single crimson red hourglass, the hourglass is the main subject, large and clear
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden hourglass
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden hourglass
 ```
 
-### XCII 凍てる太陽
+### XCI 凍てる太陽
 
 保存するファイル名: `art/bus/sun-frozen.png` / 意味: 太陽(霜の結晶に覆われている)
 
@@ -1579,7 +1549,13 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single sun, frozen, covered in frost crystals, the sun is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XCIII 黒い月
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
+```
+
+### XCII 黒い月
 
 保存するファイル名: `art/bus/moon-black.png` / 意味: 月(黒く塗った物、ふちだけ金)
 
@@ -1593,7 +1569,7 @@ single moon, a large crescent moon shape, painted solid matte black, the moon is
 text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, person, human figure, woman, hood, cloak
 ```
 
-### XCIV 凍てる炎
+### XCIII 凍てる炎
 
 保存するファイル名: `art/bus/flame-frozen.png` / 意味: 炎(霜の結晶に覆われている)
 
@@ -1601,29 +1577,15 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single flame, frozen, covered in frost crystals, the flame is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### XCV 砕けた目
+### XCIV 砕けた目
 
-保存するファイル名: `art/bus/eye-cracked.png` / 意味: 目(大きなひびが入り、かけらが浮く)
-
-```
-single eye, an open eye with an almond shaped outline and a round iris, split by large jagged cracks running across it, a few small broken fragments floating slightly apart, the eye is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-### XCVI 双子の錨
-
-保存するファイル名: `art/bus/anchor-twin.png` / 意味: 錨(同じものが2つ並ぶ)
+保存するファイル名: `art/bus/eye-cracked.png` / 意味: 目(2つに割れて、すき間があく)
 
 ```
-exactly two identical anchor, one on the left and one on the right, with a clear gap between them, not overlapping, only two, the two anchor are the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single eye, an open eye with an almond shaped outline and a round iris, broken into two separate pieces with a clear gap between them, the two pieces slightly apart, the eye is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
-
-```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, three objects, crossed, overlapping
-```
-
-### XCVII 真夜中の羽
+### XCV 真夜中の羽
 
 保存するファイル名: `art/bus/feather-midnight.png` / 意味: 羽(背景が濃紺の夜空、白く小さな星)
 
@@ -1634,24 +1596,10 @@ single feather, the feather is the main subject, large and clearly recognizable,
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, brown background, sepia, orange background
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, brown background, sepia, orange background
 ```
 
-### XCVIII 双子の輪
-
-保存するファイル名: `art/bus/wheel-twin.png` / 意味: 輪(同じものが2つ並ぶ)
-
-```
-exactly two identical wheel, one on the left and one on the right, with a clear gap between them, not overlapping, only two, a spoked wagon wheel with a hub and a rim, the two wheel are the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
-
-```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, three objects, crossed, overlapping
-```
-
-### XCIX 黒い星
+### XCVI 黒い星
 
 保存するファイル名: `art/bus/star-black.png` / 意味: 星(黒く塗った物、ふちだけ金)
 
@@ -1662,10 +1610,10 @@ single star, painted solid matte black, the star is the main subject, large and 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, person, human figure, woman, hood, cloak
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, person, human figure, woman, hood, cloak
 ```
 
-### C 翼ある剣
+### XCVII 翼ある剣
 
 保存するファイル名: `art/bus/sword-winged.png` / 意味: 剣(翼が生えている)
 
@@ -1673,21 +1621,21 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single sword, with a pair of feathered wings, the sword is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### CI 夜明けの天秤
+### XCVIII 夜明けの天秤
 
-保存するファイル名: `art/bus/scales-dawn.png` / 意味: 天秤(背景の下の地平線だけ朝焼けの光)
+保存するファイル名: `art/bus/scales-dawn.png` / 意味: 天秤(背景の下4分の1が朝焼けの橙)
 
 ```
-single balance scales, a balance scale with a central upright post, a horizontal beam on top and two pans hanging from both ends, the balance scales is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, with a soft warm orange sunrise glow only on the horizon at the very bottom, subtle glow, generous empty margin, original design
+single balance scales, a balance scale with a central upright post, a horizontal beam on top and two pans hanging from both ends, the balance scales is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, orange object, orange fill
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, orange object, orange fill
 ```
 
-### CII 逆さの天秤
+### XCIX 逆さの天秤
 
 保存するファイル名: `art/bus/scales-inverted.png` / 意味: 天秤(上下逆さま)
 
@@ -1695,7 +1643,7 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single balance scales, a balance scale with a central upright post, a horizontal beam on top and two pans hanging from both ends, upside down, the balance scales is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### CIII 銀の灯
+### C 銀の灯
 
 保存するファイル名: `art/bus/lantern-silver.png` / 意味: 灯(物を銀色に(飾りは金のまま))
 
@@ -1706,10 +1654,10 @@ single silver lantern, the lantern is the main subject, large and clearly recogn
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden lantern
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden lantern
 ```
 
-### CIV 銀の杯
+### CI 銀の杯
 
 保存するファイル名: `art/bus/chalice-silver.png` / 意味: 杯(物を銀色に(飾りは金のまま))
 
@@ -1720,46 +1668,68 @@ single silver chalice, the chalice is the main subject, large and clearly recogn
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden chalice
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden chalice
 ```
 
-### CV 夜明けの羽
+### CII 夜明けの羽
 
-保存するファイル名: `art/bus/feather-dawn.png` / 意味: 羽(背景の下の地平線だけ朝焼けの光)
-
-```
-single feather, the feather is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, with a soft warm orange sunrise glow only on the horizon at the very bottom, subtle glow, generous empty margin, original design
-```
-
-このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+保存するファイル名: `art/bus/feather-dawn.png` / 意味: 羽(背景の下4分の1が朝焼けの橙)
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, orange object, orange fill
-```
-
-### CVI 欠けた鍵
-
-保存するファイル名: `art/bus/key-chipped.png` / 意味: 鍵(一部が大きく欠けている)
-
-```
-single antique key, with one large wedge-shaped piece clearly broken off its edge, a visible missing chunk, the antique key is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
-```
-
-### CVII 夜明けの冠
-
-保存するファイル名: `art/bus/crown-dawn.png` / 意味: 冠(背景の下の地平線だけ朝焼けの光)
-
-```
-single crown, the crown is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, with a soft warm orange sunrise glow only on the horizon at the very bottom, subtle glow, generous empty margin, original design
+single feather, the feather is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient, subtle glow, generous empty margin, original design
 ```
 
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, orange object, orange fill
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, orange object, orange fill
 ```
 
-### CVIII 白い扉
+### CIII 欠けた鍵
+
+保存するファイル名: `art/bus/key-chipped.png` / 意味: 鍵(右半分が無く、左半分だけ残る)
+
+```
+single antique key, with the whole right half missing, cut off along a jagged broken edge, only the left half remains, the antique key is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+### CIV 鎖の太陽
+
+保存するファイル名: `art/bus/sun-chained.png` / 意味: 太陽(太い鎖が巻きつく)
+
+```
+single sun, wrapped tightly in a heavy chain, large chain links clearly visible coiled around it, the sun is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
+```
+
+### CV 鎖の杖
+
+保存するファイル名: `art/bus/wand-chained.png` / 意味: 杖(太い鎖が巻きつく)
+
+```
+single magic staff, wrapped tightly in a heavy chain, large chain links clearly visible coiled around it, the magic staff is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+### CVI 夜明けの冠
+
+保存するファイル名: `art/bus/crown-dawn.png` / 意味: 冠(背景の下4分の1が朝焼けの橙)
+
+```
+single crown, the crown is the main subject, large and clearly recognizable, warm muted gold lines, the object stays warm muted gold, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient, subtle glow, generous empty margin, original design
+```
+
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, orange object, orange fill
+```
+
+### CVII 白い扉
 
 保存するファイル名: `art/bus/door-white.png` / 意味: 扉(物を白に(飾りは金のまま))
 
@@ -1770,10 +1740,10 @@ single pure white arched door, a tall arched door with two panels and a round ha
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden arched door
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden arched door
 ```
 
-### CIX 翼ある灯
+### CVIII 翼ある灯
 
 保存するファイル名: `art/bus/lantern-winged.png` / 意味: 灯(翼が生えている)
 
@@ -1781,7 +1751,7 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single lantern, with a pair of feathered wings, the lantern is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### CX 蒼い鍵
+### CIX 蒼い鍵
 
 保存するファイル名: `art/bus/key-azure.png` / 意味: 鍵(物を蒼色に(飾りは金のまま))
 
@@ -1792,10 +1762,10 @@ single azure blue antique key, the antique key is the main subject, large and cl
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden antique key
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden antique key
 ```
 
-### CXI 黒い雫
+### CX 黒い雫
 
 保存するファイル名: `art/bus/droplet-black.png` / 意味: 雫(黒く塗った物、ふちだけ金)
 
@@ -1806,10 +1776,10 @@ single water droplet, a teardrop shape, round at the bottom and pointed at the t
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, person, human figure, woman, hood, cloak
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, person, human figure, woman, hood, cloak
 ```
 
-### CXII 金の砂時計
+### CXI 金の砂時計
 
 保存するファイル名: `art/bus/hourglass-gold.png` / 意味: 砂時計(物がいつもより強く輝く金)
 
@@ -1817,7 +1787,7 @@ text, letters, words, numbers, roman numerals, typography, title banner, waterma
 single hourglass, the hourglass is the main subject, large and clearly recognizable, the hourglass drawn in radiant bright gold lines with a strong golden glow, ornament in warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### CXIII 燃える目
+### CXII 燃える目
 
 保存するファイル名: `art/bus/eye-burning.png` / 意味: 目(炎に包まれている)
 
@@ -1825,7 +1795,7 @@ single hourglass, the hourglass is the main subject, large and clearly recogniza
 single eye, an open eye with an almond shaped outline and a round iris, burning, wreathed in stylized flames, the eye is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
-### CXIV 真夜中の矢
+### CXIII 真夜中の矢
 
 保存するファイル名: `art/bus/arrow-midnight.png` / 意味: 矢(背景が濃紺の夜空、白く小さな星)
 
@@ -1836,7 +1806,15 @@ single arrow, the arrow is the main subject, large and clearly recognizable, war
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, brown background, sepia, orange background
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, brown background, sepia, orange background
+```
+
+### CXIV 鎖の剣
+
+保存するファイル名: `art/bus/sword-chained.png` / 意味: 剣(太い鎖が巻きつく)
+
+```
+single sword, wrapped tightly in a heavy chain, large chain links clearly visible coiled around it, the sword is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 ### CXV 逆さの炎
@@ -1858,23 +1836,23 @@ single azure blue chalice, the chalice is the main subject, large and clearly re
 このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
 
 ```
-text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, golden chalice
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal, large circle around the object, round border, halo ring, golden chalice
 ```
 
 ### CXVII 欠けた扉
 
-保存するファイル名: `art/bus/door-chipped.png` / 意味: 扉(一部が大きく欠けている)
+保存するファイル名: `art/bus/door-chipped.png` / 意味: 扉(右半分が無く、左半分だけ残る)
 
 ```
-single arched door, a tall arched door with two panels and a round handle, with one large wedge-shaped piece clearly broken off its edge, a visible missing chunk, the arched door is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single arched door, a tall arched door with two panels and a round handle, with the whole right half missing, cut off along a jagged broken edge, only the left half remains, the arched door is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 ### CXVIII 欠けた杖
 
-保存するファイル名: `art/bus/wand-chipped.png` / 意味: 杖(一部が大きく欠けている)
+保存するファイル名: `art/bus/wand-chipped.png` / 意味: 杖(右半分が無く、左半分だけ残る)
 
 ```
-single magic staff, with one large wedge-shaped piece clearly broken off its edge, a visible missing chunk, the magic staff is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single magic staff, with the whole right half missing, cut off along a jagged broken edge, only the left half remains, the magic staff is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
 ```
 
 ### CXIX 燃える鐘
@@ -1887,8 +1865,14 @@ single bell, burning, wreathed in stylized flames, the bell is the main subject,
 
 ### CXX 砕けた太陽
 
-保存するファイル名: `art/bus/sun-cracked.png` / 意味: 太陽(大きなひびが入り、かけらが浮く)
+保存するファイル名: `art/bus/sun-cracked.png` / 意味: 太陽(2つに割れて、すき間があく)
 
 ```
-single sun, split by large jagged cracks running across it, a few small broken fragments floating slightly apart, the sun is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+single sun, broken into two separate pieces with a clear gap between them, the two pieces slightly apart, the sun is the main subject, large and clearly recognizable, warm muted gold lines, very few subtle short radiating lines behind the object, minimal ornament, art deco emblem, single icon illustration, outline drawing only, no color fill, geometric, symmetrical, front view, centered, object fills 60 to 70 percent of the image, clean medium line weight, consistent line weight, flat line art, no shading, very dark navy blue background, almost black, solid flat color, subtle glow, generous empty margin, original design
+```
+
+このカードは「描いてほしくないこと」に、共通の文の代わりに次を貼る。
+
+```
+text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed, circular frame, empty medallion, compass rose, tiny object, small object, object off center, glossy, shiny reflections, realistic metal
 ```

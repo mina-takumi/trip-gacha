@@ -123,7 +123,7 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .notice.warn { background: #FBE3D9; }
 
 /* カード(濃紺の絵、上にローマ数字、下に名前、珍しさで銅・銀・金の枠)。色合いの変更とは関係なく共通 */
-.card { border-radius: 10px; padding: 5px; background: var(--frame); box-shadow: 0 6px 16px rgba(10, 18, 40, .25); }
+.card { border-radius: 11px; padding: 8px; background: var(--frame); box-shadow: 0 6px 16px rgba(10, 18, 40, .25); }
 .card .in { background: #131A31; border-radius: 6px; padding: 7px 7px 0; text-align: center; }
 .card .num { font: 600 12px/1 var(--mincho); letter-spacing: .14em; color: #E7CF8E; padding: 2px 0 7px; }
 .card .art { position: relative; aspect-ratio: 1; border-radius: 3px; overflow: hidden; background: #0E1428; }
@@ -132,10 +132,27 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .card .art:has(img.missing)::after { content: "絵を準備中"; position: absolute; inset: 0; display: grid; place-items: center;
   color: #8F98B8; font: 600 13px var(--mincho); border: 1px dashed #3A4468; border-radius: 3px; }
 .card .nm { font: 600 14px/1.35 var(--mincho); color: #F2E6C2; padding: 9px 4px 11px; }
-.r-NORMAL { --frame: linear-gradient(135deg, #7C3F1A, #D9935C 42%, #8A4A22 70%, #C47C47); }
+.r-NORMAL { --frame: linear-gradient(135deg, #4E220E, #A9592F 42%, #5C2A12 70%, #8E4824); }
 .r-RARE { --frame: linear-gradient(135deg, #7F8891, #F1F4F6 42%, #8C959E 70%, #D6DCE1); }
-.r-SUPER_RARE { --frame: linear-gradient(135deg, #8E6210, #FBE08A 42%, #A7761C 70%, #EDC860); }
-.card.sm { padding: 3px; border-radius: 7px; box-shadow: none; }
+.r-SUPER_RARE { --frame: linear-gradient(135deg, #B8860B, #FFF3A8 42%, #E0B000 70%, #FFE066); }
+/* 絵はどれも金の線なので、珍しさごとに色味を変える(見本: mockups/rarity-tint.html)。
+   銀は色を抜くと背景の濃紺まで灰色になるため、青灰色を「色」だけ重ねて、明るい線は銀・暗い背景は濃紺のままにする */
+.r-NORMAL .art img { filter: sepia(.35) hue-rotate(-28deg) saturate(1.5) brightness(.82); }
+.r-RARE .art img { filter: brightness(1.12); }
+.r-RARE .art:not(:has(img.missing))::after { content: ""; position: absolute; inset: 0; background: #9DB0C8; mix-blend-mode: color; }
+.r-SUPER_RARE .art img { filter: saturate(1.25) brightness(1.08); }
+/* スーパーレアは光の帯が数秒ごとに横切る。動きを減らす設定の端末では、動かさずに枠のまわりをほのかに光らせる */
+.card.r-SUPER_RARE { position: relative; overflow: hidden; }
+.card.r-SUPER_RARE::after { content: ""; position: absolute; inset: 0; pointer-events: none; transform: translateX(-130%);
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, .55) 50%, transparent 65%); }
+@media (prefers-reduced-motion: no-preference) {
+  .card.r-SUPER_RARE::after { animation: shine 3.2s ease-in-out infinite; }
+  @keyframes shine { 0% { transform: translateX(-130%); } 45%, 100% { transform: translateX(130%); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card.r-SUPER_RARE, .card.r-SUPER_RARE.sm { box-shadow: 0 0 12px rgba(255, 214, 90, .8); }
+}
+.card.sm { padding: 5px; border-radius: 8px; box-shadow: none; }
 .card.sm .in { padding: 4px; border-radius: 4px; }
 .card.sm .num { font-size: 9px; padding: 1px 0 4px; }
 .card.sm .nm { display: none; }

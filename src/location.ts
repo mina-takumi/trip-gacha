@@ -9,6 +9,8 @@ export type GpsMode = 'slow' | 'medium' | 'continuous';
 /** 現在地を受け取る仕組み。本物のGPSと、開発用のシミュレーターを差し替えられるようにする */
 export interface LocationSource {
   start(onFix: (fix: Fix) => void, onError: (e: LocationError) => void, onMode?: (mode: GpsMode) => void): void;
+  /** 次の時刻を待たずに、すぐ1回位置を取りに行く(地図の「現在地へ」用) */
+  refresh(): void;
 }
 
 /** GPSから届く1回分の位置。speedMps は端末が教えてくれる速さ(m/秒)。分からなければ null */
@@ -51,7 +53,7 @@ export function decideMode(current: GpsMode, kmh: number, lowSince: number | nul
 const intervalMs = (mode: GpsMode) => (mode === 'medium' ? CONFIG.gpsMediumIntervalMs : CONFIG.gpsSlowIntervalMs);
 
 /** 速さに合わせてGPSの取り方を切り替える。wake() は、すぐに1回取りに行く(アプリが表に戻ったとき用) */
-export function createAdaptiveLocation(device: GpsDevice, clock: Clock): LocationSource & { wake(): void } {
+export function createAdaptiveLocation(device: GpsDevice, clock: Clock): Omit<LocationSource, 'refresh'> & { wake(): void } {
   let mode: GpsMode = 'slow';
   let lowSince: number | null = null;
   let prev: Reading | null = null;
@@ -137,6 +139,8 @@ const toReading = (p: GeolocationPosition, now: number): Reading => ({
 });
 const toError = (e: GeolocationPositionError): LocationError => (e.code === e.PERMISSION_DENIED ? 'denied' : 'unavailable');
 
+let adaptive: ReturnType<typeof createAdaptiveLocation> | null = null;
+
 export const browserLocation: LocationSource = {
   start(onFix, onError, onMode) {
     if (!('geolocation' in navigator)) {
@@ -155,11 +159,15 @@ export const browserLocation: LocationSource = {
       setTimeout: (fn, ms) => window.setTimeout(fn, ms),
       clearTimeout: (id) => window.clearTimeout(id),
     };
-    const adaptive = createAdaptiveLocation(device, clock);
-    adaptive.start(onFix, onError, onMode);
+    const loc = createAdaptiveLocation(device, clock);
+    adaptive = loc;
+    loc.start(onFix, onError, onMode);
     // 画面を消している間は位置が取れない。表に戻ったら待たずに1回取りに行く
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') adaptive.wake();
+      if (document.visibilityState === 'visible') loc.wake();
     });
+  },
+  refresh() {
+    adaptive?.wake();
   },
 };

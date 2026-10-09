@@ -19,7 +19,7 @@ import {
   detailScreen, mainScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearStation, type Tab,
 } from './ui/screens.ts';
 
-const VERSION = '0.1.6';
+const VERSION = '0.1.7';
 
 // ベータ版は駅だけ
 const stations: Spot[] = spotsJson.spots
@@ -242,7 +242,7 @@ app.addEventListener('click', (e) => {
       state.pendingImport = null;
       break;
     case 'import-cancel': state.pendingImport = null; break;
-    case 'map-center': mapView?.center(); return;
+    case 'map-center': refreshAndCenter(); return;
     case 'reload': (el as HTMLButtonElement).disabled = true; reloadLatest(); return;
     default: return;
   }
@@ -264,6 +264,21 @@ app.addEventListener('change', async (e) => {
 });
 
 // ---------- 現在地 ----------
+let locationSource: LocationSource | null = null;
+// 地図の「現在地へ」を押した後、次に届いた位置へ地図を動かす
+let centerOnNextFix = false;
+
+function refreshAndCenter(): void {
+  if (state.geo === 'denied') {
+    showToast('位置情報がオフです。');
+  } else {
+    showToast('現在地を取り直しています。');
+    centerOnNextFix = true;
+    locationSource?.refresh();
+  }
+  render();
+}
+
 function onFix(fix: Fix): void {
   state.fix = fix;
   state.accuracyM = fix.accuracyM;
@@ -274,9 +289,14 @@ function onFix(fix: Fix): void {
   state.save = { ...visited, walk: addFix(state.save.walk, fix) };
   persist();
   render();
+  if (centerOnNextFix) {
+    centerOnNextFix = false;
+    mapView?.center();
+  }
 }
 
 function onLocationError(kind: 'denied' | 'unavailable'): void {
+  centerOnNextFix = false;
   // 一度でも測れていれば、一時的な失敗(電波など)は表示を変えない
   if (kind === 'denied' || !state.fix) state.geo = kind;
   // 許可がないと位置を取りに行くのをやめるので、取り方の表示も消す
@@ -295,6 +315,7 @@ async function startLocation(): Promise<void> {
     onMapTap = (lat, lon) => sim.moveTo(lat, lon);
     document.body.insertAdjacentHTML('beforeend', '<div class="sim-badge">位置シミュレーター</div>');
   }
+  locationSource = source;
   source.start(onFix, onLocationError, (mode) => { state.gpsMode = mode; render(); });
 }
 

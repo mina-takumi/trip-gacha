@@ -5,11 +5,15 @@ import type { LocationSource } from '../location.ts';
 
 export function createSimLocation(start: { lat: number; lon: number }) {
   let pos = start;
+  let emit = () => {};
   const source: LocationSource = {
     start(onFix) {
-      const emit = () => onFix({ lat: pos.lat, lon: pos.lon, accuracyM: 5, t: Date.now() });
+      emit = () => onFix({ lat: pos.lat, lon: pos.lon, accuracyM: 5, t: Date.now() });
       emit();
       setInterval(emit, 1000);
+    },
+    refresh() {
+      emit();
     },
   };
   return {

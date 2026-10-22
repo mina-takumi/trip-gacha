@@ -1,7 +1,7 @@
 {
   "name": "trip-gacha",
   "private": true,
-  "version": "0.1.8",
+  "version": "0.1.9",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "node --test \"tests/*.test.ts\"",
-    "art": "node scripts/copy-station-art.mjs",
+    "art": "node scripts/copy-art.mjs",
     "names:check": "node scripts/export-card-names.mjs --check",
     "map": "node scripts/build-map.mjs",
     "map:roads": "node scripts/fetch-roads.mjs",

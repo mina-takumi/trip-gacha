@@ -41,7 +41,9 @@ function decode(e: Encoded): L.LatLngTuple[] {
   return pts;
 }
 
-const loadJson = <T>(name: string): Promise<T> => fetch(`map/${name}.json`).then((r) => r.json() as Promise<T>);
+export interface MapRanges { station: boolean; bus: boolean }
+
+const loadJson =<T>(name: string): Promise<T> => fetch(`map/${name}.json`).then((r) => r.json() as Promise<T>);
 
 /** 地図の画面。Leaflet は作り直すと重いので、一度作ったら表示・非表示を切り替えて使い回す */
 export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[], cards: Record<string, StationCard>, onTap?: (lat: number, lon: number) => void) {
@@ -102,9 +104,17 @@ export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[
   map.on('zoomend', syncBus);
   syncBus();
 
+  // バス停の範囲: 濃い色で塗り、面ごと薄める(円が重なっても濃くならないように)。道の上、バス停の点の下
+  map.createPane('bus-range').style.zIndex = '275';
+  map.getPane('bus-range')!.classList.add('map-bus-range');
+  const busRangeRenderer = L.canvas({ pane: 'bus-range' });
+  const busRanges = L.layerGroup(busStops.map((s) =>
+    L.circle([s.lat, s.lon], { renderer: busRangeRenderer, radius: CONFIG.enterRadiusM, stroke: false, fillColor: MUSTARD, fillOpacity: 1, interactive: false })));
+
+  const stationRanges = L.layerGroup();
   const dots = new Map<string, L.CircleMarker>();
   for (const s of stations) {
-    L.circle([s.lat, s.lon], { radius: CONFIG.enterRadiusM, color: RING, weight: 2, opacity: .7, dashArray: '6 6', fillColor: RING, fillOpacity: .08, interactive: false }).addTo(map);
+    L.circle([s.lat, s.lon], { radius: CONFIG.enterRadiusM, color: RING, weight: 2, opacity: .7, dashArray: '6 6', fillColor: RING, fillOpacity: .08, interactive: false }).addTo(stationRanges);
     const dot = L.circleMarker([s.lat, s.lon], { radius: 8, color: NAVY, weight: 2, fillColor: NOT_YET, fillOpacity: 1 }).addTo(map);
     const dir = LABEL_DIR[s.name] ?? 'right';
     dot.bindTooltip(esc(s.name), { permanent: true, direction: dir, offset: LABEL_OFFSET[dir], className: `st-label${BIG_STATIONS.has(s.name) ? ' big' : ''}` });
@@ -137,6 +147,13 @@ export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[
     },
     center() {
       if (lastFix) map.setView([lastFix.lat, lastFix.lon], Math.max(map.getZoom(), 15));
+    },
+    /** 駅・バス停の範囲の円を、それぞれ出すか消すか */
+    setRanges(ranges: MapRanges) {
+      for (const [group, on] of [[stationRanges, ranges.station], [busRanges, ranges.bus]] as const) {
+        if (on && !map.hasLayer(group)) group.addTo(map);
+        if (!on && map.hasLayer(group)) group.remove();
+      }
     },
     /** 非表示から表示に戻したときに、地図の大きさを測り直す */
     resize() {

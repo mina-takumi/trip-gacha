@@ -29,6 +29,19 @@ test('初めて出たカードは記録に増え、かぶるとかけらにな�
   assert.equal(d.spots.n1.spinCount, 4);
 });
 
+test('バス停で回すと共通カードが記録に入り、かぶるとかけらになる。待ち時間はバス停ごと', () => {
+  let d = emptySave();
+  let r;
+  ({ data: d, result: r } = applySpin(d, 'b1', 'RARE', T, 'common:RARE:4'));
+  assert.deepEqual(r, { itemId: 'common:RARE:4', rarity: 'RARE', isNew: true, shardsGained: 0 });
+  ({ data: d, result: r } = applySpin(d, 'b2', 'RARE', T + MIN, 'common:RARE:4'));
+  assert.equal(r.isNew, false);
+  assert.equal(r.shardsGained, 3);
+  assert.equal(d.collection['common:RARE:4'].count, 2);
+  assert.equal(cooldownRemainingMs(d, 'b1', T + 10 * MIN), 10 * MIN);
+  assert.equal(cooldownRemainingMs(d, 'b2', T + 10 * MIN), 11 * MIN);
+});
+
 test('同じ駅は20分回せない。時計が戻されたら回せることにする', () => {
   const { data } = applySpin(emptySave(), 'n1', 'NORMAL', T);
   assert.equal(cooldownRemainingMs(data, 'n1', T + 8 * MIN), 12 * MIN);

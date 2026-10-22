@@ -1,10 +1,10 @@
 import { CONFIG, RARITIES, RARITY_LABEL } from '../config.ts';
 import type { Odds } from '../gacha.ts';
 import { stationItemId } from '../gacha.ts';
-import type { Rarity, Spot, StationCard } from '../items.ts';
+import type { CommonCard, Rarity, Spot, StationCard } from '../items.ts';
 import type { GpsMode } from '../location.ts';
 import type { SaveData } from '../store.ts';
-import { cardHtml, placeholderHtml } from './card.ts';
+import { cardHtml, placeholderHtml, type CardFace } from './card.ts';
 import { distanceLabel, esc, km } from './html.ts';
 import { icon } from './icons.ts';
 
@@ -23,17 +23,18 @@ export function tabbar(tab: Tab): string {
     `<button class="tab ${t === tab ? 'on' : ''}" data-act="tab" data-tab="${t}" aria-current="${t === tab ? 'page' : 'false'}"><span class="ic ${color}">${icon(ic)}</span>${label}</button>`).join('');
 }
 
-/** 回す権利がある駅。distanceM は現在地が分からなければ null */
-export interface NearStation { spot: Spot; card: StationCard; distanceM: number | null; remainingMs: number }
+/** 回す権利がある駅・バス停。badge は駅ならカードの番号、バス停なら「バス」。distanceM は現在地が分からなければ null */
+export interface NearSpot { spot: Spot; badge: string; distanceM: number | null; remainingMs: number }
 
 export interface MainView {
   distanceM: number;
   odds: Odds;
+  busOdds: Odds;
   nextStepM: number | null;
   shards: number;
   geo: GeoStatus;
   accuracyM: number | null;
-  near: NearStation[];
+  near: NearSpot[];
   nearest: { spot: Spot; distanceM: number } | null;
   storageOk: boolean;
 }
@@ -43,11 +44,11 @@ function geoNotice(v: MainView): string {
     case 'starting':
       return `<div class="notice panel"><b>現在地を、さがしています。</b>位置情報の確認が出たら「許可」を選んでください。</div>`;
     case 'denied':
-      return `<div class="notice panel warn"><b>位置情報が、オフ。</b>駅の近くにいるかを調べるのに使います。ブラウザの設定で、このページに位置情報の利用を許可してから開き直してください。iPhone では「設定」アプリの「プライバシーとセキュリティ」→「位置情報サービス」で、Safari の位置情報がオンになっているかも確かめてください。</div>`;
+      return `<div class="notice panel warn"><b>位置情報が、オフ。</b>駅やバス停の近くにいるかを調べるのに使います。ブラウザの設定で、このページに位置情報の利用を許可してから開き直してください。iPhone では「設定」アプリの「プライバシーとセキュリティ」→「位置情報サービス」で、Safari の位置情報がオンになっているかも確かめてください。</div>`;
     case 'unavailable':
       return `<div class="notice panel warn"><b>現在地が、取れない。</b>空の見える場所で少し待つか、アプリを開き直してください。</div>`;
     case 'waiting-accuracy':
-      return `<div class="notice panel"><b>位置の精度を、待っています。</b>今の誤差は約${Math.round(v.accuracyM ?? 0)}m。${CONFIG.accuracyLimitM}m以内になるまで、駅の判定に使いません。</div>`;
+      return `<div class="notice panel"><b>位置の精度を、待っています。</b>今の誤差は約${Math.round(v.accuracyM ?? 0)}m。${CONFIG.accuracyLimitM}m以内になるまで、駅・バス停の判定に使いません。</div>`;
     case 'ok':
       return '';
   }
@@ -64,14 +65,15 @@ export function mainScreen(v: MainView): string {
     const button = ready
       ? `<button class="btn" data-act="spin" data-spot="${esc(n.spot.id)}">${icon('capsule')}回す</button>`
       : `<button class="btn wait" disabled>あと${Math.ceil(n.remainingMs / 60000)}分。少し、寄り道を。</button>`;
-    return `<div class="st panel"><div class="t"><span class="no ${ready ? '' : 'mute'}">${esc(n.card.number)}</span><span class="name">${esc(n.spot.name)}</span><span class="d">${n.distanceM == null ? '' : distanceLabel(n.distanceM)}</span></div>${button}</div>`;
+    return `<div class="st panel"><div class="t"><span class="no ${ready ? '' : 'mute'}${n.spot.kind === 'bus_stop' ? ' bus' : ''}">${esc(n.badge)}</span><span class="name">${esc(n.spot.name)}</span><span class="d">${n.distanceM == null ? '' : distanceLabel(n.distanceM)}</span></div>${button}</div>`;
   }).join('');
   // 今日もらった権利は、位置が取れていなくても使える
-  const list = v.near.length > 0 ? `<div class="sec"><span>回せる駅</span>${icon('gachapon', 'deco')}</div>${near}` : '';
+  const list = v.near.length > 0 ? `<div class="sec"><span>回せる場所</span>${icon('gachapon', 'deco')}</div>${near}` : '';
   const empty = v.geo === 'ok' && v.near.length === 0
-    ? `<p class="say">近くに駅なし。${v.nearest ? `${esc(v.nearest.spot.name)}まで、あと${distanceLabel(v.nearest.distanceM)}。` : ''}</p>`
+    ? `<p class="say">近くに駅・バス停なし。${v.nearest ? `${esc(v.nearest.spot.name)}まで、あと${distanceLabel(v.nearest.distanceM)}。` : ''}</p>`
     : '';
-  const od = (r: Rarity, cls = '') => `<div class="od panel ${cls}"><b>${pct(v.odds[r])}<small>%</small></b><span><i class="dot ${r}"></i>${RARITY_LABEL[r]}</span></div>`;
+  // 大きな数字は駅の確率。バス停の確率は下に小さく添える
+  const od = (r: Rarity, cls = '') => `<div class="od panel ${cls}"><b><small class="k">駅</small>${pct(v.odds[r])}<small>%</small></b><span><i class="dot ${r}"></i>${RARITY_LABEL[r]}</span><em>バス停 ${pct(v.busOdds[r])}%</em></div>`;
   return `
     ${v.storageOk ? '' : '<div class="notice panel warn"><b>記録が、残せません。</b>このブラウザでは端末に記録を保存できないため、閉じると集めたカードが消えます。プライベートブラウズなら、通常のモードで開いてください。</div>'}
     <div class="top"><span class="logo">トリップガチャ</span><span class="top-r"><button class="reload" data-act="reload" aria-label="最新版に更新">${icon('reload')}<span class="reload-t">更新</span></button><span class="shard"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</span></span></div>
@@ -84,7 +86,7 @@ export function mainScreen(v: MainView): string {
     ${list}${empty}`;
 }
 
-export function resultScreen(card: StationCard, rarity: Rarity, isNew: boolean, shardsGained: number, totalShards: number): string {
+export function resultScreen(card: CardFace, rarity: Rarity, tint: boolean, isNew: boolean, shardsGained: number, totalShards: number): string {
   const label = RARITY_LABEL[rarity].replace('スーパー', 'スーパー<br>');
   return `<div class="res-wrap"><div class="res">
     <div class="stamp ${rarity}"><span>${label}</span></div>
@@ -92,7 +94,7 @@ export function resultScreen(card: StationCard, rarity: Rarity, isNew: boolean, 
     <div class="sub">${isNew
       ? '<span class="mark o">はじめての1枚。</span>図鑑に入りました。'
       : `もう持ってた。<span class="mark o">かけら +${shardsGained}</span>(合計 ${totalShards})。`}</div>
-    <div class="rays">${cardHtml(card, rarity, 'big')}</div>
+    <div class="rays">${cardHtml(card, rarity, 'big', tint)}</div>
     <div class="acts">
       <button class="btn mustard" data-act="result-zukan">${icon('book')}図鑑で見る</button>
       <button class="btn cream" data-act="result-back">ホームに戻る</button>
@@ -103,10 +105,26 @@ export function resultScreen(card: StationCard, rarity: Rarity, isNew: boolean, 
 const ownedRarities = (collection: SaveData['collection'], spotId: string) => RARITIES.filter((r) => collection[stationItemId(spotId, r)]);
 const ox = (have: Rarity[]) => RARITIES.map((r) => have.includes(r) ? '<span class="o">○</span>' : '<span class="x">×</span>').join('');
 
-export function zukanScreen(stations: Spot[], cards: Record<string, StationCard>, collection: SaveData['collection']): string {
-  const total = stations.length * RARITIES.length;
-  const owned = stations.reduce((n, s) => n + ownedRarities(collection, s.id).length, 0);
-  const lead = owned === total ? '<span class="mark">ぜんぶ、集めた。</span>' : owned === 0 ? '駅の近くで、回してみる。' : '<span class="mark">まだ、たくさんある。</span>';
+export type ZukanTab = 'station' | 'bus';
+
+const zukanLead = (owned: number, total: number, where: string) =>
+  owned === total ? '<span class="mark">ぜんぶ、集めた。</span>' : owned === 0 ? `${where}の近くで、回してみる。` : '<span class="mark">まだ、たくさんある。</span>';
+
+export function zukanScreen(
+  tab: ZukanTab, stations: Spot[], cards: Record<string, StationCard>, common: CommonCard[], collection: SaveData['collection'],
+): string {
+  const stTotal = stations.length * RARITIES.length;
+  const stOwned = stations.reduce((n, s) => n + ownedRarities(collection, s.id).length, 0);
+  const busOwned = common.filter((c) => collection[c.itemId]).length;
+  const [owned, total] = tab === 'station' ? [stOwned, stTotal] : [busOwned, common.length];
+  const tabBtn = (t: ZukanTab, label: string, n: number, of: number) =>
+    `<button class="z-tab" data-act="zukan-tab" data-z="${t}" aria-pressed="${t === tab}">${label}<small>${n} / ${of}</small></button>`;
+  return `<div class="z-top"><h2>図鑑</h2><div class="count">${owned}<small> / ${total}枚</small></div></div>
+    <div class="z-tabs">${tabBtn('station', '駅', stOwned, stTotal)}${tabBtn('bus', 'バス停', busOwned, common.length)}</div>
+    ${tab === 'station' ? stationTiles(stations, cards, collection, stOwned, stTotal) : busTiles(common, collection, busOwned)}`;
+}
+
+function stationTiles(stations: Spot[], cards: Record<string, StationCard>, collection: SaveData['collection'], owned: number, total: number): string {
   const tiles = stations.map((s) => {
     const have = ownedRarities(collection, s.id);
     const best = have[have.length - 1];
@@ -116,9 +134,32 @@ export function zukanScreen(stations: Spot[], cards: Record<string, StationCard>
       <div class="ox" aria-label="${have.map((r) => RARITY_LABEL[r]).join('・') || 'まだなし'}">${ox(have)}</div>
     </button>`;
   }).join('');
-  return `<div class="z-top"><h2>図鑑</h2><div class="count">${owned}<small> / ${total}枚</small></div></div>
-    <div class="z-lead">${stations.length}駅 × 3段階。${lead}</div>
+  return `<div class="z-lead">${stations.length}駅 × 3段階。${zukanLead(owned, total, '駅')}</div>
     <div class="grid">${tiles}</div>`;
+}
+
+/** バス停カードは番号順。持っていないカードも、珍しさだけは見せる */
+function busTiles(common: CommonCard[], collection: SaveData['collection'], owned: number): string {
+  const tiles = common.map((c) => {
+    const entry = collection[c.itemId];
+    return `<button class="tile ${entry ? '' : 'none'}" data-act="detail" data-item="${esc(c.itemId)}" aria-label="${entry ? esc(c.name) : `${esc(c.number)} まだなし`}">
+      ${entry ? cardHtml(c, c.rarity, 'sm', false) : placeholderHtml(c.number)}
+      <div class="sn">${entry ? esc(c.name) : '？'}</div>
+      <div class="ox"><span class="rl"><i class="dot ${c.rarity}"></i>${RARITY_LABEL[c.rarity]}</span></div>
+    </button>`;
+  }).join('');
+  return `<div class="z-lead">どのバス停でも出る${common.length}枚。${zukanLead(owned, common.length, 'バス停')}</div>
+    <div class="grid">${tiles}</div>`;
+}
+
+export function busDetailScreen(card: CommonCard, collection: SaveData['collection']): string {
+  const entry = collection[card.itemId];
+  return `<div class="detail">
+    <h2>${entry ? esc(card.name) : `${esc(card.number)} まだなし`}</h2>
+    ${entry ? cardHtml(card, card.rarity, 'big', false) : `<div class="big">${placeholderHtml(card.number)}</div>`}
+    <p class="say" style="text-align:center"><i class="dot ${card.rarity}"></i>${RARITY_LABEL[card.rarity]}。${entry ? `${entry.count}枚、持っている。` : 'バス停で、回す。'}</p>
+    <div class="acts"><button class="btn paper" data-act="close-detail">図鑑に戻る</button></div>
+  </div>`;
 }
 
 export function detailScreen(spot: Spot, card: StationCard, collection: SaveData['collection']): string {
@@ -184,7 +225,7 @@ export function settingsScreen(
     ${confirm}
     <div class="panel">
       <h4>データの出典</h4>
-      <p>駅の位置と地図: © OpenStreetMap contributors。駅の位置のデータは ODbL(Open Database License)のもとで提供しています。<br>書体: Yusei Magic、Zen Maru Gothic(SIL Open Font License 1.1)。</p>
+      <p>駅・バス停の位置と地図: © OpenStreetMap contributors。駅・バス停の位置のデータは ODbL(Open Database License)のもとで提供しています。<br>書体: Yusei Magic、Zen Maru Gothic(SIL Open Font License 1.1)。</p>
     </div>
     ${gpsModePanel(gpsMode)}
     <p class="ver">トリップガチャ ベータ版 ${esc(version)}</p>

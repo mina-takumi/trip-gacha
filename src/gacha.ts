@@ -1,5 +1,5 @@
 import { CONFIG, RARITIES } from './config.ts';
-import type { Rarity } from './items.ts';
+import type { CommonCard, Rarity } from './items.ts';
 
 export type Odds = Record<Rarity, number>;
 
@@ -29,3 +29,9 @@ export function drawRarity(odds: Odds, rand: () => number): Rarity {
 }
 
 export const stationItemId = (spotId: string, rarity: Rarity) => `station:${spotId}:${rarity}`;
+
+/** バス停で出るカード。そのレア度の共通カードから、どれも同じ確率で1枚選ぶ */
+export function pickCommon(common: CommonCard[], rarity: Rarity, rand: () => number): CommonCard {
+  const pool = common.filter((c) => c.rarity === rarity);
+  return pool[Math.min(Math.floor(rand() * pool.length), pool.length - 1)];
+}

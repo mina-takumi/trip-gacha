@@ -32,6 +32,8 @@ export const CONFIG = {
   smoothingWeight: 0.2,
   /** 駅ガチャの確率(万分率) */
   stationOddsBp: { NORMAL: 6000, RARE: 3000, SUPER_RARE: 1000 } satisfies Record<Rarity, number>,
+  /** バス停ガチャの確率(万分率)。出たレア度の中から、共通のカードを1枚選ぶ */
+  busOddsBp: { NORMAL: 7000, RARE: 2500, SUPER_RARE: 500 } satisfies Record<Rarity, number>,
   /** 持っているカードが出たときのかけら */
   shardsFor: { NORMAL: 1, RARE: 3, SUPER_RARE: 10 } satisfies Record<Rarity, number>,
 };

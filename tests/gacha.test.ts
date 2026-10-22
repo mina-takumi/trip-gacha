@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CONFIG } from '../src/config.ts';
-import { drawRarity, metersToNextStep, oddsFor } from '../src/gacha.ts';
+import { drawRarity, metersToNextStep, oddsFor, pickCommon } from '../src/gacha.ts';
+import { createCatalog, type Rarity } from '../src/items.ts';
 import { seededRandom } from './helpers.ts';
 
 const base = CONFIG.stationOddsBp;
@@ -43,4 +44,26 @@ test('抽選の境目', () => {
   assert.equal(drawRarity(odds, () => 0.8999), 'RARE');
   assert.equal(drawRarity(odds, () => 0.9), 'SUPER_RARE');
   assert.equal(drawRarity(odds, () => 0.99999), 'SUPER_RARE');
+});
+
+test('バス停の確率は 70/25/5 で、移動距離で同じように上がる', () => {
+  assert.deepEqual(oddsFor(CONFIG.busOddsBp, 0), { NORMAL: 7000, RARE: 2500, SUPER_RARE: 500 });
+  assert.deepEqual(oddsFor(CONFIG.busOddsBp, 15000), { NORMAL: 5500, RARE: 2500, SUPER_RARE: 2000 });
+});
+
+test('バス停では、出たレア度の共通カード(ノーマル70・レア35・スーパーレア15枚)がまんべんなく出る', () => {
+  const { common } = createCatalog([]);
+  const rand = seededRandom(20261022);
+  for (const [rarity, kinds] of [['NORMAL', 70], ['RARE', 35], ['SUPER_RARE', 15]] as [Rarity, number][]) {
+    const N = kinds * 1000;
+    const count = new Map<string, number>();
+    for (let i = 0; i < N; i++) {
+      const card = pickCommon(common, rarity, rand);
+      assert.equal(card.rarity, rarity);
+      count.set(card.itemId, (count.get(card.itemId) ?? 0) + 1);
+    }
+    assert.equal(count.size, kinds);
+    for (const n of count.values()) assert.ok(n > 850 && n < 1150, `${rarity}: 1種あたり ${n}回(期待 約1000回)`);
+  }
+  assert.equal(pickCommon(common, 'RARE', () => 0.99999999).rarity, 'RARE');
 });

@@ -126,9 +126,10 @@ export interface SpinResult {
   shardsGained: number;
 }
 
-/** 駅で回した結果を記録に反映した新しい記録を返す */
-export function applySpin(data: SaveData, spotId: string, rarity: Rarity, now: number): { data: SaveData; result: SpinResult } {
-  const itemId = stationItemId(spotId, rarity);
+/** 回した結果を記録に反映した新しい記録を返す。itemId を省くと、その駅のカード */
+export function applySpin(
+  data: SaveData, spotId: string, rarity: Rarity, now: number, itemId = stationItemId(spotId, rarity),
+): { data: SaveData; result: SpinResult } {
   const owned = data.collection[itemId];
   const shardsGained = owned ? CONFIG.shardsFor[rarity] : 0;
   const spot = data.spots[spotId];

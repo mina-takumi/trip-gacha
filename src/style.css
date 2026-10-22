@@ -105,6 +105,9 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .od b small { font-size: 14px; }
 .od span { font-size: 11px; font-weight: 900; color: var(--ink-soft); white-space: nowrap; }
 .od.sr { background: var(--mustard); } .od.sr span { color: var(--navy); }
+.od b .k { font: 900 10px var(--maru); margin-right: 2px; vertical-align: 6px; color: var(--ink-soft); }
+.od em { display: block; font: 900 10.5px/1 var(--maru); font-style: normal; color: var(--ink-soft); margin-top: 6px; white-space: nowrap; }
+.od.sr b .k, .od.sr em { color: var(--navy); }
 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; border: 1.5px solid var(--line); vertical-align: 0; }
 .dot.NORMAL { background: #C58A5A; } .dot.RARE { background: #AEB8C2; } .dot.SUPER_RARE { background: #E2B23E; }
 .sec { font: 400 20px var(--hand); margin: 22px 0 10px; display: flex; align-items: center; justify-content: space-between; }
@@ -114,6 +117,7 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .st .t { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .st .no { width: 44px; height: 44px; border-radius: 50%; background: var(--teal); color: var(--paper); border: 2px solid var(--line);
   display: grid; place-items: center; font: 700 13px var(--mincho); flex: none; }
+.st .no.bus { background: var(--mustard); color: var(--navy); font: 900 12px var(--maru); }
 .st .no.mute { background: #CFC6B6; color: var(--navy); }
 .st .name { font: 400 23px/1.2 var(--hand); flex: 1; min-width: 0; }
 .st .d { font-weight: 900; font-size: 14px; }
@@ -141,6 +145,9 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .r-RARE .art img { filter: brightness(1.12); }
 .r-RARE .art:not(:has(img.missing))::after { content: ""; position: absolute; inset: 0; background: #9DB0C8; mix-blend-mode: color; }
 .r-SUPER_RARE .art img { filter: saturate(1.25) brightness(1.08); }
+/* バス停カードは修飾の色(紅・翠・蒼など)を残すため、絵の色味を変えない */
+.card.plain .art img { filter: none; }
+.card.plain.r-RARE .art::after { content: none; }
 /* スーパーレアは光の帯が数秒ごとに横切る。動きを減らす設定の端末では、動かさずに枠のまわりをほのかに光らせる */
 .card.r-SUPER_RARE { position: relative; overflow: hidden; }
 .card.r-SUPER_RARE::after { content: ""; position: absolute; inset: 0; pointer-events: none; transform: translateX(-130%);
@@ -162,6 +169,7 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .ph { aspect-ratio: 0.82; border-radius: 10px; display: grid; place-items: center; background: rgba(34, 48, 60, .05); }
 .ph b { width: 46px; height: 46px; border-radius: 50%; border: 2px dashed var(--mute); display: grid; place-items: center;
   font: 400 16px var(--hand); color: #9C9282; }
+.ph b.long { width: auto; min-width: 46px; padding: 0 6px; border-radius: 23px; font-size: 12px; }
 
 /* ---------- 結果(ネイビーで締める) ---------- */
 .res { position: relative; }
@@ -189,6 +197,13 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .count { font: 400 76px/0.9 var(--hand); text-shadow: 4px 4px 0 rgba(47, 169, 160, .55); }
 .count small { font-size: 22px; text-shadow: none; }
 .z-lead { font-weight: 900; font-size: 13.5px; margin: 12px 0 16px; }
+.z-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.z-tab { height: 44px; border: 2px solid var(--line); border-radius: 22px; background: var(--paper); color: var(--navy); box-shadow: 2px 2px 0 var(--line);
+  font: 900 15px var(--maru); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.z-tab small { font-size: 11.5px; color: var(--ink-soft); }
+.z-tab[aria-pressed="true"] { background: var(--mustard); }
+.z-tab[aria-pressed="true"] small { color: var(--navy); }
+.ox .rl { color: var(--ink-soft); font-size: 10.5px; }
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 12px; }
 .tile { background: var(--paper); border: 2px solid var(--line); border-radius: 16px; padding: 8px 8px 7px; box-shadow: 3px 3px 0 var(--line);
   text-align: left; }
@@ -205,9 +220,16 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .map-screen { position: fixed; inset: 0 0 calc(var(--tabbar-h) + env(safe-area-inset-bottom)) 0; z-index: 1; }
 .map-screen[hidden] { display: none; }
 #map { position: absolute; inset: 0; }
-.map-tools { position: absolute; top: calc(env(safe-area-inset-top) + 18px); left: 12px; right: 12px; z-index: 500; display: flex; gap: 10px; align-items: flex-start; }
+.map-tools { position: absolute; top: calc(env(safe-area-inset-top) + 18px); left: 12px; right: 12px; z-index: 500; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
 .map-tools .btn { width: auto; padding: 0 18px; height: 46px; font-size: 15px; letter-spacing: .02em; }
 .map-msg { flex: 1; padding: 8px 12px; font-size: 12.5px; line-height: 1.55; border-radius: 16px; }
+.map-ranges { flex-basis: 100%; display: flex; gap: 8px; }
+.range-btn { height: 34px; padding: 0 14px; border: 2px solid var(--line); border-radius: 17px; background: var(--paper); color: var(--ink-soft);
+  font: 700 13px var(--maru); box-shadow: 2px 2px 0 var(--line); cursor: pointer; }
+.range-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
+.range-btn.station[aria-pressed="true"] { background: var(--teal); color: var(--paper); }
+.range-btn.bus[aria-pressed="true"] { background: var(--mustard); color: var(--navy); }
+.map-bus-range { opacity: .22; }
 #map.leaflet-container { font-family: var(--maru); background: var(--cream); }
 .map-city { filter: drop-shadow(6px 6px 0 var(--navy)); }
 .map-roads { opacity: .5; }
@@ -239,6 +261,7 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 /* 開発用の位置シミュレーター */
 .sim-badge { position: fixed; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 6px); left: 8px; z-index: 1200; background: var(--navy); color: var(--mustard);
   font: 900 11px var(--maru); padding: 3px 8px; border-radius: 99px; pointer-events: none; }
+.sim-badge.all { left: auto; right: 8px; }
 /* 駅名: 吹き出しの枠を消し、地図になじむよう生成りのフチで文字を浮かせる */
 .leaflet-tooltip.st-label { width: max-content; opacity: 1 !important; background: none; border: 0; box-shadow: none; padding: 0; color: var(--navy); font: 700 12px/1 var(--maru); white-space: nowrap;
   text-shadow: 0 0 2px var(--cream), 0 0 2px var(--cream), 0 0 3px var(--cream), 1px 1px 0 var(--cream), -1px -1px 0 var(--cream), 1px -1px 0 var(--cream), -1px 1px 0 var(--cream); }

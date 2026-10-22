@@ -19,11 +19,15 @@ import {
   detailScreen, mainScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearStation, type Tab,
 } from './ui/screens.ts';
 
-const VERSION = '0.1.7';
+const VERSION = '0.1.8';
 
 // ベータ版は駅だけ
 const stations: Spot[] = spotsJson.spots
   .filter((s) => s.kind === 'station')
+  .map(({ id, name, kind, lat, lon }) => ({ id, name, kind, lat, lon }));
+// バス停はまだガチャを回せない。地図に位置を出すだけ
+const busStops: Spot[] = spotsJson.spots
+  .filter((s) => s.kind === 'bus_stop')
   .map(({ id, name, kind, lat, lon }) => ({ id, name, kind, lat, lon }));
 const cards = createCatalog(stations).stations;
 const spotById = new Map(stations.map((s) => [s.id, s]));
@@ -147,7 +151,7 @@ function render(): void {
   screenEl.hidden = showMap;
   mapScreenEl.hidden = !showMap;
   if (showMap) {
-    if (!mapView) mapView = createMapView(document.getElementById('map')!, stations, cards, onMapTap);
+    if (!mapView) mapView = createMapView(document.getElementById('map')!, stations, busStops, cards, onMapTap);
     mapView.resize();
     mapView.update(state.fix, ownedSpotIds());
     document.getElementById('map-msg')!.textContent = onMapTap

@@ -10,6 +10,7 @@ const NOT_YET = '#B9AE9C';
 const RING = '#2FA9A0';
 const NAVY = '#22303C';
 const PANEL = '#FBF6EC';
+const MUSTARD = '#F2B233';
 
 /** この倍率から、住宅街の道・歩道も描く */
 const DETAIL_ZOOM = 15;
@@ -43,7 +44,7 @@ function decode(e: Encoded): L.LatLngTuple[] {
 const loadJson = <T>(name: string): Promise<T> => fetch(`map/${name}.json`).then((r) => r.json() as Promise<T>);
 
 /** 地図の画面。Leaflet は作り直すと重いので、一度作ったら表示・非表示を切り替えて使い回す */
-export function createMapView(el: HTMLElement, stations: Spot[], cards: Record<string, StationCard>, onTap?: (lat: number, lon: number) => void) {
+export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[], cards: Record<string, StationCard>, onTap?: (lat: number, lon: number) => void) {
   const map = L.map(el, { zoomControl: false, attributionControl: true, minZoom: 11, maxZoom: 18 }).setView([35.655, 139.33], 12);
   map.attributionControl.addAttribution('&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
   L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -88,6 +89,18 @@ export function createMapView(el: HTMLElement, stations: Spot[], cards: Record<s
     }
   };
   map.on('zoomend', syncDetail);
+
+  // バス停: マスタードの小さな点。道の上、駅の下。拡大したら少し大きくする
+  map.createPane('bus').style.zIndex = '280';
+  const busRenderer = L.canvas({ pane: 'bus' });
+  const busDots = busStops.map((s) =>
+    L.circleMarker([s.lat, s.lon], { renderer: busRenderer, radius: 3, color: NAVY, weight: 1, fillColor: MUSTARD, fillOpacity: 1, interactive: false }).addTo(map));
+  const syncBus = () => {
+    const radius = map.getZoom() >= DETAIL_ZOOM ? 5 : map.getZoom() >= LABEL_ALL_ZOOM ? 4 : 2.5;
+    for (const d of busDots) d.setRadius(radius);
+  };
+  map.on('zoomend', syncBus);
+  syncBus();
 
   const dots = new Map<string, L.CircleMarker>();
   for (const s of stations) {

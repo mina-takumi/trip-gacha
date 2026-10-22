@@ -13,8 +13,6 @@ const STYLE = 'art deco emblem, single icon illustration, FILL, geometric, symme
 const PLAIN_BACKGROUND = 'very dark navy blue background, almost black, solid flat color';
 const OUTLINE_ONLY = 'outline drawing only, no color fill';
 const withBackground = (bg, fill = OUTLINE_ONLY) => STYLE.replace('BACKGROUND', bg || PLAIN_BACKGROUND).replace('FILL', fill);
-// バス停カードの飾り。1回目(2026-09-30)は「thin circle」の円が主役になり、物が小さくなるか消えたため円を外した
-const COMMON_STYLE = 'very few subtle short radiating lines behind the object, minimal ornament';
 const SPECIAL_STYLE = 'ornate art deco ornament, sunburst rays behind the object, stepped geometric details, faint radiant halo';
 const NEGATIVE = 'text, letters, words, numbers, roman numerals, typography, title banner, watermark, signature, logo, tarot card, playing card, card layout, border, frame, card border, ornamental border, corner ornaments, light blue background, sky blue, cyan, bright background, colored fill, painted, multicolored, cluttered, busy background, shading, hatching, cross-hatching, paper texture, grunge, floral ornament, vines, perspective, photo, photorealistic, 3d render, blurry, low quality, jpeg artifacts, deformed';
 
@@ -62,80 +60,95 @@ const negativeFor = (noun) => [NEGATIVE.split(', ').filter((w) => !(NEGATIVE_EXC
 // 指示書の「作り直すカード」の欄に並べるもの
 const REDO = ['鎌', '印章', '指輪'];
 
-// バス停カードのうち、描かれなかった・別の物になった物の形(2026-09-30)
-const BUS_SHAPE = {
-  '月': 'a large crescent moon shape',
-  '目': 'an open eye with an almond shaped outline and a round iris',
-  '扉': 'a tall arched door with two panels and a round handle',
-  '雫': 'a teardrop shape, round at the bottom and pointed at the top',
-  '輪': 'a spoked wagon wheel with a hub and a rim',
-  // 2回目(2026-10-07)で、凍てる天秤は天秤が出ず、真夜中の天秤は皿が1つだった
-  '天秤': 'a balance scale with a central upright post, a horizontal beam on top and two pans hanging from both ends',
-};
-// バス停カードだけに足す禁止。共通の禁止(NEGATIVE)は特別カードと同じまま
-// 2回目(2026-10-07)で写実的な光沢の絵が出たので、光沢も禁止する
-// 3回目(2026-10-08)も物を囲む大きな円が出たので、円の言葉を足す。もともと丸い物は物まで消えないよう、円の言葉を外す
-const BUS_CIRCLE_NEGATIVE = ['large circle around the object', 'round border', 'halo ring'];
-const ROUND_NOUNS = ['月', '太陽', '輪'];
-const BUS_NEGATIVE_BASE = [NEGATIVE, 'circular frame, empty medallion, compass rose, tiny object, small object, object off center', ...REDO_GLOSS].join(', ');
-const BUS_NEGATIVE = [BUS_NEGATIVE_BASE, ...BUS_CIRCLE_NEGATIVE].join(', ');
+// バス停カードの指示は短くする(2026-10-09)。長い指示(約130語)では後ろの言葉が効かず、
+// 蒼い月を約60語にしたら月そのものが蒼くなった。画像生成AIが一度に読めるのは約75トークン
+const BUS_LIMIT = 75;
+// 後ろの放射状の線は、下に垂れる縦の線や円の飾りとして描かれたので入れない(2026-10-09 試し8枚)
+// 短くしたら物が小さい・端に寄る・いくつも出るようになったので、構図の言葉を短く戻した(同)
+const BUS_COMPOSITION = 'one single object only, centered, object fills most of the image';
+const BUS_STYLE = 'art deco emblem, flat, symmetrical';
+const BUS_NEGATIVE = 'text, letters, numbers, watermark, logo, tarot card, card border, frame, circular frame, halo ring, bright background, cyan, multicolored, cluttered, texture, photorealistic, glossy, small object, off center';
+// もともと丸い物は、円の禁止で物まで消えないよう外す
+const ROUND_NOUNS = ['太陽', '輪'];
+const ROUND_WORDS = ['circular frame', 'halo ring'];
 
-// 物の線だけ色を変え、飾りは金のまま残す修飾。線ごと色を変えると金のカードと別のシリーズに見えた(2026-09-30)
-const TINTED = ['銀の', '金の', '白い', '紅い', '蒼い'];
-// 2回目(2026-10-07)で、蒼・白・銀は物が金のままだった。色を物の名前の前に付け、物全体がその色だと書く
-const RECOLOR = { '銀の': 'silver', '白い': 'pure white', '紅い': 'crimson red', '蒼い': 'azure blue' };
-// [線の色, 物への修飾, 背景への修飾, 日本語の意味]
+// 描かれなかった・別の物になった物は、形の分かる呼び方にする(2026-09-30〜10-08)
+const BUS_SUBJECT = {
+  '月': 'crescent moon',
+  '目': 'open almond-shaped eye with a round iris',
+  '扉': 'tall arched door with two panels',
+  '雫': 'teardrop-shaped water droplet',
+  '輪': 'spoked wagon wheel',
+  '天秤': 'balance scale with exactly two hanging pans',
+};
+// [物の色, 物への修飾, 背景, 日本語の意味]
 const MOD = {
-  '銀の': ['silver lines', '', '', '物を銀色に(飾りは金のまま)'],
-  '金の': ['radiant bright gold lines with a strong golden glow', '', '', '物がいつもより強く輝く金'],
-  // 2回目(2026-10-07)で silhouette が人の影絵として描かれた(黒い冠・黒い羽)。影絵という言葉を使わない
-  '黒い': [`thin ${GOLD} edge`, 'painted solid matte black', '', '黒く塗った物、ふちだけ金'],
-  '白い': ['pure white lines', '', '', '物を白に(飾りは金のまま)'],
-  '紅い': ['crimson red lines', '', '', '物を紅色に(飾りは金のまま)'],
-  '蒼い': ['azure blue lines', '', '', '物を蒼色に(飾りは金のまま)'],
-  // 2回目(2026-10-07)の小さな欠け・細いひび、3回目(2026-10-08)のくさび形の欠け・大きなひびも描かれなかった。半分ない・2つに割れる、まで大きくする
-  '欠けた': [`${GOLD} lines`, 'with the whole right half missing, cut off along a jagged broken edge, only the left half remains', '', '右半分が無く、左半分だけ残る'],
-  '砕けた': [`${GOLD} lines`, 'broken into two separate pieces with a clear gap between them, the two pieces slightly apart', '', '2つに割れて、すき間があく'],
-  '燃える': [`${GOLD} lines`, 'burning, wreathed in stylized flames', '', '炎に包まれている'],
-  '凍てる': [`${GOLD} lines`, 'frozen, covered in frost crystals', '', '霜の結晶に覆われている'],
-  '逆さの': [`${GOLD} lines`, 'upside down', '', '上下逆さま'],
-  // 双子の(2つ並べる)は2本が重なる・3本になるで数がそろわず、2026-10-08 に鎖の へ差し替えた
-  '鎖の': [`${GOLD} lines`, 'wrapped tightly in a heavy chain, large chain links clearly visible coiled around it', '', '太い鎖が巻きつく'],
-  // 2回目(2026-10-07)で、夜明けは物が橙になり帯が出ず、真夜中は背景が茶色になった。空の様子として書く
-  // 3回目(2026-10-08)も地平線の光が出なかったので、下4分の1まで広げる
-  '夜明けの': [`${GOLD} lines, the object stays ${GOLD}`, '', 'very dark navy blue sky background, the lower quarter of the background glowing with a warm orange sunrise gradient', '背景の下4分の1が朝焼けの橙'],
-  '真夜中の': [`${GOLD} lines`, '', 'deep dark navy blue night sky background with many tiny white stars scattered', '背景が濃紺の夜空、白く小さな星'],
-  '翼ある': [`${GOLD} lines`, 'with a pair of feathered wings', '', '翼が生えている'],
+  '銀の': ['silver', '', '', '物全体が銀色'],
+  '金の': ['radiant bright gold', 'strong golden glow', '', '物がいつもより強く輝く金'],
+  // silhouette は人の影絵として描かれた(2026-10-07)ので使わない
+  '黒い': ['matte black', 'painted solid black with a thin gold edge', '', '黒く塗った物、ふちだけ金'],
+  // 白い(2026-10-09 まで)は白い鍵が金のままで描けず、翠の に差し替えた
+  '翠の': ['emerald green', '', '', '物全体が翠色'],
+  '紅い': ['crimson red', '', '', '物全体が紅色'],
+  '蒼い': ['azure blue', '', '', '物全体が蒼色'],
+  // 欠けた・砕けた(物から減らす修飾)は何度直しても描けず、2026-10-09 に物へ足す修飾の 稲妻の・水晶の に差し替えた
+  '稲妻の': ['', 'crackling with stylized lightning bolts around it', '', '稲妻が走る'],
+  '水晶の': ['clear crystal', 'made of transparent faceted crystal', '', '透き通った水晶でできている'],
+  '燃える': ['', 'burning, wreathed in stylized flames', '', '炎に包まれている'],
+  '凍てる': ['', 'frozen, covered in frost crystals', '', '霜の結晶に覆われている'],
+  '逆さの': ['', 'upside down', '', '上下逆さま'],
+  '鎖の': ['', 'wrapped tightly in a heavy chain', '', '太い鎖が巻きつく'],
+  '夜明けの': ['', '', 'very dark navy blue sky background, lower quarter glowing with orange sunrise', '背景の下4分の1が朝焼けの橙'],
+  '真夜中の': ['', '', 'deep navy night sky background with many tiny white stars', '背景が濃紺の夜空、白く小さな星'],
+  '翼ある': ['', 'with a pair of feathered wings', '', '翼が生えている'],
 };
+// 物全体の色を「全体がその色」と念押しする修飾。金の・黒いは物の色だけで足りる
+const RECOLOR = ['銀の', '翠の', '紅い', '蒼い'];
+const BUS_PLAIN_BACKGROUND = 'very dark navy blue background, almost black, solid flat color';
 
-// 修飾ごとにバス停カードの禁止へ足す言葉。2回目(2026-10-07)で修飾の代わりに描かれた物
+// そのカードだけの禁止。共通の禁止より前に置く(後ろほど効きにくいため)
 const MOD_NEGATIVE = {
-  '黒い': () => ['person', 'human figure', 'woman', 'hood', 'cloak'],
-  '夜明けの': () => ['orange object', 'orange fill'],
-  '真夜中の': () => ['brown background', 'sepia', 'orange background'],
-  ...Object.fromEntries(Object.keys(RECOLOR).map((m) => [m, (noun) => [`golden ${noun}`]])),
+  '黒い': (noun) => [`golden ${noun}`, 'person', 'human figure', 'hood', 'cloak'],
+  '夜明けの': () => ['orange object'],
+  '真夜中の': () => ['brown background', 'orange background'],
+  '水晶の': (noun) => [`golden ${noun}`],
+  ...Object.fromEntries(RECOLOR.map((m) => [m, (noun) => [`golden ${noun}`]])),
 };
-// 共通の「バス停カード用」と違うときだけ、そのカードの禁止を返す
+// 蒼い月の1枚目(2026-10-09)で出た、クレーター・垂れる線・星
+const NOUN_NEGATIVE = { '月': ['craters', 'dripping', 'stars'] };
+
 const busNegativeFor = (card) => {
-  const extra = MOD_NEGATIVE[card.modifier];
-  const round = ROUND_NOUNS.includes(card.noun);
-  if (!extra && !round) return undefined;
-  return [round ? BUS_NEGATIVE_BASE : BUS_NEGATIVE, ...(extra ? extra(NOUN_EN[card.noun]) : [])].join(', ');
+  const noun = NOUN_EN[card.noun];
+  const own = [
+    ...(MOD_NEGATIVE[card.modifier]?.(noun) || []),
+    ...(NOUN_NEGATIVE[card.noun] || []).filter((w) => !(w === 'stars' && card.modifier === '真夜中の')),
+  ];
+  const common = BUS_NEGATIVE.split(', ').filter((w) => !(ROUND_NOUNS.includes(card.noun) && ROUND_WORDS.includes(w)));
+  // 共通の「バス停カード用」と同じなら、カードの下には書かない
+  if (!own.length && common.length === BUS_NEGATIVE.split(', ').length) return undefined;
+  return [...own, ...common].join(', ');
 };
 
+// 物の名前は最初の1回だけ書く。何度も書くと、その物を複数描く(2026-10-09 鍵が3本・4本出た)
 function commonPrompt(card) {
   const noun = NOUN_EN[card.noun];
   const [color, objectMod, bgMod] = MOD[card.modifier];
-  const recolor = RECOLOR[card.modifier];
-  const first = recolor ? `single ${recolor} ${noun}` : 'single ' + noun;
-  const subject = [first, BUS_SHAPE[card.noun], objectMod].filter(Boolean).join(', ');
-  const main = `the ${noun} is the main subject, large and clearly recognizable`;
-  const lines = recolor
-    ? [`the whole ${noun} drawn in ${color}`, `only the short radiating lines behind it are ${GOLD}`]
-    : TINTED.includes(card.modifier) ? [`the ${noun} drawn in ${color}`, `ornament in ${GOLD} lines`] : [color];
-  const fill = card.modifier === '黒い' ? `object filled solid black with a thin ${GOLD} edge only` : undefined;
-  return [subject, main, ...lines, COMMON_STYLE, withBackground(bgMod, fill)].join(', ');
+  const subject = `single ${color || 'warm muted gold'} ${BUS_SUBJECT[card.noun] || noun}`;
+  return [
+    subject,
+    'the main subject, large and clearly recognizable',
+    BUS_COMPOSITION,
+    RECOLOR.includes(card.modifier) ? `entirely ${color}` : '',
+    objectMod,
+    BUS_STYLE,
+    // 真夜中の星は、背景の stars でも星の名前が2回になるので、光の点と書く
+    (card.noun === '星' ? bgMod.replace('tiny white stars', 'tiny white dots of light') : bgMod) || BUS_PLAIN_BACKGROUND,
+    'subtle glow',
+  ].filter(Boolean).join(', ');
 }
+
+// 単語とカンマの数。トークン数のおおよその目安
+const roughTokens = (text) => (text.match(/[A-Za-z]+|\d+|,/g) || []).length;
 
 function specialPrompt(noun) {
   const emphasis = EMPHASIS[noun]
@@ -161,8 +174,8 @@ const specialEntry = (s) => entry(s.title, s.file, specialPrompt(s.noun), `${s.n
 
 const trials = ['蒼い月', '燃える鍵'].map((name) => catalog.common.find((c) => c.name === name));
 const trialSpecial = specials.find((s) => s.noun === '灯台');
-// 指示を直した後(2026-10-08)、残りを作る前に試すカード。3回目で修飾が出なかった・円が出たものと、新しい「鎖の」
-const busTrials = ['欠けた錨', '欠けた鐘', '砕けた鍵', '砕けた鐘', '夜明けの炎', '黒い冠', '白い鍵', '紅い目', '鎖の剣', '鎖の錨']
+// 指示を短くした後(2026-10-09)、120枚を作る前に試すカード。修飾の種類ごとに1枚
+const busTrials = ['黒い冠', '稲妻の錨', '水晶の鍵', '夜明けの炎', '真夜中の星', '鎖の剣', '燃える鍵', '翠の鍵']
   .map((name) => catalog.common.find((c) => c.name === name));
 
 const lines = [
@@ -189,11 +202,11 @@ const lines = [
   '|---|---|',
   '| 様式 | アール・デコ風。直線・円・放射状の線の幾何学的な飾り、左右対称 |',
   '| 線 | 落ち着いた金。太さは中くらいでそろえる(スマホで小さく表示しても消えないように)。陰影は付けない |',
-  '| 塗り | 輪郭線だけで描き、色は塗らない(「黒い」のカードだけ黒い影絵にする) |',
-  '| 色の修飾 | 銀・白・紅・蒼は物の線だけその色にし、後ろの飾りは金のまま(シリーズとしてそろえるため) |',
+  '| 塗り | 特別カードは輪郭線だけの指示(実際は金で塗られた絵になった)。バス停カードは平らな塗りでよい |',
+  '| 色の修飾 | 銀・白・紅・蒼は物全体をその色にする |',
   '| 背景 | ほぼ黒に近い無地の濃紺。模様や質感は付けない(「夜明けの」「真夜中の」のカードだけ背景が変わる) |',
-  '| 構図 | 真正面から見た形で中央に。物は画面の6〜7割 |',
-  '| バス停カード | 物が主役。後ろの飾りは短い放射状の線を少しだけで、円は描かない |',
+  '| 構図 | 真正面から見た形で中央に。物は大きく |',
+  '| バス停カード | 物が主役で1つだけ。後ろの飾りは描かない(放射状の線は縦の線や円になった)。指示文は短く(約75語以内)。長いと後ろに書いた言葉が効かない |',
   '| 特別カード | 太陽光線のような放射状の飾り・階段状の模様・かすかな光の輪。バス停カードより豪華にして特別感を出す |',
   '| 金の修飾 | 「金の」カードだけ、物をいつもの落ち着いた金ではなく強く輝く金にする |',
   '',
@@ -217,7 +230,7 @@ const lines = [
   '',
   '### バス停カード用',
   '',
-  '特別カード用の文に、円の飾りや小さすぎる物を防ぐ言葉を足したもの。',
+  '特別カード用より短くしたもの。このカードだけの禁止があるカードは、各カードの下に先頭へ足した文を書いてある。',
   '',
   block(BUS_NEGATIVE),
   '',
@@ -229,7 +242,7 @@ const lines = [
   ...specialEntry(trialSpecial),
   `## バス停カードの試し(${busTrials.length}枚)`,
   '',
-  '3回目で、欠けた・砕けた・夜明けがまだ絵に出ず、物を囲む大きな円も残ったので、書き方を直した。「双子の」は「鎖の」に変えた。残りを作る前にこの10枚で試す。このカードだけの「描いてほしくないこと」があるものは、各カードの下に書いてある。',
+  `指示文が長すぎて後ろの言葉が効いていなかったため、バス停カードの指示を短くした(2026-10-09)。作ってあったバス停カードもすべてこの指示で作り直す。120枚を作る前に、修飾の種類ごとに1枚ずつ、この${busTrials.length}枚で試す。`,
   '',
   ...busTrials.flatMap(commonEntry),
   `## 作り直すカード(${REDO.length}枚)`,
@@ -248,4 +261,9 @@ const lines = [
 ];
 
 writeFileSync(root + 'docs/illustration-prompts.md', lines.join('\n'));
+const over = catalog.common.flatMap((c) => [['プロンプト', commonPrompt(c)], ['禁止', busNegativeFor(c) || BUS_NEGATIVE]]
+  .map(([kind, text]) => [c.name, kind, roughTokens(text)]).filter(([, , n]) => n > BUS_LIMIT));
+const longest = Math.max(...catalog.common.flatMap((c) => [commonPrompt(c), busNegativeFor(c) || BUS_NEGATIVE].map(roughTokens)));
+console.log(`バス停カードの指示の長さ: 最長 ${longest}(目安 ${BUS_LIMIT} 以内)`);
+for (const [name, kind, n] of over) console.log(`  長すぎ: ${name} の${kind} ${n}`);
 console.log(`書き出し: docs/illustration-prompts.md(特別 ${specials.length}枚 + バス停 ${catalog.common.length}枚 = ${specials.length + catalog.common.length}枚)`);

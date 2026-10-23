@@ -1,4 +1,5 @@
-// SeaArt AI に渡すイラストの指示書(docs/illustration-prompts.md)を src/items.ts から書き出す。
+// SeaArt AI に渡すイラストの指示書(docs/illustration-prompts.md)と、ChatGPT に渡す裏カードの指示書
+// (docs/illustration-prompts-secret.md。公開しない)を src/items.ts から書き出す。
 // 実行: node scripts/export-art-prompts.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -267,3 +268,100 @@ const longest = Math.max(...catalog.common.flatMap((c) => [commonPrompt(c), busN
 console.log(`バス停カードの指示の長さ: 最長 ${longest}(目安 ${BUS_LIMIT} 以内)`);
 for (const [name, kind, n] of over) console.log(`  長すぎ: ${name} の${kind} ${n}`);
 console.log(`書き出し: docs/illustration-prompts.md(特別 ${specials.length}枚 + バス停 ${catalog.common.length}枚 = ${specials.length + catalog.common.length}枚)`);
+
+// ---------- 裏カード(ChatGPT 用) ----------
+// 裏カードは存在を知らせないので、別のファイルに書き出して公開しない(.gitignore)。
+// 絵柄は駅カードと見分けるため、紫と銀のステンドグラス風(2026-10-23、灯台・天球儀・船の3枚で決定)。
+// ChatGPT は文章で書いた指示をよく守るので、SeaArt のような単語の並びではなく文で書く
+
+// [物の説明, 「the ◯◯ is built from」の◯◯, 向き, 左右対称か, そのカードだけ足す文]
+// 灯台・天球儀・船は試しで作った3枚と1文字も変えない
+const FRONT = 'Shown from the front, centered';
+const SECRET_SUBJECT = {
+  '門': ['ornate gate: two tall pillars with a pair of closed iron gate doors between them, under an arch', 'gate', FRONT, true],
+  '羅針盤': ['compass: a round navigation compass with a needle pointing north', 'compass', 'Seen from directly above, centered', true],
+  '旗': ['banner flag: a waving flag hanging from a tall vertical pole', 'flag', 'Centered', false],
+  '灯台': ['lighthouse: a tall tower with a lantern room at the top, with beams of light shining out to both sides', 'lighthouse', FRONT, true],
+  '橋': ['stone arch bridge with one large arch spanning from left to right', 'bridge', 'Seen from the side, centered', true, 'No river, no landscape.'],
+  '船': ['sailing ship with full sails, seen from the side', 'ship', 'Centered', false, 'No sea, no waves.'],
+  '燭台': ['candlestick holding one lit candle', 'candlestick', FRONT, true],
+  '竪琴': ['harp: a tall frame harp with many strings', 'harp', 'Seen from the side, centered', false],
+  '書': ['open book with its pages spread to both sides', 'book', FRONT, true, 'The pages are blank, with no writing.'],
+  '巻物': ['scroll: a long sheet of paper partly unrolled, with a wooden roller at each end', 'scroll', FRONT, true, 'The paper is blank, with no writing.'],
+  '松明': ['torch: a wooden handle standing upright with a burning flame at the top', 'torch', FRONT, true],
+  '泉': ['fountain: a round stone basin on a pedestal with water spraying up from the center', 'fountain', FRONT, true],
+  '樹': ['tree with a thick trunk, spreading branches and a round leafy crown', 'tree', FRONT, true, 'No ground, no landscape.'],
+  '山': ['mountain: one large triangular peak with a snow cap', 'mountain', FRONT, true, 'Only one peak, no landscape.'],
+  '階段': ['staircase: a straight flight of steps rising upward', 'staircase', FRONT, true],
+  '窓': ['arched window with a frame divided into small panes, standing on its own', 'window', FRONT, true, 'No building or wall around the window.'],
+  '歯車': ['gear: a cogwheel with teeth around its edge and a hole in the center', 'gear', FRONT, true],
+  '風車': ['windmill: a tower with four large cross-shaped sails', 'windmill', FRONT, true, 'No ground, no landscape.'],
+  '仮面': ['masquerade mask that covers the eyes, with two empty eye holes, floating on its own', 'mask', FRONT, true, 'No face behind the mask.'],
+  '指輪': ['ring: a ring band with one large faceted gem set on top', 'ring', FRONT, true],
+  '宝珠': ['orb: a round sphere with a band around its middle and a small cross on top', 'orb', FRONT, true],
+  '印章': ['ink stamp: a short wooden handle on top and a square stamp block at the bottom with an engraved flat face', 'stamp', FRONT, true],
+  '鎌': ['scythe: a long straight wooden pole standing vertically with a large curved blade at the top, the blade sweeping out to one side', 'scythe', 'Centered', false, 'No skull, no hooded figure.'],
+  '天球儀': ['armillary sphere: several crossing rings forming a sphere around a small globe in the center, on a short stand', 'armillary sphere', FRONT, true],
+};
+// 試しで作り、そのまま本番に使う3枚(2026-10-23)
+const SECRET_DONE = ['灯台', '天球儀', '船'];
+// 窓は物そのものが窓なので、「窓の形で囲まない」の禁止を外す
+const SECRET_NO_FRAME = 'No card frame or border, no circle or window shape around the object, no arched church window.';
+const SECRET_NO_FRAME_WINDOW = 'No card frame or border, no circle around the object.';
+
+function secretPrompt(noun) {
+  const [desc, short, view, symmetrical, extra] = SECRET_SUBJECT[noun];
+  return [
+    `Square image. A single ${desc}. ${view}, filling about 60 to 70 percent of the image.`,
+    `Stained glass style: the ${short} is built from flat pieces of colored glass in shades of violet, amethyst purple and pale lavender, separated by bold silver lead lines of even medium thickness.`,
+    'A few small silver sparkles around it.',
+    'Plain, solid, very deep purple background, almost black, with no pattern or texture.',
+    ...(extra ? [extra] : []),
+    `${symmetrical ? 'Symmetrical, simple' : 'Simple'} and bold, so it still reads clearly when shown small on a phone.`,
+    'Only one object. No text, letters or numbers.',
+    noun === '窓' ? SECRET_NO_FRAME_WINDOW : SECRET_NO_FRAME,
+    'No people or hands. No gold. Not photorealistic, not 3D.',
+  ].join(' ');
+}
+
+const missing = Items.SPECIAL_NOUNS.filter((n) => !SECRET_SUBJECT[n]);
+if (missing.length) throw new Error('裏カードの物の説明がない: ' + missing.join('、'));
+const secretEntry = (noun) => [
+  `### ${noun}${SECRET_DONE.includes(noun) ? '(作成済み)' : ''}`, '',
+  `保存する名前: \`${noun}.png\` / アプリでの名前: \`art/secret/${Items.ART_KEYS[noun]}\``, '', block(secretPrompt(noun)), '',
+];
+const todo = Items.SPECIAL_NOUNS.filter((n) => !SECRET_DONE.includes(n));
+const secretLines = [
+  '<!-- このファイルは scripts/export-art-prompts.mjs が src/items.ts から自動で作る。手で編集しない。 -->',
+  '',
+  '# 裏カードの絵の指示書(ChatGPT 用)',
+  '',
+  `裏カードの真ん中の図柄 ${Items.SPECIAL_NOUNS.length}枚ぶんの指示。物ごとに1枚で、同じ物の裏カードどうしは同じ絵になる。裏カードは存在を知らせないので、このファイルは公開しない(\`.gitignore\` で外している)。`,
+  '',
+  '## 絵柄の決まりごと(2026-10-23 決定)',
+  '',
+  '| 項目 | 決まりごと |',
+  '|---|---|',
+  '| 様式 | ステンドグラス風。物を平らな色ガラスのかけらで組み、かけらの間を銀の線で区切る |',
+  '| 色 | 紫・アメジスト色・薄いラベンダー。金は使わない(駅カードと見分けるため) |',
+  '| 背景 | ほぼ黒に近い、無地の濃い紫 |',
+  '| 構図 | 物は1つだけ、真ん中に大きく(画面の6〜7割) |',
+  '| 描かないもの | 文字・数字、カードの枠、物を囲む丸や窓の形、人や手(窓のカードだけ「窓の形」の禁止を外している) |',
+  '',
+  '灯台・天球儀・船の3枚で試し、駅カードと別のシリーズに見えること、3枚がそろうこと、図鑑の大きさでも物が分かることを確かめた。',
+  '',
+  '## 使い方',
+  '',
+  '1. ChatGPT に、枠の中の英文を1枚ずつそのまま貼る。共通の部分は変えない(変えると絵柄がそろわなくなる)',
+  '2. 正方形で作られているか確かめる',
+  '3. `C:\\Users\\cazut\\Desktop\\大学\\卒業制作\\カード\\GPT-裏\\` に、書いてある日本語の名前で保存する',
+  '',
+  `## まだ作っていないカード(${todo.length}枚)`,
+  '',
+  ...todo.flatMap(secretEntry),
+  `## 作成済みのカード(${SECRET_DONE.length}枚)`,
+  '',
+  ...SECRET_DONE.flatMap(secretEntry),
+];
+writeFileSync(root + 'docs/illustration-prompts-secret.md', secretLines.join('\n'));
+console.log(`書き出し: docs/illustration-prompts-secret.md(裏カード ${Items.SPECIAL_NOUNS.length}枚。まだ作っていない ${todo.length}枚)`);

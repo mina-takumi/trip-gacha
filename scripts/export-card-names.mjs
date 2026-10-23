@@ -43,17 +43,29 @@ function publicList() {
 
 function secretList() {
   const bus = spots.filter((s) => s.kind === 'bus_stop');
+  const nameAt = (s) => catalog.describe(catalog.secretAt(s.id)).name;
+  const stopsOf = (noun) => bus.filter((s) => nameAt(s) === noun).length;
   return [
     ...HEADER,
-    '# 裏アイテムの名前一覧(確定版 v4・非公開)',
+    '# 裏アイテムの名前一覧(確定版 v5・非公開)',
     '',
     '存在を知らせない隠し要素なので、このファイルは公開しない(.gitignore で除外)。',
     '',
-    `バス停 ${bus.length}か所に1枚ずつ。並びはスポット番号順。`,
+    'v5(2026-10-23)で、名前からバス停の名前を外し、物の名前だけにした。物ごとに1種(24種)で、どのバス停で出ても同じ物ならかぶり。どのバス停でどの物が出るかは v4 と同じ。',
     '',
-    '| バス停 | 裏アイテムの名前 |',
+    `## 裏アイテム(${Items.SPECIAL_NOUNS.length}種)`,
+    '',
+    '| 名前 | 出るバス停の数 |',
     '|---|---|',
-    ...bus.map((s) => `| ${s.name} | ${catalog.describe('secret:' + s.id).name} |`),
+    ...Items.SPECIAL_NOUNS.map((n) => `| ${n} | ${stopsOf(n)} |`),
+    '',
+    `## バス停ごとに出る裏アイテム(${bus.length}か所)`,
+    '',
+    '並びはスポット番号順。',
+    '',
+    '| バス停 | 裏アイテム |',
+    '|---|---|',
+    ...bus.map((s) => `| ${s.name} | ${nameAt(s)} |`),
     '',
   ].join('\n');
 }

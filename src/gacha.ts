@@ -30,6 +30,11 @@ export function drawRarity(odds: Odds, rand: () => number): Rarity {
 
 export const stationItemId = (spotId: string, rarity: Rarity) => `station:${spotId}:${rarity}`;
 
+/** 裏カードが出る確率(0〜1)。かけらが多いほど出やすい */
+export function secretChance(shards: number): number {
+  return Math.min(CONFIG.secretBasePpm + Math.max(0, shards) * CONFIG.secretPerShardPpm, CONFIG.secretMaxPpm) / 1_000_000;
+}
+
 /** バス停で出るカード。そのレア度の共通カードから、どれも同じ確率で1枚選ぶ */
 export function pickCommon(common: CommonCard[], rarity: Rarity, rand: () => number): CommonCard {
   const pool = common.filter((c) => c.rarity === rarity);

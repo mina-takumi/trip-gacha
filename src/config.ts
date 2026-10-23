@@ -36,6 +36,12 @@ export const CONFIG = {
   busOddsBp: { NORMAL: 7000, RARE: 2500, SUPER_RARE: 500 } satisfies Record<Rarity, number>,
   /** 持っているカードが出たときのかけら */
   shardsFor: { NORMAL: 1, RARE: 3, SUPER_RARE: 10 } satisfies Record<Rarity, number>,
+  /** 裏カードが出る確率(百万分率。100 = 0.01%)。バス停で回したときだけ。移動距離では変わらない */
+  secretBasePpm: 100,
+  /** かけら1個ごとに足す確率(百万分率。1 = 0.0001%) */
+  secretPerShardPpm: 1,
+  /** 裏カードの確率の上限(百万分率。2000 = 0.2%。かけら1900個で到達) */
+  secretMaxPpm: 2000,
 };
 
 export const RARITIES: Rarity[] = ['NORMAL', 'RARE', 'SUPER_RARE'];

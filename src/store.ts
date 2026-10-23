@@ -1,5 +1,5 @@
 import { CONFIG } from './config.ts';
-import type { Rarity } from './items.ts';
+import type { CardRarity, Rarity } from './items.ts';
 import { emptyWalk, localDate, type WalkState } from './walk.ts';
 import { stationItemId } from './gacha.ts';
 
@@ -142,17 +142,23 @@ export function hasTicket(data: SaveData, spotId: string, now: number): boolean 
 
 export interface SpinResult {
   itemId: string;
-  rarity: Rarity;
+  rarity: CardRarity;
   isNew: boolean;
+  /** 増えたかけら。裏カードでは減った分がマイナスで入る */
   shardsGained: number;
 }
 
+/** 裏カードが出たあとのかけら。初めてなら0に、かぶりなら半分(端数は切り捨て)にする */
+const shardsAfterSecret = (shards: number, owned: boolean) => owned ? Math.floor(shards / 2) : 0;
+
 /** 回した結果を記録に反映した新しい記録を返す。itemId を省くと、その駅のカード */
 export function applySpin(
-  data: SaveData, spotId: string, rarity: Rarity, now: number, itemId = stationItemId(spotId, rarity),
+  data: SaveData, spotId: string, rarity: CardRarity, now: number, itemId = stationItemId(spotId, rarity as Rarity),
 ): { data: SaveData; result: SpinResult } {
   const owned = data.collection[itemId];
-  const shardsGained = owned ? CONFIG.shardsFor[rarity] : 0;
+  const shardsGained = rarity === 'SECRET'
+    ? shardsAfterSecret(data.shards, !!owned) - data.shards
+    : owned ? CONFIG.shardsFor[rarity] : 0;
   const spot = data.spots[spotId];
   return {
     data: {
@@ -166,12 +172,18 @@ export function applySpin(
   };
 }
 
-export interface Spin { spotId: string; rarity: Rarity; itemId: string }
+export interface Spin { spotId: string; rarity: CardRarity; itemId: string }
 
-/** 何か所かをまとめて回した結果を、1か所ずつ順に回したのと同じように記録する(同じ回で同じカードが2回出たら2枚目はかぶり) */
-export function applySpins(data: SaveData, spins: Spin[], now: number): { data: SaveData; results: (SpinResult & { spotId: string })[] } {
+/**
+ * 何か所かをまとめて回した結果を、1か所ずつ順に回したのと同じように記録する(同じ回で同じカードが2回出たら2枚目はかぶり)。
+ * 1か所引くたびに記録してから次を引く(drawFor にはその時点の記録を渡す)。前の場所で増減したかけらが、次の裏カードの確率に効くように
+ */
+export function applySpins(
+  data: SaveData, spotIds: string[], now: number, drawFor: (data: SaveData, spotId: string) => Spin,
+): { data: SaveData; results: (SpinResult & { spotId: string })[] } {
   const results: (SpinResult & { spotId: string })[] = [];
-  for (const s of spins) {
+  for (const spotId of spotIds) {
+    const s = drawFor(data, spotId);
     const r = applySpin(data, s.spotId, s.rarity, now, s.itemId);
     data = r.data;
     results.push({ ...r.result, spotId: s.spotId });

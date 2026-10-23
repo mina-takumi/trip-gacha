@@ -1,16 +1,17 @@
 // 卒業制作フォルダのカードの絵(ChatGPT で作ったもの)を、英字の名前で public/art/ にコピーし、512×512 の WebP に縮める。
-// 駅カード → public/art/special/、バス停カード → public/art/bus/。ホーム画面のアイコンもここで作る。
-// 実行: npm run art   (絵の置き場所を変えたときは: node scripts/copy-art.mjs <駅のフォルダ> <バス停のフォルダ>)
+// 駅カード → public/art/special/、バス停カード → public/art/bus/、裏カード → public/art/secret/。ホーム画面のアイコンもここで作る。
+// 実行: npm run art   (絵の置き場所を変えたときは: node scripts/copy-art.mjs <駅のフォルダ> <バス停のフォルダ> <裏カードのフォルダ>)
 import { readFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
-import { createCatalog } from '../src/items.ts';
+import { ART_KEYS, SPECIAL_NOUNS, createCatalog } from '../src/items.ts';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const CARDS = 'C:/Users/cazut/Desktop/大学/卒業制作/カード';
 const STATION_SRC = process.argv[2] ?? join(CARDS, 'GPT-駅');
 const BUS_SRC = process.argv[3] ?? join(CARDS, 'GPT-バス');
+const SECRET_SRC = process.argv[4] ?? join(CARDS, 'GPT-裏カード');
 const ART = join(root, 'public', 'art');
 const ICONS = join(root, 'public', 'icons');
 
@@ -34,6 +35,9 @@ async function copyAll(cards, srcDir) {
 const stations = Object.values(catalog.stations);
 console.log(`駅: ${await copyAll(stations, STATION_SRC)} / ${stations.length}枚 → public/art/special/`);
 console.log(`バス停: ${await copyAll(catalog.common, BUS_SRC)} / ${catalog.common.length}枚 → public/art/bus/`);
+// 裏カードの絵は物ごとに1枚。ファイル名は物の名前(灯台.png など)
+const secrets = SPECIAL_NOUNS.map((noun) => ({ name: noun, art: 'secret/' + ART_KEYS[noun] }));
+console.log(`裏カード: ${await copyAll(secrets, SECRET_SRC)} / ${secrets.length}枚 → public/art/secret/`);
 
 // アイコンは京王八王子の灯台の絵から作る
 mkdirSync(ICONS, { recursive: true });

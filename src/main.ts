@@ -7,22 +7,23 @@ import spotsJson from '../data/spots.json';
 import { CONFIG, RARITIES } from './config.ts';
 import { createGeofence, haversineDistanceM, type Fix } from './geofence.ts';
 import { createCatalog, type Spot } from './items.ts';
-import { drawRarity, metersToNextStep, oddsFor, pickCommon, stationItemId } from './gacha.ts';
+import { drawRarity, metersToNextStep, oddsFor, pickCommon, secretChance, stationItemId } from './gacha.ts';
 import { addFix, distanceToday, localDate } from './walk.ts';
 import {
-  applySpins, cooldownRemainingMs, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, storageAvailable, type SaveData, type SpinResult,
+  applySpins, cooldownRemainingMs, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, storageAvailable, type SaveData, type Spin, type SpinResult,
 } from './store.ts';
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
 import {
-  busDetailScreen, chooserSheet, detailScreen, mainScreen, multiResultScreen, notesScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearSpot, type Tab, type ZukanTab,
+  busDetailScreen, chooserSheet, detailScreen, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
+  type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
 
-// 駅では駅のカード、バス停では共通のカードが出る(裏アイテムはまだ入れていない)
+// 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon }) => ({ id, name, kind, lat, lon }));
 const stations = spots.filter((s) => s.kind === 'station');
 const busStops = spots.filter((s) => s.kind === 'bus_stop');
@@ -36,9 +37,11 @@ const geofence = createGeofence(spots, {
 const storageOk = storageAvailable(globalThis.localStorage);
 // 開発中だけ: ?all で「全部集めた」画面を見る。端末の記録は読まず、書きもしない
 const allCards = import.meta.env.DEV && new URLSearchParams(location.search).has('all');
+// 開発中だけ: ?secret でバス停では必ず裏カードが出る(結果の画面を確かめる用)
+const forceSecret = import.meta.env.DEV && new URLSearchParams(location.search).has('secret');
 
 const state = {
-  save: allCards ? allCardsSave(stations, catalog.common, Date.now())
+  save: allCards ? allCardsSave(stations, catalog.common, busStops, catalog, Date.now())
     : storageOk ? load(localStorage) : load({ getItem: () => null, setItem() {}, removeItem() {} }),
   tab: 'main' as Tab,
   geo: 'starting' as GeoStatus,
@@ -50,7 +53,7 @@ const state = {
   /** バス停の「回す」を押したときの、1か所だけかまとめてかを選ぶシート */
   chooser: null as { spotId: string; count: number } | null,
   zukanTab: 'station' as ZukanTab,
-  /** 図鑑で開いているもの。駅なら spotId、バス停カードなら itemId(common:...) */
+  /** 図鑑で開いているもの。駅なら spotId、バス停カード・裏カードなら itemId(common:... / secret:...) */
   detailId: null as string | null,
   showNotes: false,
   pendingImport: null as { data: SaveData; fileName: string } | null,
@@ -153,11 +156,24 @@ function nearestSpot() {
   return best;
 }
 
+/** 裏カードには番号がないので、番号の欄は「???」 */
+function secretFace(itemId: string): SecretFace {
+  const c = catalog.describe(itemId)!;
+  return { itemId, name: c.name, number: '???', art: c.art };
+}
+
+/** 持っている裏カード(手に入れた順) */
+const ownedSecrets = (): SecretFace[] => Object.entries(state.save.collection)
+  .filter(([id]) => id.startsWith('secret:') && catalog.describe(id))
+  .sort(([, a], [, b]) => a.firstAcquiredAt - b.firstAcquiredAt)
+  .map(([id]) => secretFace(id));
+
 const ownedSpotIds = () => new Set(stations.filter((s) => RARITIES.some((r) => state.save.collection[stationItemId(s.id, r)])).map((s) => s.id));
 
 function screenHtml(now: number): string {
   if (state.results) {
-    const faceOf = (r: SpinResult & { spotId: string }) => r.itemId.startsWith('station:') ? cards[r.spotId] : catalog.common.find((c) => c.itemId === r.itemId)!;
+    const faceOf = (r: SpinResult & { spotId: string }) => r.itemId.startsWith('station:') ? cards[r.spotId]
+      : r.rarity === 'SECRET' ? secretFace(r.itemId) : catalog.common.find((c) => c.itemId === r.itemId)!;
     if (state.results.length > 1) {
       return multiResultScreen(state.results.map((r) => ({ face: faceOf(r), rarity: r.rarity, isNew: r.isNew, shardsGained: r.shardsGained })), state.save.shards);
     }
@@ -175,11 +191,15 @@ function screenHtml(now: number): string {
     case 'zukan': {
       const id = state.detailId;
       if (id?.startsWith('common:')) return busDetailScreen(catalog.common.find((c) => c.itemId === id)!, state.save.collection);
+      if (id?.startsWith('secret:')) return secretDetailScreen(secretFace(id), state.save.collection[id]?.count ?? 0);
       if (id) return detailScreen(spotById.get(id)!, cards[id], state.save.collection);
-      return zukanScreen(state.zukanTab, stations, cards, catalog.common, state.save.collection);
+      const secrets = ownedSecrets();
+      // 記録を読み込み直して裏カードが無くなったら、「???」の切り替えは消えるので駅に戻す
+      if (state.zukanTab === 'secret' && secrets.length === 0) state.zukanTab = 'station';
+      return zukanScreen(state.zukanTab, stations, cards, catalog.common, secrets, state.save.collection);
     }
     case 'settings': {
-      if (state.showNotes) return notesScreen();
+      if (state.showNotes) return notesScreen(ownedSecrets().length > 0);
       const cardCount = Object.keys(state.save.collection).filter((id) => id.startsWith('station:') || id.startsWith('common:')).length;
       return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode);
     }
@@ -189,11 +209,14 @@ function screenHtml(now: number): string {
 }
 
 let lastHtml = '';
+let lastTabs = '';
 let lastSheet = '';
 function render(): void {
   const now = Date.now();
   // 結果画面だけネイビーの背景で締める
   document.body.classList.toggle('dark', !!state.results);
+  // 裏カードが出た結果は、ネイビーの代わりに濃い紫
+  document.body.classList.toggle('secret', !!state.results?.some((r) => r.rarity === 'SECRET'));
   const showMap = state.tab === 'map' && !state.results;
   // 同じ中身なら書き換えない(1秒ごとの測位で画面を作り直すと、押している途中のボタンが消えるため)
   const html = showMap ? '' : screenHtml(now);
@@ -214,8 +237,13 @@ function render(): void {
       ? '位置シミュレーター: 地図をタップした場所にいることにします'
       : `大きな丸は駅。オレンジは、カードを持っている駅。黄色の小さな点はバス停。駅やバス停の${CONFIG.enterRadiusM}m以内に入ると、その日のうちは、どこでも回せる。`;
   }
+  // 前に描いた文字列と比べる。innerHTML と比べると、ブラウザが書き方を変えて返す(<use/> → <use></use>)ので毎回「違う」になり、
+  // 測位のたびに作り直して、押している途中のタブが消えていた
   const tabs = tabbar(state.results ? 'main' : state.tab);
-  if (tabbarEl.innerHTML !== tabs) tabbarEl.innerHTML = tabs;
+  if (tabs !== lastTabs) {
+    tabbarEl.innerHTML = tabs;
+    lastTabs = tabs;
+  }
   toastEl.innerHTML = state.toast ? `<div class="toast" role="status">${state.toast}</div>` : '';
   const sheet = state.chooser ? chooserSheet(spotById.get(state.chooser.spotId)!.name, state.chooser.count) : '';
   // 中身が同じなら描き直さない(測位のたびに作り直すと、押している途中のボタンが消える)
@@ -255,10 +283,14 @@ async function reloadLatest(): Promise<void> {
   location.reload();
 }
 
-/** 1か所ぶんの抽選。範囲内なら今の距離、範囲の外ならその範囲を出たときの距離で確率を決める */
-function draw(spotId: string, inside: Set<string>, now: number) {
-  const distanceM = spinDistanceM(state.save, spotId, inside.has(spotId), distanceToday(state.save.walk, now), now);
+/**
+ * 1か所ぶんの抽選。範囲内なら今の距離、範囲の外ならその範囲を出たときの距離で確率を決める。
+ * バス停では先に裏カードを引く(確率はその時点のかけらで決まり、移動距離は関係しない)。出なければ共通のカード
+ */
+function draw(data: SaveData, spotId: string, inside: Set<string>, now: number): Spin {
   const isStation = spotById.get(spotId)!.kind === 'station';
+  if (!isStation && (forceSecret || Math.random() < secretChance(data.shards))) return { spotId, rarity: 'SECRET', itemId: catalog.secretAt(spotId) };
+  const distanceM = spinDistanceM(data, spotId, inside.has(spotId), distanceToday(data.walk, now), now);
   const rarity = drawRarity(oddsFor(isStation ? CONFIG.stationOddsBp : CONFIG.busOddsBp, distanceM), Math.random);
   const itemId = isStation ? stationItemId(spotId, rarity) : pickCommon(catalog.common, rarity, Math.random).itemId;
   return { spotId, rarity, itemId };
@@ -288,10 +320,10 @@ function spin(spotId: string): void {
 function spinSpots(spotIds: string[]): void {
   const now = Date.now();
   const inside = new Set(geofence.insideStopIds());
-  const spins = spotIds.filter((id) => canSpin(id, now, inside)).map((id) => draw(id, inside, now));
+  const ready = spotIds.filter((id) => canSpin(id, now, inside));
   state.chooser = null;
-  if (spins.length === 0) { render(); return; }
-  const { data, results } = applySpins(state.save, spins, now);
+  if (ready.length === 0) { render(); return; }
+  const { data, results } = applySpins(state.save, ready, now, (d, id) => draw(d, id, inside, now));
   state.save = data;
   persist();
   state.results = results;
@@ -333,7 +365,7 @@ app.addEventListener('click', (e) => {
       const rs = state.results ?? [];
       const r = rs.length === 1 ? rs[0] : null;
       const isStation = !!r?.itemId.startsWith('station:');
-      state.zukanTab = isStation ? 'station' : 'bus';
+      state.zukanTab = isStation ? 'station' : r?.rarity === 'SECRET' ? 'secret' : 'bus';
       state.detailId = r ? (isStation ? r.spotId : r.itemId) : null;
       zukanScrollY = null;
       state.results = null;

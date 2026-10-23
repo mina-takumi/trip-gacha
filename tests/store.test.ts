@@ -159,7 +159,7 @@ test('バス停をまとめて回すと、1か所ずつ回したのと同じ記�
     { spotId: 'b2', rarity: 'RARE' as const, itemId: 'common:RARE:0' },
     { spotId: 'b3', rarity: 'NORMAL' as const, itemId: 'common:NORMAL:3' },
   ];
-  const { data, results } = applySpins(emptySave(), spins, T);
+  const { data, results } = applySpins(emptySave(), spins.map((s) => s.spotId), T, (_, id) => spins.find((s) => s.spotId === id)!);
   assert.deepEqual(results.map((r) => [r.spotId, r.isNew, r.shardsGained]), [['b1', true, 0], ['b2', true, 0], ['b3', false, 1]]);
   assert.equal(data.collection['common:NORMAL:3'].count, 2);
   assert.equal(data.shards, 1);
@@ -168,4 +168,35 @@ test('バス停をまとめて回すと、1か所ずつ回したのと同じ記�
   let one = emptySave();
   for (const s of spins) one = applySpin(one, s.spotId, s.rarity, T, s.itemId).data;
   assert.deepEqual(data, one);
+});
+
+test('裏カード: 初めてならかけらは0に、かぶりなら半分(切り捨て)に。かけらは増えない', () => {
+  let d = { ...emptySave(), shards: 135 };
+  let r;
+  ({ data: d, result: r } = applySpin(d, 'b1', 'SECRET', T, 'secret:seal'));
+  assert.deepEqual(r, { itemId: 'secret:seal', rarity: 'SECRET', isNew: true, shardsGained: -135 });
+  assert.equal(d.shards, 0);
+  d = { ...d, shards: 135 };
+  ({ data: d, result: r } = applySpin(d, 'b1', 'SECRET', T + 30 * MIN, 'secret:seal'));
+  assert.equal(r.isNew, false);
+  assert.equal(d.shards, 67);
+  assert.equal(r.shardsGained, -68);
+  assert.equal(d.collection['secret:seal'].count, 2);
+  // かけらが無くても減らない
+  ({ data: d } = applySpin({ ...d, shards: 0 }, 'b1', 'SECRET', T + 60 * MIN, 'secret:seal'));
+  assert.equal(d.shards, 0);
+});
+
+test('まとめて回すとき、前の場所で増減したかけらを見てから次を引く', () => {
+  const seen: number[] = [];
+  const draws: Record<string, { rarity: 'NORMAL' | 'SECRET'; itemId: string }> = {
+    b1: { rarity: 'NORMAL', itemId: 'common:NORMAL:3' },
+    b2: { rarity: 'SECRET', itemId: 'secret:lighthouse' },
+    b3: { rarity: 'NORMAL', itemId: 'common:NORMAL:3' },
+  };
+  const start = { ...emptySave(), shards: 40, collection: { 'common:NORMAL:3': { count: 1, firstAcquiredAt: T } } };
+  const { data } = applySpins(start, ['b1', 'b2', 'b3'], T, (d, id) => { seen.push(d.shards); return { spotId: id, ...draws[id] }; });
+  // b1 のかぶりで41、b2 の裏カード(初めて)で0、b3 のかぶりで1
+  assert.deepEqual(seen, [40, 41, 0]);
+  assert.equal(data.shards, 1);
 });

@@ -1,7 +1,7 @@
 import { CONFIG, RARITIES, RARITY_LABEL } from '../config.ts';
 import type { Odds } from '../gacha.ts';
 import { stationItemId } from '../gacha.ts';
-import type { CommonCard, Rarity, Spot, StationCard } from '../items.ts';
+import type { CardRarity, CommonCard, Rarity, Spot, StationCard } from '../items.ts';
 import type { GpsMode } from '../location.ts';
 import type { SaveData } from '../store.ts';
 import { cardHtml, placeholderHtml, type CardFace } from './card.ts';
@@ -106,14 +106,20 @@ export function mainScreen(v: MainView): string {
     ${list}${empty}`;
 }
 
-export function resultScreen(card: CardFace, rarity: Rarity, tint: boolean, isNew: boolean, shardsGained: number, totalShards: number): string {
-  const label = RARITY_LABEL[rarity].replace('スーパー', 'スーパー<br>');
+/** 結果のスタンプの文字。裏カードは「???」(裏カードとは名乗らない) */
+const stampLabel = (rarity: CardRarity) => rarity === 'SECRET' ? '???' : RARITY_LABEL[rarity].replace('スーパー', 'スーパー<br>');
+
+export function resultScreen(card: CardFace, rarity: CardRarity, tint: boolean, isNew: boolean, shardsGained: number, totalShards: number): string {
+  // 裏カードのかぶりは、かけらが減ったことだけ書く(初めてのときは書かない)
+  const sub = rarity === 'SECRET'
+    ? isNew ? '<span class="mark o">見たことのない1枚。</span>図鑑に入りました。'
+      : `もう持ってた。<span class="mark o">かけら ${totalShards - shardsGained} → ${totalShards}</span>。`
+    : isNew ? '<span class="mark o">はじめての1枚。</span>図鑑に入りました。'
+      : `もう持ってた。<span class="mark o">かけら +${shardsGained}</span>(合計 ${totalShards})。`;
   return `<div class="res-wrap"><div class="res">
-    <div class="stamp ${rarity}"><span>${label}</span></div>
+    <div class="stamp ${rarity}"><span>${stampLabel(rarity)}</span></div>
     <h2>出た。</h2>
-    <div class="sub">${isNew
-      ? '<span class="mark o">はじめての1枚。</span>図鑑に入りました。'
-      : `もう持ってた。<span class="mark o">かけら +${shardsGained}</span>(合計 ${totalShards})。`}</div>
+    <div class="sub">${sub}</div>
     <div class="rays">${cardHtml(card, rarity, 'big', tint)}</div>
     <div class="acts">
       <button class="btn mustard" data-act="result-zukan">${icon('book')}図鑑で見る</button>
@@ -122,24 +128,30 @@ export function resultScreen(card: CardFace, rarity: Rarity, tint: boolean, isNe
   </div></div>`;
 }
 
-const RANK: Record<Rarity, number> = { NORMAL: 0, RARE: 1, SUPER_RARE: 2 };
+const RANK: Record<CardRarity, number> = { NORMAL: 0, RARE: 1, SUPER_RARE: 2, SECRET: 3 };
 
-export interface MultiItem { face: CardFace; rarity: Rarity; isNew: boolean; shardsGained: number }
+export interface MultiItem { face: CardFace; rarity: CardRarity; isNew: boolean; shardsGained: number }
 
 /** まとめて回した結果。いちばん珍しい1枚を大きく、全部を小さく4列で並べる(バス停カードなので絵の色味は変えない) */
 export function multiResultScreen(items: MultiItem[], totalShards: number): string {
-  const best = items.reduce((a, b) => RANK[b.rarity] > RANK[a.rarity] ? b : a);
+  // 同じ珍しさなら、はじめての1枚を大きく見せる
+  const best = items.reduce((a, b) => RANK[b.rarity] > RANK[a.rarity] || (RANK[b.rarity] === RANK[a.rarity] && b.isNew && !a.isNew) ? b : a);
   const newCount = items.filter((i) => i.isNew).length;
-  const shards = items.reduce((n, i) => n + i.shardsGained, 0);
-  const label = RARITY_LABEL[best.rarity].replace('スーパー', 'スーパー<br>');
+  const secrets = items.filter((i) => i.rarity === 'SECRET');
+  // 裏カードが出た回は、かけらが途中で0や半分になるので「+◯」ではなく、回す前と後の数を書く(かぶったときだけ)
+  const before = totalShards - items.reduce((n, i) => n + i.shardsGained, 0);
+  const gained = items.reduce((n, i) => n + Math.max(0, i.shardsGained), 0);
+  const shardText = secrets.some((i) => !i.isNew) ? `かけら ${before} → ${totalShards}。`
+    : secrets.length > 0 ? '' : gained > 0 ? `かけら +${gained}(合計 ${totalShards})。` : '';
+  const tag = (i: MultiItem) => i.rarity === 'SECRET' ? '<span class="new">???</span>' : i.isNew ? '<span class="new">NEW</span>' : `かけら+${i.shardsGained}`;
   const tiles = items.map((i) => `<div class="m-tile ${i.isNew ? '' : 'dup'}">
       ${cardHtml(i.face, i.rarity, 'sm', false)}
-      <div class="m-tag">${i.isNew ? '<span class="new">NEW</span>' : `かけら+${i.shardsGained}`}</div>
+      <div class="m-tag">${tag(i)}</div>
     </div>`).join('');
   return `<div class="res-wrap"><div class="res">
-    <div class="stamp ${best.rarity}"><span>${label}</span></div>
+    <div class="stamp ${best.rarity}"><span>${stampLabel(best.rarity)}</span></div>
     <h2>${items.length}回、出た。</h2>
-    <div class="sub">${newCount > 0 ? `<span class="mark o">はじめて ${newCount}枚。</span>` : 'ぜんぶ、もう持ってた。'}${shards > 0 ? `かけら +${shards}(合計 ${totalShards})。` : ''}</div>
+    <div class="sub">${newCount > 0 ? `<span class="mark o">はじめて ${newCount}枚。</span>` : 'ぜんぶ、もう持ってた。'}${shardText}</div>
     <div class="rays">${cardHtml(best.face, best.rarity, 'big', false)}</div>
     <div class="m-grid">${tiles}</div>
     <div class="acts">
@@ -164,23 +176,47 @@ export function chooserSheet(spotName: string, count: number): string {
 const ownedRarities = (collection: SaveData['collection'], spotId: string) => RARITIES.filter((r) => collection[stationItemId(spotId, r)]);
 const ox = (have: Rarity[]) => RARITIES.map((r) => have.includes(r) ? '<span class="o">○</span>' : '<span class="x">×</span>').join('');
 
-export type ZukanTab = 'station' | 'bus';
+export type ZukanTab = 'station' | 'bus' | 'secret';
+
+/** 持っている裏カード。図鑑には手に入れた順に並べる */
+export interface SecretFace extends CardFace { itemId: string }
 
 const zukanLead = (owned: number, total: number, where: string) =>
   owned === total ? '<span class="mark">ぜんぶ、集めた。</span>' : owned === 0 ? `${where}の近くで、回してみる。` : '<span class="mark">まだ、たくさんある。</span>';
 
+/** 裏カードの切り替え「???」は、1枚でも持っているときだけ出す。全部で何種あるかは見せない */
 export function zukanScreen(
-  tab: ZukanTab, stations: Spot[], cards: Record<string, StationCard>, common: CommonCard[], collection: SaveData['collection'],
+  tab: ZukanTab, stations: Spot[], cards: Record<string, StationCard>, common: CommonCard[], secrets: SecretFace[], collection: SaveData['collection'],
 ): string {
   const stTotal = stations.length * RARITIES.length;
   const stOwned = stations.reduce((n, s) => n + ownedRarities(collection, s.id).length, 0);
   const busOwned = common.filter((c) => collection[c.itemId]).length;
-  const [owned, total] = tab === 'station' ? [stOwned, stTotal] : [busOwned, common.length];
-  const tabBtn = (t: ZukanTab, label: string, n: number, of: number) =>
-    `<button class="z-tab" data-act="zukan-tab" data-z="${t}" aria-pressed="${t === tab}">${label}<small>${n} / ${of}</small></button>`;
-  return `<div class="z-top"><h2>図鑑</h2><div class="count">${owned}<small> / ${total}枚</small></div></div>
-    <div class="z-tabs">${tabBtn('station', '駅', stOwned, stTotal)}${tabBtn('bus', 'バス停', busOwned, common.length)}</div>
-    ${tab === 'station' ? stationTiles(stations, cards, collection, stOwned, stTotal) : busTiles(common, collection, busOwned)}`;
+  const tabBtn = (t: ZukanTab, label: string, n: number, of: number | null) =>
+    `<button class="z-tab" data-act="zukan-tab" data-z="${t}" aria-pressed="${t === tab}">${label}<small>${of == null ? `${n}枚` : `${n} / ${of}`}</small></button>`;
+  const count = tab === 'secret' ? `${secrets.length}<small>枚</small>`
+    : tab === 'station' ? `${stOwned}<small> / ${stTotal}枚</small>` : `${busOwned}<small> / ${common.length}枚</small>`;
+  const body = tab === 'secret' ? secretTiles(secrets)
+    : tab === 'station' ? stationTiles(stations, cards, collection, stOwned, stTotal) : busTiles(common, collection, busOwned);
+  return `<div class="z-top"><h2>図鑑</h2><div class="count">${count}</div></div>
+    <div class="z-tabs ${secrets.length ? 'three' : ''}">${tabBtn('station', '駅', stOwned, stTotal)}${tabBtn('bus', 'バス停', busOwned, common.length)}${secrets.length ? tabBtn('secret', '???', secrets.length, null) : ''}</div>
+    ${body}`;
+}
+
+function secretTiles(secrets: SecretFace[]): string {
+  const tiles = secrets.map((c) => `<button class="tile" data-act="detail" data-item="${esc(c.itemId)}" aria-label="${esc(c.name)}">
+      ${cardHtml(c, 'SECRET', 'sm', false)}<div class="sn">${esc(c.name)}</div>
+    </button>`).join('');
+  return `<div class="z-lead">${secrets.length}枚、見つけた。</div>
+    <div class="grid grid4">${tiles}</div>`;
+}
+
+export function secretDetailScreen(card: SecretFace, count: number): string {
+  return `<div class="detail">
+    <h2>${esc(card.name)}</h2>
+    ${cardHtml(card, 'SECRET', 'big', false)}
+    <p class="say" style="text-align:center">${count}枚、持っている。</p>
+    <div class="acts"><button class="btn paper" data-act="close-detail">図鑑に戻る</button></div>
+  </div>`;
 }
 
 function stationTiles(stations: Spot[], cards: Record<string, StationCard>, collection: SaveData['collection'], owned: number, total: number): string {
@@ -293,7 +329,7 @@ export function settingsScreen(
 
 const km1 = (m: number) => `${m / 1000}km`;
 
-/** 使ううえで誤解しやすいこと。かけらの使い道は書かない(企画で説明しないと決めている) */
+/** 使ううえで誤解しやすいこと。かけらの使い道は書かない(企画で説明しないと決めている。裏カードを持ってからは SECRET_NOTE を足す) */
 const NOTES: [string, string[]][] = [
   ['回す権利', [
     `範囲(${CONFIG.enterRadiusM}m)に入ると、その場所の回す権利がもらえる。権利はその日のうちだけ。日付が変わると消える。`,
@@ -323,11 +359,21 @@ const NOTES: [string, string[]][] = [
   ]],
 ];
 
-export function notesScreen(): string {
+/** 裏カードを1枚でも手に入れた人にだけ見せる説明(2026-10-23 ユーザー要望)。持つまでは存在を知らせない */
+const SECRET_NOTE: [string, string[]] = ['???のカード', [
+  'バス停で回すと、ごくまれに「???」のカードが出る。どの「???」が出るかは、バス停ごとに決まっている。駅では出ない。',
+  'かけらが多いほど、出やすくなる。移動距離では変わらない。',
+  '初めて出ると、かけらは0に戻る。もう持っている「???」のカードがまた出ると、かけらは半分になる。',
+]];
+
+export function notesScreen(hasSecret: boolean): string {
+  // 「カード」の次に入れる
+  const at = NOTES.findIndex(([title]) => title === 'カード') + 1;
+  const notes = hasSecret ? [...NOTES.slice(0, at), SECRET_NOTE, ...NOTES.slice(at)] : NOTES;
   // 長い画面なので、戻るボタンは左上に固定する(スクロールしても押せる)
   return `<div class="settings notes">
     <button class="back-fixed" data-act="close-notes">← 設定に戻る</button>
     <h2>注意事項</h2>
-    ${NOTES.map(([title, items]) => `<div class="panel"><h4>${title}</h4><ul>${items.map((t) => `<li>${t}</li>`).join('')}</ul></div>`).join('')}
+    ${notes.map(([title, items]) => `<div class="panel"><h4>${title}</h4><ul>${items.map((t) => `<li>${t}</li>`).join('')}</ul></div>`).join('')}
   </div>`;
 }

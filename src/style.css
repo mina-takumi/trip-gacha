@@ -21,6 +21,9 @@ html, body { height: 100%; }
 body { background: var(--cream); color: var(--navy); font: 700 15px/1.6 var(--maru); -webkit-text-size-adjust: 100%; }
 body::after { content: ""; position: fixed; inset: 0; background: var(--grain); pointer-events: none; z-index: 2000; }
 body.dark { background: var(--navy); color: var(--cream); }
+/* 裏カードが出た結果は濃い紫。後ろの光の筋は銀 */
+body.dark.secret { background: #2A1846; }
+body.secret .rays::before { background: repeating-conic-gradient(rgba(214, 200, 240, .3) 0 7deg, transparent 7deg 18deg); }
 button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outline-offset: 3px; }
 
@@ -157,6 +160,12 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .r-RARE .art img { filter: brightness(1.12); }
 .r-RARE .art:not(:has(img.missing))::after { content: ""; position: absolute; inset: 0; background: #9DB0C8; mix-blend-mode: color; }
 .r-SUPER_RARE .art img { filter: saturate(1.25) brightness(1.08); }
+/* 裏カード: 銀と紫の枠、中も紫寄りに(絵は紫と銀のステンドグラス風) */
+.r-SECRET { --frame: linear-gradient(135deg, #4B2C7A, #ECE4F7 42%, #6E4BA0 70%, #C9B8E8); }
+.card.r-SECRET .in { background: #1C1030; }
+.card.r-SECRET .art { background: #140A24; }
+.card.r-SECRET .num { color: #D6C8F0; }
+.card.r-SECRET .nm { color: #EDE6FA; }
 /* バス停カードは修飾の色(紅・翠・蒼など)を残すため、絵の色味を変えない */
 .card.plain .art img { filter: none; }
 .card.plain.r-RARE .art::after { content: none; }
@@ -189,6 +198,7 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
   border: 2px solid var(--cream); box-shadow: 3px 3px 0 var(--cream); transform: rotate(10deg); display: grid; place-items: center;
   text-align: center; font: 400 17px/1.2 var(--hand); z-index: 2; }
 .stamp.NORMAL { background: #D9935C; } .stamp.RARE { background: #DCE2E6; } .stamp.SUPER_RARE { background: var(--mustard); }
+.stamp.SECRET { background: #C9B8E8; font-size: 26px; }
 .res h2 { font: 400 64px/1 var(--hand); margin-top: 18px; padding-right: 110px; color: var(--cream); text-shadow: 4px 4px 0 rgba(232, 85, 47, .7); }
 .res .sub { font-weight: 900; font-size: 15px; margin: 12px 0 18px; padding-right: 100px; }
 .rays { position: relative; padding: 10px 0 6px; }
@@ -210,6 +220,7 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .count small { font-size: 22px; text-shadow: none; }
 .z-lead { font-weight: 900; font-size: 13.5px; margin: 12px 0 16px; }
 .z-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.z-tabs.three { grid-template-columns: 1fr 1fr .8fr; }
 .z-tab { height: 44px; border: 2px solid var(--line); border-radius: 22px; background: var(--paper); color: var(--navy); box-shadow: 2px 2px 0 var(--line);
   font: 900 15px var(--maru); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
 .z-tab small { font-size: 11.5px; color: var(--ink-soft); }

@@ -2,8 +2,11 @@
 // 同じ itemId からは必ず同じ名前が出る(乱数・時刻を使わない)。
 // 名前は確定版 v4(v2: 2026-10-07 「角笛」を「鎌」に。v3: 2026-10-08 「双子の」を「鎖の」に。v4: 2026-10-09 「欠けた」「砕けた」「白い」を「稲妻の」「水晶の」「翠の」に。どれも絵に描けなかったため)。言葉のリストを変えると所持カードの名前が変わる。変えていないことは
 // node scripts/export-card-names.mjs --check で確かめる。
+// 裏カードは確定版 v5(2026-10-23): バス停の名前を外し、物の名前だけに。物ごとに1種(24種)で、どのバス停で出ても同じ物ならかぶり。
 
 export type Rarity = 'NORMAL' | 'RARE' | 'SUPER_RARE';
+/** 裏カード(SECRET)も含めた珍しさ */
+export type CardRarity = Rarity | 'SECRET';
 
 export const MODIFIERS = [
   '銀の', '金の', '黒い', '翠の', '紅い', '蒼い',
@@ -61,16 +64,18 @@ export interface StationCard {
 
 export interface CardInfo {
   itemId: string;
-  rarity: Rarity | 'SECRET';
+  rarity: CardRarity;
   name: string;
   noun: string;
   number: string | null;
   art: string;
 }
 
-// 絵のパス(拡張子なし)。バス停は物と修飾の組ごと、駅と裏は物ごとに1枚
+// 絵のパス(拡張子なし)。バス停は物と修飾の組ごと、駅と裏は物ごとに1枚。
+// 裏は駅と同じ物でも別の絵(紫と銀のステンドグラス風。2026-10-23)
 const commonArt = (noun: string, modifier: string) => 'bus/' + ART_KEYS[noun] + '-' + ART_KEYS[modifier];
 const specialArt = (noun: string) => 'special/' + ART_KEYS[noun];
+const secretArt = (noun: string) => 'secret/' + ART_KEYS[noun];
 
 // 意味が重なるため使わない組み合わせ
 const EXCLUDED = new Set(['翼ある羽', '燃える炎', '鎖の輪']);
@@ -154,14 +159,20 @@ function buildStations(spots: Spot[]): Record<string, StationCard> {
   return out;
 }
 
-function secretName(spot: Spot): { name: string; noun: string } {
+// バス停ごとに、出る裏カードの物が1つ決まっている。v4 まで名前が「バス停名の物」だったころの決め方のまま
+// (名前と物で同じ字が重ならないように選ぶ)。変えると、どのバス停でどの裏カードが出るかが変わる
+function secretNoun(spot: Spot): string {
   const start = hash('secret:' + spot.id);
   for (let k = 0; k < SPECIAL_NOUNS.length; k++) {
     const noun = SPECIAL_NOUNS[(start + k) % SPECIAL_NOUNS.length];
-    if (!sharesChar(spot.name, noun)) return { name: spot.name + 'の' + noun, noun };
+    if (!sharesChar(spot.name, noun)) return noun;
   }
   throw new Error('裏アイテムに割り当てられる物がない: ' + spot.name);
 }
+
+// 裏カードの itemId は物ごと(secret:lighthouse など)
+const secretIdOf = (noun: string) => 'secret:' + ART_KEYS[noun];
+const secretNounOf = new Map(SPECIAL_NOUNS.map((n) => [secretIdOf(n), n]));
 
 export function createCatalog(spots: Spot[]) {
   const common = buildCommon();
@@ -177,15 +188,20 @@ export function createCatalog(spots: Spot[]) {
       return st ? { itemId, rarity: p[2] as Rarity, name: st.name, noun: st.noun, number: st.number, art: st.art } : null;
     }
     if (p[0] === 'secret') {
-      const spot = spotById.get(p[1]);
-      if (!spot) return null;
-      const sec = secretName(spot);
-      return { itemId, rarity: 'SECRET', name: sec.name, noun: sec.noun, number: null, art: specialArt(sec.noun) };
+      const noun = secretNounOf.get(itemId);
+      return noun ? { itemId, rarity: 'SECRET', name: noun, noun, number: null, art: secretArt(noun) } : null;
     }
     return null;
   }
 
-  return { common, stations, describe };
+  /** そのバス停で出る裏カードの itemId */
+  function secretAt(spotId: string): string {
+    const spot = spotById.get(spotId);
+    if (!spot) throw new Error('スポットがない: ' + spotId);
+    return secretIdOf(secretNoun(spot));
+  }
+
+  return { common, stations, describe, secretAt };
 }
 
 export type Catalog = ReturnType<typeof createCatalog>;

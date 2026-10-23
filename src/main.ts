@@ -10,17 +10,17 @@ import { createCatalog, type Spot } from './items.ts';
 import { drawRarity, metersToNextStep, oddsFor, pickCommon, stationItemId } from './gacha.ts';
 import { addFix, distanceToday, localDate } from './walk.ts';
 import {
-  applySpin, cooldownRemainingMs, exportJson, hasTicket, load, markVisited, parseSave, save, storageAvailable, type SaveData, type SpinResult,
+  applySpin, cooldownRemainingMs, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, storageAvailable, type SaveData, type SpinResult,
 } from './store.ts';
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
 import {
-  busDetailScreen, detailScreen, mainScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearSpot, type Tab, type ZukanTab,
+  busDetailScreen, detailScreen, mainScreen, notesScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearSpot, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.1.9';
+const VERSION = '0.2.0';
 
 // 駅では駅のカード、バス停では共通のカードが出る(裏アイテムはまだ入れていない)
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon }) => ({ id, name, kind, lat, lon }));
@@ -49,6 +49,7 @@ const state = {
   zukanTab: 'station' as ZukanTab,
   /** 図鑑で開いているもの。駅なら spotId、バス停カードなら itemId(common:...) */
   detailId: null as string | null,
+  showNotes: false,
   pendingImport: null as { data: SaveData; fileName: string } | null,
   toast: null as string | null,
 };
@@ -95,11 +96,13 @@ app.innerHTML = `${ICON_DEFS}<div class="bar4" aria-hidden="true"><i></i><i></i>
   <main class="screen" id="screen"></main>
   <section class="map-screen" id="map-screen" hidden>
     <div id="map"></div>
-    <div class="map-tools"><div class="map-msg panel" id="map-msg"></div><button class="btn" data-act="map-center">現在地へ</button>
-      <div class="map-ranges">
-        <button class="range-btn station" data-act="map-range" data-kind="station" aria-pressed="${mapRanges.station}">駅の範囲</button>
-        <button class="range-btn bus" data-act="map-range" data-kind="bus" aria-pressed="${mapRanges.bus}">バス停の範囲</button>
-      </div></div>
+    <div class="map-tools">
+      <button class="range-btn help" data-act="map-help" aria-expanded="false" aria-controls="map-msg" aria-label="地図の見方">?</button>
+      <button class="range-btn station" data-act="map-range" data-kind="station" aria-pressed="${mapRanges.station}">駅の範囲</button>
+      <button class="range-btn bus" data-act="map-range" data-kind="bus" aria-pressed="${mapRanges.bus}">バス停の範囲</button>
+      <button class="range-btn center" data-act="map-center">現在地へ</button>
+      <div class="map-msg panel" id="map-msg" hidden></div>
+    </div>
   </section>
   <nav class="tabbar" id="tabbar"></nav>
   <div id="toast"></div>`;
@@ -167,6 +170,7 @@ function screenHtml(now: number): string {
       return zukanScreen(state.zukanTab, stations, cards, catalog.common, state.save.collection);
     }
     case 'settings': {
+      if (state.showNotes) return notesScreen();
       const cardCount = Object.keys(state.save.collection).filter((id) => id.startsWith('station:') || id.startsWith('common:')).length;
       return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode);
     }
@@ -237,8 +241,9 @@ async function reloadLatest(): Promise<void> {
 
 function spin(spotId: string): void {
   const now = Date.now();
-  if (!canSpin(spotId, now, new Set(geofence.insideStopIds()))) return;
-  const distanceM = distanceToday(state.save.walk, now);
+  const inside = new Set(geofence.insideStopIds());
+  if (!canSpin(spotId, now, inside)) return;
+  const distanceM = spinDistanceM(state.save, spotId, inside.has(spotId), distanceToday(state.save.walk, now), now);
   const isStation = spotById.get(spotId)!.kind === 'station';
   const rarity = drawRarity(oddsFor(isStation ? CONFIG.stationOddsBp : CONFIG.busOddsBp, distanceM), Math.random);
   const itemId = isStation ? stationItemId(spotId, rarity) : pickCommon(catalog.common, rarity, Math.random).itemId;
@@ -269,8 +274,11 @@ app.addEventListener('click', (e) => {
       state.tab = el.dataset.tab as Tab;
       state.result = null;
       state.detailId = null;
+      state.showNotes = false;
       window.scrollTo(0, 0);
       break;
+    case 'notes': state.showNotes = true; window.scrollTo(0, 0); break;
+    case 'close-notes': state.showNotes = false; window.scrollTo(0, 0); break;
     case 'spin': spin(el.dataset.spot!); return;
     case 'result-zukan': {
       const r = state.result;
@@ -297,6 +305,13 @@ app.addEventListener('click', (e) => {
       break;
     case 'import-cancel': state.pendingImport = null; break;
     case 'map-center': refreshAndCenter(); return;
+    case 'map-help': {
+      // 地図の見方は、押したときだけ出す(地図を広く見せるため)
+      const msg = document.getElementById('map-msg')!;
+      msg.hidden = !msg.hidden;
+      el.setAttribute('aria-expanded', String(!msg.hidden));
+      return;
+    }
     case 'map-range': toggleRange(el.dataset.kind as keyof MapRanges); return;
     case 'reload': (el as HTMLButtonElement).disabled = true; reloadLatest(); return;
     default: return;
@@ -339,9 +354,10 @@ function onFix(fix: Fix): void {
   state.accuracyM = fix.accuracyM;
   const accepted = geofence.update(fix).accepted;
   state.geo = accepted ? 'ok' : 'waiting-accuracy';
-  // 範囲内にいた記録が、回す権利になる(この後は範囲の外でも回せる)
-  const visited = accepted ? markVisited(state.save, geofence.insideStopIds(), fix.t) : state.save;
-  state.save = { ...visited, walk: addFix(state.save.walk, fix) };
+  const walk = addFix(state.save.walk, fix);
+  // 範囲内にいた記録が、回す権利になる(この後は範囲の外でも回せる)。そのときの移動距離で、外で回すときの確率を決める
+  const visited = accepted ? markVisited(state.save, geofence.insideStopIds(), fix.t, distanceToday(walk, fix.t)) : state.save;
+  state.save = { ...visited, walk };
   persist();
   render();
   if (centerOnNextFix) {

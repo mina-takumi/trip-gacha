@@ -14,6 +14,8 @@ export interface SaveData {
   spots: Record<string, { lastSpunAt: number; spinCount: number }>;
   /** spotId -> その駅の範囲内に最後にいた日時。回す権利の判定に使う(0.1.2 で追加。古い記録には無い) */
   visitedAt: Record<string, number>;
+  /** spotId -> 範囲内に最後にいたときの、その日の移動距離。範囲の外で回すときはこの距離で確率を決める(0.1.10 で追加。古い記録には無い) */
+  visitedDistanceM: Record<string, number>;
   shards: number;
   totalSpins: number;
   walk: WalkState;
@@ -26,7 +28,7 @@ export interface StorageLike {
 }
 
 export const emptySave = (): SaveData => ({
-  schemaVersion: SCHEMA_VERSION, collection: {}, spots: {}, visitedAt: {}, shards: 0, totalSpins: 0, walk: emptyWalk(),
+  schemaVersion: SCHEMA_VERSION, collection: {}, spots: {}, visitedAt: {}, visitedDistanceM: {}, shards: 0, totalSpins: 0, walk: emptyWalk(),
 });
 
 /** 端末に保存できるか(プライベートブラウズなどで使えないことがある) */
@@ -72,6 +74,7 @@ export function parseSave(text: string): SaveData {
   if (raw.schemaVersion !== SCHEMA_VERSION) throw new Error('記録の版が違います');
   const { collection, spots, shards, totalSpins, walk } = raw;
   const visitedAt = raw.visitedAt ?? {};
+  const visitedDistanceM = raw.visitedDistanceM ?? {};
   if (!isObj(collection) || !Object.values(collection).every((e) => isObj(e) && isNum(e.count) && e.count >= 1 && isNum(e.firstAcquiredAt))) {
     throw new Error('カードの記録が壊れています');
   }
@@ -79,6 +82,7 @@ export function parseSave(text: string): SaveData {
     throw new Error('駅の記録が壊れています');
   }
   if (!isObj(visitedAt) || !Object.values(visitedAt).every(isNum)) throw new Error('駅に寄った記録が壊れています');
+  if (!isObj(visitedDistanceM) || !Object.values(visitedDistanceM).every((v) => isNum(v) && v >= 0)) throw new Error('寄ったときの移動距離の記録が壊れています');
   if (!isNum(shards) || shards < 0 || !isNum(totalSpins) || totalSpins < 0) throw new Error('かけらか回した回数が壊れています');
   if (!isObj(walk) || !isNum(walk.dailyDistanceM) || typeof walk.distanceDate !== 'string') throw new Error('移動距離の記録が壊れています');
   const point = (v: unknown) => isObj(v) && isNum(v.lat) && isNum(v.lon) && isNum(v.accM) ? { lat: v.lat, lon: v.lon, accM: v.accM } : null;
@@ -87,6 +91,7 @@ export function parseSave(text: string): SaveData {
     collection: collection as SaveData['collection'],
     spots: spots as SaveData['spots'],
     visitedAt: visitedAt as SaveData['visitedAt'],
+    visitedDistanceM: visitedDistanceM as SaveData['visitedDistanceM'],
     shards, totalSpins,
     walk: { dailyDistanceM: walk.dailyDistanceM, distanceDate: walk.distanceDate, smooth: point(walk.smooth), anchor: point(walk.anchor) },
   };
@@ -99,12 +104,28 @@ export function cooldownRemainingMs(data: SaveData, spotId: string, now: number)
   return Math.max(0, last + CONFIG.cooldownMs - now);
 }
 
-/** 範囲内にいる駅に「いた」と記録した新しい記録を返す。範囲内の駅がなければ同じ記録を返す */
-export function markVisited(data: SaveData, spotIds: string[], now: number): SaveData {
+/** 範囲内にいる場所に「いた」と、そのときの移動距離を記録した新しい記録を返す。範囲内の場所がなければ同じ記録を返す */
+export function markVisited(data: SaveData, spotIds: string[], now: number, distanceM: number): SaveData {
   if (spotIds.length === 0) return data;
   const visitedAt = { ...data.visitedAt };
-  for (const id of spotIds) visitedAt[id] = now;
-  return { ...data, visitedAt };
+  const visitedDistanceM = { ...data.visitedDistanceM };
+  for (const id of spotIds) {
+    visitedAt[id] = now;
+    visitedDistanceM[id] = distanceM;
+  }
+  return { ...data, visitedAt, visitedDistanceM };
+}
+
+/**
+ * 回すときの確率に使う移動距離。範囲内なら今の距離。範囲の外なら、今日その範囲を出たときの距離
+ * (出たあとに歩いても、その場所の確率は上がらない)。記録が無ければ(0.1.9 までに寄った場所)今の距離
+ */
+export function spinDistanceM(data: SaveData, spotId: string, inside: boolean, currentM: number, now: number): number {
+  if (inside) return currentM;
+  const visited = data.visitedAt[spotId];
+  const saved = data.visitedDistanceM[spotId];
+  if (visited == null || saved == null || localDate(visited) !== localDate(now)) return currentM;
+  return saved;
 }
 
 /**

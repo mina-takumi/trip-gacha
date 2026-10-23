@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  applySpin, cooldownRemainingMs, emptySave, exportJson, hasTicket, load, markVisited, parseSave, save, type StorageLike,
+  applySpin, cooldownRemainingMs, emptySave, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, type StorageLike,
 } from '../src/store.ts';
 
 const memoryStorage = (): StorageLike => {
@@ -56,7 +56,7 @@ test('書き出して、端末の記録を消して、読み込むと元に戻�
   ({ data } = applySpin(data, 'n2', 'SUPER_RARE', T + MIN));
   const p = { lat: 35.6, lon: 139.3, accM: 8 };
   data = { ...data, walk: { dailyDistanceM: 2800, distanceDate: '2026-10-02', smooth: p, anchor: { ...p, lat: 35.61 } } };
-  data = markVisited(data, ['n1', 'n3'], T + 2 * MIN);
+  data = markVisited(data, ['n1', 'n3'], T + 2 * MIN, 2800);
   save(storage, data);
   const file = exportJson(load(storage));
   storage.removeItem('trip-gacha:save');
@@ -84,40 +84,40 @@ test('端末の記録が壊れていても、空の記録で起動する', () =>
 const DAY = new Date(2026, 9, 6, 9, 0, 0).getTime(); // 2026-10-06 09:00(端末の時刻)
 
 test('範囲に入って出た後でも、権利があって回せる', () => {
-  const d = markVisited(emptySave(), ['n1'], DAY);
+  const d = markVisited(emptySave(), ['n1'], DAY, 0);
   assert.equal(hasTicket(d, 'n1', DAY + 30 * MIN), true);
   assert.equal(hasTicket(d, 'n2', DAY + 30 * MIN), false);
-  assert.equal(markVisited(d, [], DAY + MIN), d);
+  assert.equal(markVisited(d, [], DAY + MIN, 0), d);
 });
 
 test('回した直後に範囲内にいても、離れたら20分たっても回せない', () => {
-  let d = markVisited(emptySave(), ['n1'], DAY);
+  let d = markVisited(emptySave(), ['n1'], DAY, 0);
   ({ data: d } = applySpin(d, 'n1', 'NORMAL', DAY + 10 * MIN));
-  d = markVisited(d, ['n1'], DAY + 10 * MIN + 15_000); // 回した直後の測位はまだ範囲内
+  d = markVisited(d, ['n1'], DAY + 10 * MIN + 15_000, 0); // 回した直後の測位はまだ範囲内
   assert.equal(hasTicket(d, 'n1', DAY + 11 * MIN), false);
   assert.equal(hasTicket(d, 'n1', DAY + 31 * MIN), false); // その後は範囲の外
 });
 
 test('待ち時間の間に範囲内にいても権利は戻らず、待ち時間が終わった後に範囲内にいると戻る', () => {
-  let d = markVisited(emptySave(), ['n1'], DAY);
+  let d = markVisited(emptySave(), ['n1'], DAY, 0);
   ({ data: d } = applySpin(d, 'n1', 'NORMAL', DAY + 10 * MIN));
-  d = markVisited(d, ['n1'], DAY + 29 * MIN);
+  d = markVisited(d, ['n1'], DAY + 29 * MIN, 0);
   assert.equal(hasTicket(d, 'n1', DAY + 40 * MIN), false);
-  d = markVisited(d, ['n1'], DAY + 30 * MIN);
+  d = markVisited(d, ['n1'], DAY + 30 * MIN, 0);
   assert.equal(hasTicket(d, 'n1', DAY + 40 * MIN), true);
   assert.equal(cooldownRemainingMs(d, 'n1', DAY + 40 * MIN), 0);
 });
 
 test('日付が変わると権利が消える', () => {
-  const d = markVisited(emptySave(), ['n1'], new Date(2026, 9, 6, 23, 50).getTime());
+  const d = markVisited(emptySave(), ['n1'], new Date(2026, 9, 6, 23, 50).getTime(), 0);
   assert.equal(hasTicket(d, 'n1', new Date(2026, 9, 6, 23, 59).getTime()), true);
   assert.equal(hasTicket(d, 'n1', new Date(2026, 9, 7, 0, 1).getTime()), false);
 });
 
 test('端末の時計が戻されても、権利があれば回せる', () => {
-  let d = markVisited(emptySave(), ['n1'], DAY);
+  let d = markVisited(emptySave(), ['n1'], DAY, 0);
   ({ data: d } = applySpin(d, 'n1', 'NORMAL', DAY + 60 * MIN));
-  d = markVisited(d, ['n1'], DAY + 5 * MIN); // 時計が55分戻った
+  d = markVisited(d, ['n1'], DAY + 5 * MIN, 0); // 時計が55分戻った
   assert.equal(hasTicket(d, 'n1', DAY + 6 * MIN), true);
   assert.equal(cooldownRemainingMs(d, 'n1', DAY + 6 * MIN), 0);
 });
@@ -129,4 +129,26 @@ test('寄った記録の無い古い書き出しファイル(0.1.1まで)も読�
   assert.deepEqual(d.visitedAt, {});
   assert.equal(d.spots.n1.spinCount, 1);
   assert.throws(() => parseSave(JSON.stringify({ ...old, visitedAt: { n1: 'x' } })), /寄った/);
+});
+
+test('範囲の外で回すときは、その範囲を出たときの移動距離で確率を決める', () => {
+  const DAY = new Date(2026, 9, 23, 9, 0).getTime();
+  let d = markVisited(emptySave(), ['n1'], DAY, 1200);
+  d = markVisited(d, ['n1'], DAY + MIN, 1500); // 範囲内にいる間は、歩けば上がる
+  // 範囲を出たあとに 4km 歩いても、n1 は出たときの 1500m のまま
+  assert.equal(spinDistanceM(d, 'n1', false, 5500, DAY + 30 * MIN), 1500);
+  // いま範囲内なら今の距離
+  assert.equal(spinDistanceM(d, 'n1', true, 5500, DAY + 30 * MIN), 5500);
+  // 寄った記録の無い場所、日付が変わった後は今の距離
+  assert.equal(spinDistanceM(d, 'n2', false, 5500, DAY + 30 * MIN), 5500);
+  assert.equal(spinDistanceM(d, 'n1', false, 300, DAY + 24 * 60 * MIN), 300);
+});
+
+test('距離の記録が無い古い記録(0.1.9 まで)も読める。壊れた距離は断る', () => {
+  const old = JSON.parse(exportJson(markVisited(emptySave(), ['n1'], T, 800)));
+  delete old.visitedDistanceM;
+  const d = parseSave(JSON.stringify(old));
+  assert.deepEqual(d.visitedDistanceM, {});
+  assert.equal(spinDistanceM(d, 'n1', false, 2000, T + MIN), 2000);
+  assert.throws(() => parseSave(JSON.stringify({ ...old, visitedDistanceM: { n1: -5 } })), /移動距離/);
 });

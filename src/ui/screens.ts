@@ -60,20 +60,32 @@ export function mainScreen(v: MainView): string {
   const caption = v.nextStepM == null
     ? '<span class="mark">運は、もう最大。</span>'
     : `あと<span class="mark o">${Math.ceil(v.nextStepM)}m</span>で、運がひとつ上がる。`;
-  const near = v.near.map((n) => {
+  // 1か所を1行に。回せる場所を上に、待ち時間中の場所は下に薄くまとめる
+  const row = (n: NearSpot) => {
     const ready = n.remainingMs <= 0;
-    const button = ready
-      ? `<button class="btn" data-act="spin" data-spot="${esc(n.spot.id)}">${icon('capsule')}回す</button>`
-      : `<button class="btn wait" disabled>あと${Math.ceil(n.remainingMs / 60000)}分。少し、寄り道を。</button>`;
-    return `<div class="st panel"><div class="t"><span class="no ${ready ? '' : 'mute'}${n.spot.kind === 'bus_stop' ? ' bus' : ''}">${esc(n.badge)}</span><span class="name">${esc(n.spot.name)}</span><span class="d">${n.distanceM == null ? '' : distanceLabel(n.distanceM)}</span></div>${button}</div>`;
-  }).join('');
+    const right = ready
+      ? `<button class="spin-btn" data-act="spin" data-spot="${esc(n.spot.id)}">${icon('capsule')}回す</button>`
+      : `<span class="wait-t">あと${Math.ceil(n.remainingMs / 60000)}分</span>`;
+    return `<div class="spot ${ready ? '' : 'waiting'}"><span class="no${n.spot.kind === 'bus_stop' ? ' bus' : ''}">${esc(n.badge)}</span><span class="name">${esc(n.spot.name)}</span><span class="d">${n.distanceM == null ? '' : distanceLabel(n.distanceM)}</span>${right}</div>`;
+  };
+  const ready = v.near.filter((n) => n.remainingMs <= 0);
+  const waiting = v.near.filter((n) => n.remainingMs > 0);
   // 今日もらった権利は、位置が取れていなくても使える
-  const list = v.near.length > 0 ? `<div class="sec"><span>回せる場所</span>${icon('gachapon', 'deco')}</div>${near}` : '';
+  const list = v.near.length > 0
+    ? `<div class="sec"><span>回せる場所</span>${icon('gachapon', 'deco')}</div>
+      ${ready.length > 0 ? `<div class="spots panel">${ready.map(row).join('')}</div>` : ''}
+      ${waiting.length > 0 ? `<div class="spots wait-list">${waiting.map(row).join('')}</div><p class="wait-say">少し、寄り道を。</p>` : ''}`
+    : '';
   const empty = v.geo === 'ok' && v.near.length === 0
     ? `<p class="say">近くに駅・バス停なし。${v.nearest ? `${esc(v.nearest.spot.name)}まで、あと${distanceLabel(v.nearest.distanceM)}。` : ''}</p>`
     : '';
-  // 大きな数字は駅の確率。バス停の確率は下に小さく添える
-  const od = (r: Rarity, cls = '') => `<div class="od panel ${cls}"><b><small class="k">駅</small>${pct(v.odds[r])}<small>%</small></b><span><i class="dot ${r}"></i>${RARITY_LABEL[r]}</span><em>バス停 ${pct(v.busOdds[r])}%</em></div>`;
+  // 確率は小さな表1つ。横が珍しさ、縦が駅・バス停。スーパーレアの列だけ色を付ける
+  const cell = (odds: Odds, r: Rarity) => `<b class="${r === 'SUPER_RARE' ? 'sr' : ''}">${pct(odds[r])}<small>%</small></b>`;
+  const oddsTable = `<div class="odds-t panel" role="table" aria-label="今の確率">
+    <span></span>${RARITIES.map((r) => `<span class="oh ${r === 'SUPER_RARE' ? 'sr' : ''}"><i class="dot ${r}"></i>${RARITY_LABEL[r]}</span>`).join('')}
+    <span class="ok">駅</span>${RARITIES.map((r) => cell(v.odds, r)).join('')}
+    <span class="ok">バス停</span>${RARITIES.map((r) => cell(v.busOdds, r)).join('')}
+  </div>`;
   return `
     ${v.storageOk ? '' : '<div class="notice panel warn"><b>記録が、残せません。</b>このブラウザでは端末に記録を保存できないため、閉じると集めたカードが消えます。プライベートブラウズなら、通常のモードで開いてください。</div>'}
     <div class="top"><span class="logo">トリップガチャ</span><span class="top-r"><button class="reload" data-act="reload" aria-label="最新版に更新">${icon('reload')}<span class="reload-t">更新</span></button><span class="shard"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</span></span></div>
@@ -81,7 +93,7 @@ export function mainScreen(v: MainView): string {
     <div class="huge">${km(v.distanceM)}<small>km</small></div>
     <div class="feet" role="img" aria-label="${km(MAX_M)}kmまでのうち${km(v.distanceM)}km">${feet}</div>
     <div class="feet-cap">${caption}</div>
-    <div class="odds">${od('NORMAL')}${od('RARE')}${od('SUPER_RARE', 'sr')}</div>
+    ${oddsTable}
     ${geoNotice(v)}
     ${list}${empty}`;
 }
@@ -138,18 +150,17 @@ function stationTiles(stations: Spot[], cards: Record<string, StationCard>, coll
     <div class="grid">${tiles}</div>`;
 }
 
-/** バス停カードは番号順。持っていないカードも、珍しさだけは見せる */
+/** バス停カードは番号順に4列。持っていないカードも、珍しさだけは見せる */
 function busTiles(common: CommonCard[], collection: SaveData['collection'], owned: number): string {
   const tiles = common.map((c) => {
     const entry = collection[c.itemId];
     return `<button class="tile ${entry ? '' : 'none'}" data-act="detail" data-item="${esc(c.itemId)}" aria-label="${entry ? esc(c.name) : `${esc(c.number)} まだなし`}">
-      ${entry ? cardHtml(c, c.rarity, 'sm', false) : placeholderHtml(c.number)}
-      <div class="sn">${entry ? esc(c.name) : '？'}</div>
+      ${entry ? cardHtml(c, c.rarity, 'sm', false) + `<div class="sn">${esc(c.name)}</div>` : placeholderHtml(c.number)}
       <div class="ox"><span class="rl"><i class="dot ${c.rarity}"></i>${RARITY_LABEL[c.rarity]}</span></div>
     </button>`;
   }).join('');
   return `<div class="z-lead">どのバス停でも出る${common.length}枚。${zukanLead(owned, common.length, 'バス停')}</div>
-    <div class="grid">${tiles}</div>`;
+    <div class="grid grid4">${tiles}</div>`;
 }
 
 export function busDetailScreen(card: CommonCard, collection: SaveData['collection']): string {
@@ -184,14 +195,12 @@ const GPS_MODES: [GpsMode, string, string][] = [
   ['continuous', '測り続ける', `${CONFIG.gpsFastKmh}km以上`],
 ];
 
-/** 今の位置の取り方。3つを並べ、今のものに色を付ける(iPhoneで切り替わるかを確かめる用) */
-function gpsModePanel(gpsMode: GpsMode | 'sim' | null): string {
+/** 今の位置の取り方を1行で(iPhoneで切り替わるかを確かめる用) */
+function gpsModeLine(gpsMode: GpsMode | 'sim' | null): string {
   if (!gpsMode) return '';
-  const body = gpsMode === 'sim'
-    ? '<p>位置シミュレーターを使っています。</p>'
-    : `<div class="gps-modes">${GPS_MODES.map(([m, label, pace]) =>
-      `<div class="gps-mode ${m === gpsMode ? 'on' : ''}" ${m === gpsMode ? 'aria-current="true"' : ''}><b>${label}</b><span>${pace}</span></div>`).join('')}</div>`;
-  return `<div class="panel"><h4>位置の取り方</h4>${body}</div>`;
+  if (gpsMode === 'sim') return '<p>位置の取り方: 位置シミュレーター</p>';
+  const [, label, pace] = GPS_MODES.find(([m]) => m === gpsMode)!;
+  return `<p>位置の取り方: <b>${label}</b>(${pace})</p>`;
 }
 
 export function settingsScreen(
@@ -213,21 +222,65 @@ export function settingsScreen(
       <div><b>${save.totalSpins}</b><span>回した回数</span></div>
     </div></div>
     <div class="panel">
-      <h4>記録の書き出し</h4>
-      <p>集めたカードなどの記録を、ファイルに保存します。機種変更や、念のための控えに。</p>
-      <button class="btn mustard" data-act="export">記録を書き出す</button>
+      <h4>注意事項</h4>
+      <p>回す権利・確率・記録のしくみで、まちがえやすいところをまとめました。</p>
+      <button class="btn paper" data-act="notes">注意事項を見る</button>
     </div>
     <div class="panel">
-      <h4>記録の読み込み</h4>
-      <p>書き出したファイルから記録を戻します。読み込む前に確認が出ます。</p>
-      <label class="btn paper file-label">記録を読み込む<input type="file" accept="application/json,.json" data-act="import-file"></label>
+      <h4>記録</h4>
+      <p>集めたカードなどの記録を、ファイルに保存したり戻したりします。機種変更や、念のための控えに。戻す前には確認が出ます。</p>
+      <div class="pair">
+        <button class="btn mustard" data-act="export">書き出す</button>
+        <label class="btn paper file-label">読み込む<input type="file" accept="application/json,.json" data-act="import-file"></label>
+      </div>
     </div>
     ${confirm}
-    <div class="panel">
-      <h4>データの出典</h4>
-      <p>駅・バス停の位置と地図: © OpenStreetMap contributors。駅・バス停の位置のデータは ODbL(Open Database License)のもとで提供しています。<br>書体: Yusei Magic、Zen Maru Gothic(SIL Open Font License 1.1)。</p>
+    <div class="foot">
+      ${gpsModeLine(gpsMode)}
+      <p>駅・バス停の位置と地図: © OpenStreetMap contributors。駅・バス停の位置のデータは ODbL(Open Database License)のもとで提供しています。</p>
+      <p>書体: Yusei Magic、Zen Maru Gothic(SIL Open Font License 1.1)。</p>
+      <p>トリップガチャ ベータ版 ${esc(version)}</p>
     </div>
-    ${gpsModePanel(gpsMode)}
-    <p class="ver">トリップガチャ ベータ版 ${esc(version)}</p>
+  </div>`;
+}
+
+const km1 = (m: number) => `${m / 1000}km`;
+
+/** 使ううえで誤解しやすいこと。かけらの使い道は書かない(企画で説明しないと決めている) */
+const NOTES: [string, string[]][] = [
+  ['回す権利', [
+    `範囲(${CONFIG.enterRadiusM}m)に入ると、その場所の回す権利がもらえる。権利はその日のうちだけ。日付が変わると消える。`,
+    '範囲の外で回すと、その場所の範囲を出たときの確率で引く。出たあとに歩いて確率が上がっても、その場所の確率は上がらない。',
+    `同じ場所は、回してから${CONFIG.cooldownMs / 60000}分待つ。待ち時間が終わったあと、もう一度その範囲に入ると、また回せる。`,
+  ]],
+  ['確率と移動距離', [
+    '移動距離は、アプリを開いている間だけ数える。画面を消したり、ほかのアプリに切り替えたりすると数えない。',
+    '移動距離は、日付が変わると0に戻る。電車・バスの移動も数える。',
+    `${km1(CONFIG.bonusStepM)}進むごとに、ノーマルの確率${CONFIG.bonusPerStepBp / 100}%がスーパーレアに移る。${km1(MAX_M)}で最大。レアの確率は変わらない。`,
+    '止まっているときの位置の揺れは数えない。そのため、少しの移動は距離に入らないことがある。',
+  ]],
+  ['位置', [
+    `位置の誤差が${CONFIG.accuracyLimitM}mより大きいときは、範囲に入ったかの判定に使わない。`,
+    `歩いているときは${CONFIG.gpsSlowIntervalMs / 1000}秒ごとに位置を取る。範囲の端をかすめただけだと、入ったことにならないことがある。`,
+  ]],
+  ['カード', [
+    '駅のカードは、その駅でしか出ない。バス停のカードは、どのバス停でも同じ120枚から出る。',
+  ]],
+  ['記録', [
+    '記録は、この端末のブラウザの中にだけある。ブラウザのデータを消すと、記録も消える。機種変更のときは、書き出しと読み込みを使う。',
+    'iPhone では、Safari で開いたときと、ホーム画面に追加したアプリとで、記録が別々になる。',
+    '「更新」ボタンを押しても、記録は消えない。',
+  ]],
+  ['安全', [
+    '範囲の外でも回せる。歩きながら画面を見ず、立ち止まってから回す。',
+  ]],
+];
+
+export function notesScreen(): string {
+  // 長い画面なので、戻るボタンは左上に固定する(スクロールしても押せる)
+  return `<div class="settings notes">
+    <button class="back-fixed" data-act="close-notes">← 設定に戻る</button>
+    <h2>注意事項</h2>
+    ${NOTES.map(([title, items]) => `<div class="panel"><h4>${title}</h4><ul>${items.map((t) => `<li>${t}</li>`).join('')}</ul></div>`).join('')}
   </div>`;
 }

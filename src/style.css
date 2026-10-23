@@ -43,8 +43,6 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
   display: flex; align-items: center; justify-content: center; gap: 10px; }
 .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--line); }
 .btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.btn.wait { background: transparent; color: var(--ink-soft); border-style: dashed; box-shadow: none; font-size: 15px; letter-spacing: 0; cursor: default; }
-.btn.wait:active { transform: none; }
 .btn.cream { background: var(--cream); color: var(--navy); }
 .btn.mustard { background: var(--mustard); color: var(--navy); }
 .btn.paper { background: var(--paper); color: var(--navy); }
@@ -99,28 +97,38 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .feet .on { fill: var(--orange); stroke: var(--line); }
 .feet .off { fill: none; stroke: var(--mute); stroke-dasharray: 2 2; }
 .feet-cap { font-weight: 900; font-size: 14px; }
-.odds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; }
-.od { text-align: center; padding: 10px 4px 9px; }
-.od b { display: block; font: 400 30px/1 var(--hand); }
-.od b small { font-size: 14px; }
-.od span { font-size: 11px; font-weight: 900; color: var(--ink-soft); white-space: nowrap; }
-.od.sr { background: var(--mustard); } .od.sr span { color: var(--navy); }
-.od b .k { font: 900 10px var(--maru); margin-right: 2px; vertical-align: 6px; color: var(--ink-soft); }
-.od em { display: block; font: 900 10.5px/1 var(--maru); font-style: normal; color: var(--ink-soft); margin-top: 6px; white-space: nowrap; }
-.od.sr b .k, .od.sr em { color: var(--navy); }
+/* 確率の表: 1列目が駅・バス停、残り3列が珍しさ。スーパーレアの列はマスタード */
+.odds-t { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)); margin-top: 18px; padding: 6px 8px; align-items: center; }
+.odds-t > * { text-align: center; padding: 5px 2px; }
+.odds-t .oh { font-size: 11px; font-weight: 900; color: var(--ink-soft); white-space: nowrap; }
+.odds-t .ok { font-size: 12px; font-weight: 900; text-align: left; padding-right: 8px; white-space: nowrap; }
+.odds-t b { font: 400 26px/1 var(--hand); }
+.odds-t b small { font-size: 12px; }
+.odds-t .sr { background: var(--mustard); color: var(--navy); }
+.odds-t .oh.sr { border-radius: 10px 10px 0 0; }
+.odds-t b.sr:last-child { border-radius: 0 0 10px 10px; }
+/* 回せる場所: 1か所1行 */
+.spots .spot { display: flex; align-items: center; gap: 10px; padding: 10px 2px; }
+.spots.panel { padding: 4px 12px; }
+.spots .spot + .spot { border-top: 1.5px dashed var(--mute); }
+.spot .no { width: 36px; height: 36px; border-radius: 50%; background: var(--teal); color: var(--paper); border: 2px solid var(--line);
+  display: grid; place-items: center; font: 700 12px var(--mincho); flex: none; }
+.spot .no.bus { background: var(--mustard); color: var(--navy); font: 900 11px var(--maru); }
+.spot .name { font: 400 18px/1.25 var(--hand); flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.spot .d { font-weight: 900; font-size: 12px; color: var(--ink-soft); flex: none; }
+.spin-btn { flex: none; display: flex; align-items: center; gap: 4px; height: 40px; padding: 0 14px; border: 2px solid var(--line); border-radius: 20px;
+  background: var(--orange); color: var(--paper); box-shadow: 2px 2px 0 var(--line); font: 900 14px var(--maru); cursor: pointer; }
+.spin-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+.spin-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.wait-list { margin-top: 10px; padding: 0 14px; border: 2px dashed var(--mute); border-radius: 22px; }
+.spot.waiting { opacity: .62; }
+.spot.waiting .no { background: #CFC6B6; color: var(--navy); }
+.wait-t { flex: none; width: 72px; text-align: right; font-weight: 900; font-size: 13px; }
+.wait-say { margin-top: 8px; font-size: 13px; font-weight: 900; color: var(--ink-soft); text-align: center; }
 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; border: 1.5px solid var(--line); vertical-align: 0; }
 .dot.NORMAL { background: #C58A5A; } .dot.RARE { background: #AEB8C2; } .dot.SUPER_RARE { background: #E2B23E; }
 .sec { font: 400 20px var(--hand); margin: 22px 0 10px; display: flex; align-items: center; justify-content: space-between; }
 .sec .deco { width: 40px; height: 40px; stroke: var(--navy); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.st { padding: 14px; }
-.st + .st { margin-top: 12px; }
-.st .t { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.st .no { width: 44px; height: 44px; border-radius: 50%; background: var(--teal); color: var(--paper); border: 2px solid var(--line);
-  display: grid; place-items: center; font: 700 13px var(--mincho); flex: none; }
-.st .no.bus { background: var(--mustard); color: var(--navy); font: 900 12px var(--maru); }
-.st .no.mute { background: #CFC6B6; color: var(--navy); }
-.st .name { font: 400 23px/1.2 var(--hand); flex: 1; min-width: 0; }
-.st .d { font-weight: 900; font-size: 14px; }
 .say { margin-top: 18px; font-size: 14px; font-weight: 900; line-height: 1.8; }
 .notice { margin-top: 18px; padding: 16px 18px; font-size: 13.5px; line-height: 1.75; }
 .notice b { display: block; font: 400 20px var(--hand); margin-bottom: 4px; }
@@ -203,7 +211,16 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .z-tab small { font-size: 11.5px; color: var(--ink-soft); }
 .z-tab[aria-pressed="true"] { background: var(--mustard); }
 .z-tab[aria-pressed="true"] small { color: var(--navy); }
-.ox .rl { color: var(--ink-soft); font-size: 10.5px; }
+.ox .rl { color: var(--ink-soft); font-size: 10.5px; white-space: nowrap; }
+/* バス停カードの図鑑は4列。持っていない枠は小さめの丸 */
+.grid.grid4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 8px; }
+.grid4 .tile { padding: 5px 5px 6px; border-radius: 12px; box-shadow: 2px 2px 0 var(--line); }
+.grid4 .tile.none { box-shadow: none; }
+.grid4 .ph b { width: 32px; height: 32px; font-size: 12px; }
+.grid4 .ph b.long { min-width: 32px; padding: 0 4px; font-size: 9.5px; }
+.grid4 .ox .rl { font-size: 9px; }
+.grid4 .tile .sn { font-size: 10px; margin-top: 4px; }
+.grid4 .ox .dot { width: 7px; height: 7px; margin-right: 2px; }
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 12px; }
 .tile { background: var(--paper); border: 2px solid var(--line); border-radius: 16px; padding: 8px 8px 7px; box-shadow: 3px 3px 0 var(--line);
   text-align: left; }
@@ -220,15 +237,17 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .map-screen { position: fixed; inset: 0 0 calc(var(--tabbar-h) + env(safe-area-inset-bottom)) 0; z-index: 1; }
 .map-screen[hidden] { display: none; }
 #map { position: absolute; inset: 0; }
-.map-tools { position: absolute; top: calc(env(safe-area-inset-top) + 18px); left: 12px; right: 12px; z-index: 500; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
-.map-tools .btn { width: auto; padding: 0 18px; height: 46px; font-size: 15px; letter-spacing: .02em; }
-.map-msg { flex: 1; padding: 8px 12px; font-size: 12.5px; line-height: 1.55; border-radius: 16px; }
-.map-ranges { flex-basis: 100%; display: flex; gap: 8px; }
+.map-tools { position: absolute; top: calc(env(safe-area-inset-top) + 14px); left: 12px; right: 12px; z-index: 500; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.map-msg { flex-basis: 100%; padding: 8px 12px; font-size: 12.5px; line-height: 1.55; border-radius: 16px; }
+.map-msg[hidden] { display: none; }
 .range-btn { height: 34px; padding: 0 14px; border: 2px solid var(--line); border-radius: 17px; background: var(--paper); color: var(--ink-soft);
   font: 700 13px var(--maru); box-shadow: 2px 2px 0 var(--line); cursor: pointer; }
 .range-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line); }
 .range-btn.station[aria-pressed="true"] { background: var(--teal); color: var(--paper); }
 .range-btn.bus[aria-pressed="true"] { background: var(--mustard); color: var(--navy); }
+.range-btn.help { width: 34px; padding: 0; font: 900 16px var(--maru); color: var(--navy); }
+.range-btn.help[aria-expanded="true"] { background: var(--navy); color: var(--paper); }
+.range-btn.center { margin-left: auto; background: var(--orange); color: var(--paper); }
 .map-bus-range { opacity: .22; }
 #map.leaflet-container { font-family: var(--maru); background: var(--cream); }
 .map-city { filter: drop-shadow(6px 6px 0 var(--navy)); }
@@ -242,18 +261,24 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .settings .panel h4 { font: 400 19px var(--hand); margin-bottom: 4px; }
 .settings .panel p { font-size: 13.5px; line-height: 1.75; color: var(--ink-soft); }
 .settings .panel .btn { margin-top: 12px; }
+.notes ul { margin: 6px 0 0; padding-left: 1.2em; }
+.notes li { font-size: 13.5px; line-height: 1.7; }
+.notes li + li { margin-top: 6px; }
+.notes h2 { margin-top: 56px; }
+.back-fixed { position: fixed; top: calc(env(safe-area-inset-top) + 14px); left: max(12px, calc(50% - 228px)); z-index: 1000;
+  min-height: 44px; padding: 0 16px; border: 2px solid var(--line); border-radius: 22px; background: var(--paper);
+  box-shadow: 2px 2px 0 var(--line); font: 900 14px var(--maru); color: var(--navy); cursor: pointer; }
+.back-fixed:active { transform: translate(2px, 2px); box-shadow: none; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; gap: 8px; }
 .stats b { display: block; font: 400 34px/1.1 var(--hand); }
 .stats span { font-size: 12px; font-weight: 900; color: var(--ink-soft); }
 .file-label { position: relative; }
 .file-label input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.gps-modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
-.gps-mode { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border: 2px dashed var(--mute);
-  border-radius: 14px; color: var(--ink-soft); text-align: center; }
-.gps-mode b { font-size: 14px; white-space: nowrap; }
-.gps-mode span { font-size: 11px; white-space: nowrap; }
-.gps-mode.on { border: 2px solid var(--line); background: var(--teal); color: var(--paper); box-shadow: 2px 2px 0 var(--line); }
-.ver { margin-top: 18px; text-align: center; font-size: 12px; color: var(--ink-soft); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.settings .panel .pair .btn { margin-top: 12px; }
+.foot { margin-top: 22px; text-align: center; font-size: 11px; line-height: 1.7; color: var(--ink-soft); }
+.foot p + p { margin-top: 6px; }
+.foot b { color: var(--navy); }
 .toast { position: fixed; left: 16px; right: 16px; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); z-index: 1100;
   max-width: 448px; margin: 0 auto; background: var(--navy); color: var(--cream); border: 2px solid var(--cream); border-radius: 16px;
   padding: 12px 16px; font-size: 14px; line-height: 1.6; box-shadow: 3px 3px 0 var(--orange); }

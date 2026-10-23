@@ -165,3 +165,16 @@ export function applySpin(
     result: { itemId, rarity, isNew: !owned, shardsGained },
   };
 }
+
+export interface Spin { spotId: string; rarity: Rarity; itemId: string }
+
+/** 何か所かをまとめて回した結果を、1か所ずつ順に回したのと同じように記録する(同じ回で同じカードが2回出たら2枚目はかぶり) */
+export function applySpins(data: SaveData, spins: Spin[], now: number): { data: SaveData; results: (SpinResult & { spotId: string })[] } {
+  const results: (SpinResult & { spotId: string })[] = [];
+  for (const s of spins) {
+    const r = applySpin(data, s.spotId, s.rarity, now, s.itemId);
+    data = r.data;
+    results.push({ ...r.result, spotId: s.spotId });
+  }
+  return { data, results };
+}

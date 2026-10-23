@@ -120,6 +120,10 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
   background: var(--orange); color: var(--paper); box-shadow: 2px 2px 0 var(--line); font: 900 14px var(--maru); cursor: pointer; }
 .spin-btn:active { transform: translate(2px, 2px); box-shadow: none; }
 .spin-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.sub-sec { display: flex; align-items: center; gap: 6px; margin: 14px 0 8px; font-weight: 900; font-size: 14px; }
+.sub-sec::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--teal); border: 2px solid var(--line); }
+.sub-sec.bus::before { background: var(--mustard); }
+.sec + .sub-sec { margin-top: 0; }
 .wait-list { margin-top: 10px; padding: 0 14px; border: 2px dashed var(--mute); border-radius: 22px; }
 .spot.waiting { opacity: .62; }
 .spot.waiting .no { background: #CFC6B6; color: var(--navy); }
@@ -293,3 +297,19 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .leaflet-tooltip.st-label::before { display: none; }
 .leaflet-tooltip.st-label.big { font-size: 15px; font-weight: 900; }
 .labels-few .leaflet-tooltip.st-label:not(.big) { visibility: hidden; }
+
+/* ---------- まとめて回す ---------- */
+.sheet-bg { position: fixed; inset: 0; z-index: 1300; background: rgba(34, 48, 60, .45); }
+.sheet { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 12px); transform: translateX(-50%); z-index: 1301;
+  width: min(456px, calc(100% - 24px)); padding: 18px 18px 16px; display: grid; gap: 10px; }
+.sheet h3 { font: 400 24px var(--hand); }
+.sheet p { font-size: 13.5px; font-weight: 900; color: var(--ink-soft); margin-bottom: 4px; }
+.sheet .btn { height: 50px; font-size: 16px; }
+@media (prefers-reduced-motion: no-preference) {
+  .sheet { animation: sheet-up .22s ease-out both; }
+  @keyframes sheet-up { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+}
+.m-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 8px; margin-top: 18px; }
+.m-tile.dup .card { opacity: .55; }
+.m-tag { margin-top: 4px; text-align: center; font: 900 10.5px var(--maru); color: var(--cream); white-space: nowrap; }
+.m-tag .new { display: inline-block; padding: 1px 6px; border-radius: 8px; background: var(--orange); color: var(--paper); }

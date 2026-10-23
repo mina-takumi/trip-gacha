@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  applySpin, cooldownRemainingMs, emptySave, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, type StorageLike,
+  applySpin, applySpins, cooldownRemainingMs, emptySave, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, type StorageLike,
 } from '../src/store.ts';
 
 const memoryStorage = (): StorageLike => {
@@ -151,4 +151,21 @@ test('距離の記録が無い古い記録(0.1.9 まで)も読める。壊れた
   assert.deepEqual(d.visitedDistanceM, {});
   assert.equal(spinDistanceM(d, 'n1', false, 2000, T + MIN), 2000);
   assert.throws(() => parseSave(JSON.stringify({ ...old, visitedDistanceM: { n1: -5 } })), /移動距離/);
+});
+
+test('バス停をまとめて回すと、1か所ずつ回したのと同じ記録になる。同じ回で同じカードが出たら2枚目はかぶり', () => {
+  const spins = [
+    { spotId: 'b1', rarity: 'NORMAL' as const, itemId: 'common:NORMAL:3' },
+    { spotId: 'b2', rarity: 'RARE' as const, itemId: 'common:RARE:0' },
+    { spotId: 'b3', rarity: 'NORMAL' as const, itemId: 'common:NORMAL:3' },
+  ];
+  const { data, results } = applySpins(emptySave(), spins, T);
+  assert.deepEqual(results.map((r) => [r.spotId, r.isNew, r.shardsGained]), [['b1', true, 0], ['b2', true, 0], ['b3', false, 1]]);
+  assert.equal(data.collection['common:NORMAL:3'].count, 2);
+  assert.equal(data.shards, 1);
+  assert.equal(data.totalSpins, 3);
+  for (const id of ['b1', 'b2', 'b3']) assert.equal(cooldownRemainingMs(data, id, T + 5 * MIN), 15 * MIN);
+  let one = emptySave();
+  for (const s of spins) one = applySpin(one, s.spotId, s.rarity, T, s.itemId).data;
+  assert.deepEqual(data, one);
 });

@@ -68,13 +68,21 @@ export function mainScreen(v: MainView): string {
       : `<span class="wait-t">あと${Math.ceil(n.remainingMs / 60000)}分</span>`;
     return `<div class="spot ${ready ? '' : 'waiting'}"><span class="no${n.spot.kind === 'bus_stop' ? ' bus' : ''}">${esc(n.badge)}</span><span class="name">${esc(n.spot.name)}</span><span class="d">${n.distanceM == null ? '' : distanceLabel(n.distanceM)}</span>${right}</div>`;
   };
-  const ready = v.near.filter((n) => n.remainingMs <= 0);
-  const waiting = v.near.filter((n) => n.remainingMs > 0);
+  // 駅とバス停は出るカードが違うので、見出しを分けて並べる(駅が上)
+  const group = (kind: string, title: string) => {
+    const spots = v.near.filter((n) => n.spot.kind === kind);
+    if (spots.length === 0) return '';
+    const ready = spots.filter((n) => n.remainingMs <= 0);
+    const waiting = spots.filter((n) => n.remainingMs > 0);
+    return `<div class="sub-sec ${kind === 'bus_stop' ? 'bus' : ''}">${title}</div>
+      ${ready.length > 0 ? `<div class="spots panel">${ready.map(row).join('')}</div>` : ''}
+      ${waiting.length > 0 ? `<div class="spots wait-list">${waiting.map(row).join('')}</div>` : ''}`;
+  };
   // 今日もらった権利は、位置が取れていなくても使える
   const list = v.near.length > 0
     ? `<div class="sec"><span>回せる場所</span>${icon('gachapon', 'deco')}</div>
-      ${ready.length > 0 ? `<div class="spots panel">${ready.map(row).join('')}</div>` : ''}
-      ${waiting.length > 0 ? `<div class="spots wait-list">${waiting.map(row).join('')}</div><p class="wait-say">少し、寄り道を。</p>` : ''}`
+      ${group('station', '駅')}${group('bus_stop', 'バス停')}
+      ${v.near.some((n) => n.remainingMs > 0) ? '<p class="wait-say">少し、寄り道を。</p>' : ''}`
     : '';
   const empty = v.geo === 'ok' && v.near.length === 0
     ? `<p class="say">近くに駅・バス停なし。${v.nearest ? `${esc(v.nearest.spot.name)}まで、あと${distanceLabel(v.nearest.distanceM)}。` : ''}</p>`
@@ -112,6 +120,45 @@ export function resultScreen(card: CardFace, rarity: Rarity, tint: boolean, isNe
       <button class="btn cream" data-act="result-back">ホームに戻る</button>
     </div>
   </div></div>`;
+}
+
+const RANK: Record<Rarity, number> = { NORMAL: 0, RARE: 1, SUPER_RARE: 2 };
+
+export interface MultiItem { face: CardFace; rarity: Rarity; isNew: boolean; shardsGained: number }
+
+/** まとめて回した結果。いちばん珍しい1枚を大きく、全部を小さく4列で並べる(バス停カードなので絵の色味は変えない) */
+export function multiResultScreen(items: MultiItem[], totalShards: number): string {
+  const best = items.reduce((a, b) => RANK[b.rarity] > RANK[a.rarity] ? b : a);
+  const newCount = items.filter((i) => i.isNew).length;
+  const shards = items.reduce((n, i) => n + i.shardsGained, 0);
+  const label = RARITY_LABEL[best.rarity].replace('スーパー', 'スーパー<br>');
+  const tiles = items.map((i) => `<div class="m-tile ${i.isNew ? '' : 'dup'}">
+      ${cardHtml(i.face, i.rarity, 'sm', false)}
+      <div class="m-tag">${i.isNew ? '<span class="new">NEW</span>' : `かけら+${i.shardsGained}`}</div>
+    </div>`).join('');
+  return `<div class="res-wrap"><div class="res">
+    <div class="stamp ${best.rarity}"><span>${label}</span></div>
+    <h2>${items.length}回、出た。</h2>
+    <div class="sub">${newCount > 0 ? `<span class="mark o">はじめて ${newCount}枚。</span>` : 'ぜんぶ、もう持ってた。'}${shards > 0 ? `かけら +${shards}(合計 ${totalShards})。` : ''}</div>
+    <div class="rays">${cardHtml(best.face, best.rarity, 'big', false)}</div>
+    <div class="m-grid">${tiles}</div>
+    <div class="acts">
+      <button class="btn mustard" data-act="result-zukan">${icon('book')}図鑑で見る</button>
+      <button class="btn cream" data-act="result-back">ホームに戻る</button>
+    </div>
+  </div></div>`;
+}
+
+/** バス停の「回す」を押したとき、ほかにも回せるバス停があれば出す */
+export function chooserSheet(spotName: string, count: number): string {
+  return `<div class="sheet-bg" data-act="chooser-cancel"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="回し方を選ぶ">
+      <h3>どう回す?</h3>
+      <p>回せるバス停が、いま ${count}か所。</p>
+      <button class="btn" data-act="spin-one">${icon('capsule')}${esc(spotName)}だけ回す</button>
+      <button class="btn mustard" data-act="spin-all">${icon('capsule')}バス停 ${count}か所をまとめて回す</button>
+      <button class="btn paper" data-act="chooser-cancel">やめる</button>
+    </div>`;
 }
 
 const ownedRarities = (collection: SaveData['collection'], spotId: string) => RARITIES.filter((r) => collection[stationItemId(spotId, r)]);

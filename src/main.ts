@@ -10,17 +10,17 @@ import { createCatalog, type Spot } from './items.ts';
 import { drawRarity, metersToNextStep, oddsFor, pickCommon, stationItemId } from './gacha.ts';
 import { addFix, distanceToday, localDate } from './walk.ts';
 import {
-  applySpin, cooldownRemainingMs, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, storageAvailable, type SaveData, type SpinResult,
+  applySpins, cooldownRemainingMs, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, storageAvailable, type SaveData, type SpinResult,
 } from './store.ts';
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
 import {
-  busDetailScreen, detailScreen, mainScreen, notesScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearSpot, type Tab, type ZukanTab,
+  busDetailScreen, chooserSheet, detailScreen, mainScreen, multiResultScreen, notesScreen, resultScreen, settingsScreen, tabbar, zukanScreen, type GeoStatus, type NearSpot, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 
 // 駅では駅のカード、バス停では共通のカードが出る(裏アイテムはまだ入れていない)
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon }) => ({ id, name, kind, lat, lon }));
@@ -45,7 +45,10 @@ const state = {
   fix: null as Fix | null,
   accuracyM: null as number | null,
   gpsMode: null as GpsMode | 'sim' | null,
-  result: null as (SpinResult & { spotId: string }) | null,
+  /** 回した結果。1つなら今までの結果画面、2つ以上ならまとめて回した結果画面 */
+  results: null as (SpinResult & { spotId: string })[] | null,
+  /** バス停の「回す」を押したときの、1か所だけかまとめてかを選ぶシート */
+  chooser: null as { spotId: string; count: number } | null,
   zukanTab: 'station' as ZukanTab,
   /** 図鑑で開いているもの。駅なら spotId、バス停カードなら itemId(common:...) */
   detailId: null as string | null,
@@ -105,13 +108,17 @@ app.innerHTML = `${ICON_DEFS}<div class="bar4" aria-hidden="true"><i></i><i></i>
     </div>
   </section>
   <nav class="tabbar" id="tabbar"></nav>
-  <div id="toast"></div>`;
+  <div id="toast"></div>
+  <div id="sheet"></div>`;
 const screenEl = document.getElementById('screen')!;
 const mapScreenEl = document.getElementById('map-screen')!;
 const tabbarEl = document.getElementById('tabbar')!;
 const toastEl = document.getElementById('toast')!;
+const sheetEl = document.getElementById('sheet')!;
 let mapView: MapView | null = null;
 let onMapTap: ((lat: number, lon: number) => void) | undefined;
+/** 図鑑でカードを開く前の位置。戻ったときに同じ場所を出す(結果画面から開いたときは null) */
+let zukanScrollY: number | null = null;
 if (allCards) document.body.insertAdjacentHTML('beforeend', '<div class="sim-badge all">全部集めた(保存しない)</div>');
 
 /**
@@ -149,11 +156,13 @@ function nearestSpot() {
 const ownedSpotIds = () => new Set(stations.filter((s) => RARITIES.some((r) => state.save.collection[stationItemId(s.id, r)])).map((s) => s.id));
 
 function screenHtml(now: number): string {
-  if (state.result) {
-    const r = state.result;
-    const isStation = r.itemId.startsWith('station:');
-    const face = isStation ? cards[r.spotId] : catalog.common.find((c) => c.itemId === r.itemId)!;
-    return resultScreen(face, r.rarity, isStation, r.isNew, r.shardsGained, state.save.shards);
+  if (state.results) {
+    const faceOf = (r: SpinResult & { spotId: string }) => r.itemId.startsWith('station:') ? cards[r.spotId] : catalog.common.find((c) => c.itemId === r.itemId)!;
+    if (state.results.length > 1) {
+      return multiResultScreen(state.results.map((r) => ({ face: faceOf(r), rarity: r.rarity, isNew: r.isNew, shardsGained: r.shardsGained })), state.save.shards);
+    }
+    const r = state.results[0];
+    return resultScreen(faceOf(r), r.rarity, r.itemId.startsWith('station:'), r.isNew, r.shardsGained, state.save.shards);
   }
   switch (state.tab) {
     case 'main': {
@@ -180,11 +189,12 @@ function screenHtml(now: number): string {
 }
 
 let lastHtml = '';
+let lastSheet = '';
 function render(): void {
   const now = Date.now();
   // 結果画面だけネイビーの背景で締める
-  document.body.classList.toggle('dark', !!state.result);
-  const showMap = state.tab === 'map' && !state.result;
+  document.body.classList.toggle('dark', !!state.results);
+  const showMap = state.tab === 'map' && !state.results;
   // 同じ中身なら書き換えない(1秒ごとの測位で画面を作り直すと、押している途中のボタンが消えるため)
   const html = showMap ? '' : screenHtml(now);
   if (html !== lastHtml) {
@@ -204,9 +214,15 @@ function render(): void {
       ? '位置シミュレーター: 地図をタップした場所にいることにします'
       : `大きな丸は駅。オレンジは、カードを持っている駅。黄色の小さな点はバス停。駅やバス停の${CONFIG.enterRadiusM}m以内に入ると、その日のうちは、どこでも回せる。`;
   }
-  const tabs = tabbar(state.result ? 'main' : state.tab);
+  const tabs = tabbar(state.results ? 'main' : state.tab);
   if (tabbarEl.innerHTML !== tabs) tabbarEl.innerHTML = tabs;
   toastEl.innerHTML = state.toast ? `<div class="toast" role="status">${state.toast}</div>` : '';
+  const sheet = state.chooser ? chooserSheet(spotById.get(state.chooser.spotId)!.name, state.chooser.count) : '';
+  // 中身が同じなら描き直さない(測位のたびに作り直すと、押している途中のボタンが消える)
+  if (sheet !== lastSheet) {
+    sheetEl.innerHTML = sheet;
+    lastSheet = sheet;
+  }
 }
 
 let toastTimer = 0;
@@ -239,18 +255,46 @@ async function reloadLatest(): Promise<void> {
   location.reload();
 }
 
-function spin(spotId: string): void {
-  const now = Date.now();
-  const inside = new Set(geofence.insideStopIds());
-  if (!canSpin(spotId, now, inside)) return;
+/** 1か所ぶんの抽選。範囲内なら今の距離、範囲の外ならその範囲を出たときの距離で確率を決める */
+function draw(spotId: string, inside: Set<string>, now: number) {
   const distanceM = spinDistanceM(state.save, spotId, inside.has(spotId), distanceToday(state.save.walk, now), now);
   const isStation = spotById.get(spotId)!.kind === 'station';
   const rarity = drawRarity(oddsFor(isStation ? CONFIG.stationOddsBp : CONFIG.busOddsBp, distanceM), Math.random);
   const itemId = isStation ? stationItemId(spotId, rarity) : pickCommon(catalog.common, rarity, Math.random).itemId;
-  const { data, result } = applySpin(state.save, spotId, rarity, now, itemId);
+  return { spotId, rarity, itemId };
+}
+
+/** いま回せるバス停 */
+function readyBusStops(now: number, inside: Set<string>): string[] {
+  return ticketSpots(now).filter((n) => n.spot.kind === 'bus_stop' && canSpin(n.spot.id, now, inside)).map((n) => n.spot.id);
+}
+
+/** 「回す」を押したとき。バス停で、ほかにも回せるバス停があれば、1か所だけかまとめてかを先に聞く */
+function spin(spotId: string): void {
+  const now = Date.now();
+  const inside = new Set(geofence.insideStopIds());
+  if (!canSpin(spotId, now, inside)) return;
+  if (spotById.get(spotId)!.kind === 'bus_stop') {
+    const count = readyBusStops(now, inside).length;
+    if (count >= 2) {
+      state.chooser = { spotId, count };
+      render();
+      return;
+    }
+  }
+  spinSpots([spotId]);
+}
+
+function spinSpots(spotIds: string[]): void {
+  const now = Date.now();
+  const inside = new Set(geofence.insideStopIds());
+  const spins = spotIds.filter((id) => canSpin(id, now, inside)).map((id) => draw(id, inside, now));
+  state.chooser = null;
+  if (spins.length === 0) { render(); return; }
+  const { data, results } = applySpins(state.save, spins, now);
   state.save = data;
   persist();
-  state.result = { ...result, spotId };
+  state.results = results;
   render();
   window.scrollTo(0, 0);
 }
@@ -272,7 +316,8 @@ app.addEventListener('click', (e) => {
   switch (el.dataset.act) {
     case 'tab':
       state.tab = el.dataset.tab as Tab;
-      state.result = null;
+      state.results = null;
+      state.chooser = null;
       state.detailId = null;
       state.showNotes = false;
       window.scrollTo(0, 0);
@@ -280,19 +325,38 @@ app.addEventListener('click', (e) => {
     case 'notes': state.showNotes = true; window.scrollTo(0, 0); break;
     case 'close-notes': state.showNotes = false; window.scrollTo(0, 0); break;
     case 'spin': spin(el.dataset.spot!); return;
+    case 'spin-one': if (state.chooser) spinSpots([state.chooser.spotId]); return;
+    case 'spin-all': spinSpots(readyBusStops(Date.now(), new Set(geofence.insideStopIds()))); return;
+    case 'chooser-cancel': state.chooser = null; break;
     case 'result-zukan': {
-      const r = state.result;
+      // 1枚ならそのカードを開く。まとめて回したとき(バス停だけ)は、バス停の図鑑の一覧へ
+      const rs = state.results ?? [];
+      const r = rs.length === 1 ? rs[0] : null;
       const isStation = !!r?.itemId.startsWith('station:');
       state.zukanTab = isStation ? 'station' : 'bus';
       state.detailId = r ? (isStation ? r.spotId : r.itemId) : null;
-      state.result = null;
+      zukanScrollY = null;
+      state.results = null;
       state.tab = 'zukan';
       window.scrollTo(0, 0);
       break;
     }
-    case 'result-back': state.result = null; break;
-    case 'detail': state.detailId = el.dataset.spot ?? el.dataset.item!; window.scrollTo(0, 0); break;
-    case 'close-detail': state.detailId = null; break;
+    case 'result-back': state.results = null; break;
+    case 'detail':
+      zukanScrollY = window.scrollY;
+      state.detailId = el.dataset.spot ?? el.dataset.item!;
+      window.scrollTo(0, 0);
+      break;
+    case 'close-detail': {
+      const id = state.detailId;
+      state.detailId = null;
+      render();
+      // 一覧から開いたなら元の位置へ。結果画面から開いたなら、そのカードが見える位置へ
+      if (zukanScrollY != null) window.scrollTo(0, zukanScrollY);
+      else document.querySelector(`[data-spot="${id}"], [data-item="${id}"]`)?.scrollIntoView({ block: 'center' });
+      zukanScrollY = null;
+      return;
+    }
     case 'zukan-tab': state.zukanTab = el.dataset.z as ZukanTab; break;
     case 'export': exportSave(); return;
     case 'import-apply':

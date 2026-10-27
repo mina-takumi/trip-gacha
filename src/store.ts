@@ -93,7 +93,7 @@ export function parseSave(text: string): SaveData {
     visitedAt: visitedAt as SaveData['visitedAt'],
     visitedDistanceM: visitedDistanceM as SaveData['visitedDistanceM'],
     shards, totalSpins,
-    walk: { dailyDistanceM: walk.dailyDistanceM, distanceDate: walk.distanceDate, smooth: point(walk.smooth), anchor: point(walk.anchor) },
+    walk: { dailyDistanceM: walk.dailyDistanceM, distanceDate: walk.distanceDate, smooth: point(walk.smooth), anchor: point(walk.anchor), lastFixAt: isNum(walk.lastFixAt) ? walk.lastFixAt : null },
   };
 }
 

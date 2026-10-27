@@ -32,10 +32,16 @@ for (const sigma of [3, 5, 8]) {
   });
 }
 
-// 歩いているときは15秒ごとに位置を取りに行く(location.ts)。位置をならす割合は1秒ごと向けなので、
-// 数字が増えるのは遅れるが、止まれば追いつく
+// 歩いているときは15秒ごとに位置を取りに行く(location.ts)。ならす割合は間隔に合わせて大きくする
 for (const sigma of [3, 8]) {
   const every15s = (fixes: F[]) => fixes.filter((_, i) => i % 15 === 0);
+
+  test(`15秒ごとの位置でも、歩いている途中の数字が大きく遅れない(揺れ σ${sigma}m)`, () => {
+    const s = run(every15s(route(1.3, 600, sigma, 400 + sigma, 0)));
+    const actual = 1.3 * 585; // 最後の測位は585秒目
+    // 遅れは、ならしの分(約20m)と、起点から「2点の誤差の和」に届かず数えていない残り(σ8mで最大32m)
+    assert.ok(actual - s.dailyDistanceM < 60, `実際 ${actual.toFixed(0)}m に対して ${s.dailyDistanceM.toFixed(1)}m`);
+  });
 
   test(`15秒ごとの位置でも、1km歩いて止まるとほぼ1km数える(揺れ σ${sigma}m)`, () => {
     const s = run(every15s(route(1.3, 770, sigma, 200 + sigma, 300)));
@@ -47,6 +53,14 @@ for (const sigma of [3, 8]) {
     assert.ok(s.dailyDistanceM < 20, `止まっているのに ${s.dailyDistanceM.toFixed(1)}m 増えた`);
   });
 }
+
+test('画面を消して離れた後の測位は、ならさずに1回で追いつく', () => {
+  const s = run([
+    { ...north(LAT, LON, 0), accuracyM: 10, t: T0 },
+    { ...north(LAT, LON, 500), accuracyM: 10, t: T0 + 10 * 60 * 1000 },
+  ]);
+  assert.ok(Math.abs(s.dailyDistanceM - 500) < 1, `${s.dailyDistanceM.toFixed(1)}m`);
+});
 
 test('乗り物の速さ(時速60km)の移動も数える', () => {
   const s = run(route(16.7, 300, 5, 7));

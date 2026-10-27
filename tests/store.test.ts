@@ -55,7 +55,7 @@ test('書き出して、端末の記録を消して、読み込むと元に戻�
   let { data } = applySpin(emptySave(), 'n1', 'NORMAL', T);
   ({ data } = applySpin(data, 'n2', 'SUPER_RARE', T + MIN));
   const p = { lat: 35.6, lon: 139.3, accM: 8 };
-  data = { ...data, walk: { dailyDistanceM: 2800, distanceDate: '2026-10-02', smooth: p, anchor: { ...p, lat: 35.61 } } };
+  data = { ...data, walk: { dailyDistanceM: 2800, distanceDate: '2026-10-02', smooth: p, anchor: { ...p, lat: 35.61 }, lastFixAt: T + MIN } };
   data = markVisited(data, ['n1', 'n3'], T + 2 * MIN, 2800);
   save(storage, data);
   const file = exportJson(load(storage));
@@ -151,6 +151,15 @@ test('距離の記録が無い古い記録(0.1.9 まで)も読める。壊れた
   assert.deepEqual(d.visitedDistanceM, {});
   assert.equal(spinDistanceM(d, 'n1', false, 2000, T + MIN), 2000);
   assert.throws(() => parseSave(JSON.stringify({ ...old, visitedDistanceM: { n1: -5 } })), /移動距離/);
+});
+
+test('最後の測位の時刻が無い古い記録(0.4.0 まで)も読める', () => {
+  const old = JSON.parse(exportJson({ ...emptySave(), walk: { dailyDistanceM: 1200, distanceDate: '2026-10-27', smooth: null, anchor: null, lastFixAt: T } }));
+  assert.equal(parseSave(JSON.stringify(old)).walk.lastFixAt, T);
+  delete old.walk.lastFixAt;
+  const d = parseSave(JSON.stringify(old));
+  assert.equal(d.walk.lastFixAt, null);
+  assert.equal(d.walk.dailyDistanceM, 1200);
 });
 
 test('バス停をまとめて回すと、1か所ずつ回したのと同じ記録になる。同じ回で同じカードが出たら2枚目はかぶり', () => {

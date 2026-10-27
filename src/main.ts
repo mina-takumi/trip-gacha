@@ -21,7 +21,7 @@ import {
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.4.1';
+const VERSION = '0.4.2';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon }) => ({ id, name, kind, lat, lon }));
@@ -50,6 +50,8 @@ const state = {
   gpsMode: null as GpsMode | 'sim' | null,
   /** 回した結果。1つなら今までの結果画面、2つ以上ならまとめて回した結果画面 */
   results: null as (SpinResult & { spotId: string })[] | null,
+  /** まとめて回した結果で、大きく出しているカードの番号。null ならいちばん珍しい1枚 */
+  resultPick: null as number | null,
   /** バス停の「回す」を押したときの、1か所だけかまとめてかを選ぶシート */
   chooser: null as { spotId: string; count: number } | null,
   zukanTab: 'station' as ZukanTab,
@@ -146,6 +148,14 @@ function ticketSpots(now: number): NearSpot[] {
     .sort((a, b) => a.remainingMs - b.remainingMs || (a.distanceM ?? 0) - (b.distanceM ?? 0));
 }
 
+/** 地図でバス停をタップしたときの状態。ホームの「回せる場所」と同じ決まりで見る */
+function busStatus(spotId: string): string {
+  const now = Date.now();
+  const remainingMs = cooldownRemainingMs(state.save, spotId, now);
+  if (remainingMs > 0) return `待ち時間 あと${Math.ceil(remainingMs / 60000)}分`;
+  return canSpin(spotId, now, new Set(geofence.insideStopIds())) ? 'いま回せる' : `${CONFIG.enterRadiusM}m以内に入ると回せる`;
+}
+
 function nearestSpot() {
   if (!state.fix) return null;
   let best: { spot: Spot; distanceM: number } | null = null;
@@ -175,7 +185,7 @@ function screenHtml(now: number): string {
     const faceOf = (r: SpinResult & { spotId: string }) => r.itemId.startsWith('station:') ? cards[r.spotId]
       : r.rarity === 'SECRET' ? secretFace(r.itemId) : catalog.common.find((c) => c.itemId === r.itemId)!;
     if (state.results.length > 1) {
-      return multiResultScreen(state.results.map((r) => ({ face: faceOf(r), rarity: r.rarity, isNew: r.isNew, shardsGained: r.shardsGained })), state.save.shards);
+      return multiResultScreen(state.results.map((r) => ({ face: faceOf(r), rarity: r.rarity, isNew: r.isNew, shardsGained: r.shardsGained })), state.save.shards, state.resultPick);
     }
     const r = state.results[0];
     return resultScreen(faceOf(r), r.rarity, r.itemId.startsWith('station:'), r.isNew, r.shardsGained, state.save.shards);
@@ -228,14 +238,14 @@ function render(): void {
   mapScreenEl.hidden = !showMap;
   if (showMap) {
     if (!mapView) {
-      mapView = createMapView(document.getElementById('map')!, stations, busStops, cards, onMapTap);
+      mapView = createMapView(document.getElementById('map')!, stations, busStops, cards, busStatus, onMapTap);
       mapView.setRanges(mapRanges);
     }
     mapView.resize();
     mapView.update(state.fix, ownedSpotIds());
     document.getElementById('map-msg')!.textContent = onMapTap
       ? '位置シミュレーター: 地図をタップした場所にいることにします'
-      : `大きな丸は駅。オレンジは、カードを持っている駅。黄色の小さな点はバス停。駅やバス停の${CONFIG.enterRadiusM}m以内に入ると、その日のうちは、どこでも回せる。`;
+      : `大きな丸は駅。オレンジは、カードを持っている駅。黄色の小さな点はバス停。点をタップすると、名前と回せるかどうかが出る。駅やバス停の${CONFIG.enterRadiusM}m以内に入ると、その日のうちは、どこでも回せる。`;
   }
   // 前に描いた文字列と比べる。innerHTML と比べると、ブラウザが書き方を変えて返す(<use/> → <use></use>)ので毎回「違う」になり、
   // 測位のたびに作り直して、押している途中のタブが消えていた
@@ -327,6 +337,7 @@ function spinSpots(spotIds: string[]): void {
   state.save = data;
   persist();
   state.results = results;
+  state.resultPick = null;
   render();
   window.scrollTo(0, 0);
 }
@@ -374,6 +385,7 @@ app.addEventListener('click', (e) => {
       break;
     }
     case 'result-back': state.results = null; break;
+    case 'result-pick': state.resultPick = Number(el.dataset.i); break;
     case 'detail':
       zukanScrollY = window.scrollY;
       state.detailId = el.dataset.spot ?? el.dataset.item!;

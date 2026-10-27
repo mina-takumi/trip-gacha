@@ -45,8 +45,11 @@ export interface MapRanges { station: boolean; bus: boolean }
 
 const loadJson =<T>(name: string): Promise<T> => fetch(`map/${name}.json`).then((r) => r.json() as Promise<T>);
 
-/** 地図の画面。Leaflet は作り直すと重いので、一度作ったら表示・非表示を切り替えて使い回す */
-export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[], cards: Record<string, StationCard>, onTap?: (lat: number, lon: number) => void) {
+/**
+ * 地図の画面。Leaflet は作り直すと重いので、一度作ったら表示・非表示を切り替えて使い回す。
+ * busStatus はバス停をタップしたときに、吹き出しに出す今の状態(「いま回せる」など)を返す
+ */
+export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[], cards: Record<string, StationCard>, busStatus: (spotId: string) => string, onTap?: (lat: number, lon: number) => void) {
   const map = L.map(el, { zoomControl: false, attributionControl: true, minZoom: 11, maxZoom: 18 }).setView([35.655, 139.33], 12);
   map.attributionControl.addAttribution('&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
   L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -93,10 +96,13 @@ export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[
   map.on('zoomend', syncDetail);
 
   // バス停: マスタードの小さな点。道の上、駅の下。拡大したら少し大きくする
+  // 点が小さく指で押しにくいので、見た目より 8px 広く押せるようにする。吹き出しの状態は待ち時間で変わるので、開くたびに作る
   map.createPane('bus').style.zIndex = '280';
-  const busRenderer = L.canvas({ pane: 'bus' });
+  const busRenderer = L.canvas({ pane: 'bus', tolerance: 8 });
   const busDots = busStops.map((s) =>
-    L.circleMarker([s.lat, s.lon], { renderer: busRenderer, radius: 3, color: NAVY, weight: 1, fillColor: MUSTARD, fillOpacity: 1, interactive: false }).addTo(map));
+    L.circleMarker([s.lat, s.lon], { renderer: busRenderer, radius: 3, color: NAVY, weight: 1, fillColor: MUSTARD, fillOpacity: 1 })
+      .bindPopup(() => `<b>${esc(s.name)}</b><br>${esc(busStatus(s.id))}`)
+      .addTo(map));
   const syncBus = () => {
     const radius = map.getZoom() >= DETAIL_ZOOM ? 5 : map.getZoom() >= LABEL_ALL_ZOOM ? 4 : 2.5;
     for (const d of busDots) d.setRadius(radius);

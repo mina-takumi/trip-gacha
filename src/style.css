@@ -321,6 +321,8 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
   @keyframes sheet-up { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 }
 .m-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 8px; margin-top: 18px; }
+.m-tile { display: block; width: 100%; padding: 4px; border: 0; border-radius: 10px; background: none; font: inherit; color: inherit; cursor: pointer; }
+.m-tile.on { box-shadow: 0 0 0 3px var(--mustard); }
 .m-tile.dup .card { opacity: .55; }
 .m-tag { margin-top: 4px; text-align: center; font: 900 10.5px var(--maru); color: var(--cream); white-space: nowrap; }
 .m-tag .new { display: inline-block; padding: 1px 6px; border-radius: 8px; background: var(--orange); color: var(--paper); }

@@ -132,8 +132,11 @@ const RANK: Record<CardRarity, number> = { NORMAL: 0, RARE: 1, SUPER_RARE: 2, SE
 
 export interface MultiItem { face: CardFace; rarity: CardRarity; isNew: boolean; shardsGained: number }
 
-/** まとめて回した結果。いちばん珍しい1枚を大きく、全部を小さく4列で並べる(バス停カードなので絵の色味は変えない) */
-export function multiResultScreen(items: MultiItem[], totalShards: number): string {
+/**
+ * まとめて回した結果。いちばん珍しい1枚を大きく、全部を小さく4列で並べる(バス停カードなので絵の色味は変えない)。
+ * 小さいカードを押すと、そのカード(pick 番目)を大きく出す。スタンプと文は全体のまとめなので変えない
+ */
+export function multiResultScreen(items: MultiItem[], totalShards: number, pick: number | null): string {
   // 同じ珍しさなら、はじめての1枚を大きく見せる
   const best = items.reduce((a, b) => RANK[b.rarity] > RANK[a.rarity] || (RANK[b.rarity] === RANK[a.rarity] && b.isNew && !a.isNew) ? b : a);
   const newCount = items.filter((i) => i.isNew).length;
@@ -144,15 +147,16 @@ export function multiResultScreen(items: MultiItem[], totalShards: number): stri
   const shardText = secrets.some((i) => !i.isNew) ? `かけら ${before} → ${totalShards}。`
     : secrets.length > 0 ? '' : gained > 0 ? `かけら +${gained}(合計 ${totalShards})。` : '';
   const tag = (i: MultiItem) => i.rarity === 'SECRET' ? '<span class="new">???</span>' : i.isNew ? '<span class="new">NEW</span>' : `かけら+${i.shardsGained}`;
-  const tiles = items.map((i) => `<div class="m-tile ${i.isNew ? '' : 'dup'}">
+  const shown = pick != null && items[pick] ? items[pick] : best;
+  const tiles = items.map((i, n) => `<button class="m-tile ${i.isNew ? '' : 'dup'} ${i === shown ? 'on' : ''}" data-act="result-pick" data-i="${n}" aria-pressed="${i === shown}" aria-label="${esc(i.face.name)}を大きく見る">
       ${cardHtml(i.face, i.rarity, 'sm', false)}
       <div class="m-tag">${tag(i)}</div>
-    </div>`).join('');
+    </button>`).join('');
   return `<div class="res-wrap"><div class="res">
     <div class="stamp ${best.rarity}"><span>${stampLabel(best.rarity)}</span></div>
     <h2>${items.length}回、出た。</h2>
     <div class="sub">${newCount > 0 ? `<span class="mark o">はじめて ${newCount}枚。</span>` : 'ぜんぶ、もう持ってた。'}${shardText}</div>
-    <div class="rays">${cardHtml(best.face, best.rarity, 'big', false)}</div>
+    <div class="rays">${cardHtml(shown.face, shown.rarity, 'big', false)}</div>
     <div class="m-grid">${tiles}</div>
     <div class="acts">
       <button class="btn mustard" data-act="result-zukan">${icon('book')}図鑑で見る</button>

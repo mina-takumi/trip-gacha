@@ -10,18 +10,18 @@ import { createCatalog, type Spot } from './items.ts';
 import { drawRarity, metersToNextStep, oddsFor, pickCommon, secretChance, stationItemId } from './gacha.ts';
 import { addFix, distanceToday, localDate } from './walk.ts';
 import {
-  applySpins, cooldownRemainingMs, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, storageAvailable, type SaveData, type Spin, type SpinResult,
+  applyShardSpin, applySpins, canShardSpin, cooldownRemainingMs, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, storageAvailable, type SaveData, type Spin, type SpinResult,
 } from './store.ts';
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
 import {
-  busDetailScreen, chooserSheet, detailScreen, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
+  busDetailScreen, chooserSheet, detailScreen, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.4.2';
+const VERSION = '0.5.0';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon }) => ({ id, name, kind, lat, lon }));
@@ -54,6 +54,10 @@ const state = {
   resultPick: null as number | null,
   /** バス停の「回す」を押したときの、1か所だけかまとめてかを選ぶシート */
   chooser: null as { spotId: string; count: number } | null,
+  /** かけらで回す前にたずねている駅 */
+  shardSpot: null as string | null,
+  /** かけらの使い道を見せているか */
+  shardInfo: false,
   zukanTab: 'station' as ZukanTab,
   /** 図鑑で開いているもの。駅なら spotId、バス停カード・裏カードなら itemId(common:... / secret:...) */
   detailId: null as string | null,
@@ -202,7 +206,7 @@ function screenHtml(now: number): string {
       const id = state.detailId;
       if (id?.startsWith('common:')) return busDetailScreen(catalog.common.find((c) => c.itemId === id)!, state.save.collection);
       if (id?.startsWith('secret:')) return secretDetailScreen(secretFace(id), state.save.collection[id]?.count ?? 0);
-      if (id) return detailScreen(spotById.get(id)!, cards[id], state.save.collection);
+      if (id) return detailScreen(spotById.get(id)!, cards[id], state.save.collection, canShardSpin(state.save, id));
       const secrets = ownedSecrets();
       // 記録を読み込み直して裏カードが無くなったら、「???」の切り替えは消えるので駅に戻す
       if (state.zukanTab === 'secret' && secrets.length === 0) state.zukanTab = 'station';
@@ -255,7 +259,9 @@ function render(): void {
     lastTabs = tabs;
   }
   toastEl.innerHTML = state.toast ? `<div class="toast" role="status">${state.toast}</div>` : '';
-  const sheet = state.chooser ? chooserSheet(spotById.get(state.chooser.spotId)!.name, state.chooser.count) : '';
+  const sheet = state.chooser ? chooserSheet(spotById.get(state.chooser.spotId)!.name, state.chooser.count)
+    : state.shardSpot ? shardSpinSheet(spotById.get(state.shardSpot)!.name, state.save.shards)
+    : state.shardInfo ? shardInfoSheet() : '';
   // 中身が同じなら描き直さない(測位のたびに作り直すと、押している途中のボタンが消える)
   if (sheet !== lastSheet) {
     sheetEl.innerHTML = sheet;
@@ -342,6 +348,21 @@ function spinSpots(spotIds: string[]): void {
   window.scrollTo(0, 0);
 }
 
+/** かけらで駅のガチャを回す。確率はホームの表と同じ(今日の移動距離で上がる)。待ち時間・回す権利は変えない */
+function shardSpin(spotId: string): void {
+  const now = Date.now();
+  state.shardSpot = null;
+  const rarity = drawRarity(oddsFor(CONFIG.stationOddsBp, distanceToday(state.save.walk, now)), Math.random);
+  const r = applyShardSpin(state.save, spotId, rarity, now);
+  if (!r) { render(); return; }
+  state.save = r.data;
+  persist();
+  state.results = [{ ...r.result, spotId }];
+  state.resultPick = null;
+  render();
+  window.scrollTo(0, 0);
+}
+
 function exportSave(): void {
   const blob = new Blob([exportJson(state.save)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -361,6 +382,8 @@ app.addEventListener('click', (e) => {
       state.tab = el.dataset.tab as Tab;
       state.results = null;
       state.chooser = null;
+      state.shardSpot = null;
+      state.shardInfo = false;
       state.detailId = null;
       state.showNotes = false;
       window.scrollTo(0, 0);
@@ -371,6 +394,11 @@ app.addEventListener('click', (e) => {
     case 'spin-one': if (state.chooser) spinSpots([state.chooser.spotId]); return;
     case 'spin-all': spinSpots(readyBusStops(Date.now(), new Set(geofence.insideStopIds()))); return;
     case 'chooser-cancel': state.chooser = null; break;
+    case 'shard-spin': state.shardSpot = el.dataset.spot!; break;
+    case 'shard-spin-go': if (state.shardSpot) shardSpin(state.shardSpot); return;
+    case 'shard-cancel': state.shardSpot = null; break;
+    case 'shard-info': state.shardInfo = true; break;
+    case 'shard-info-close': state.shardInfo = false; break;
     case 'result-zukan': {
       // 1枚ならそのカードを開く。まとめて回したとき(バス停だけ)は、バス停の図鑑の一覧へ
       const rs = state.results ?? [];
@@ -384,7 +412,7 @@ app.addEventListener('click', (e) => {
       window.scrollTo(0, 0);
       break;
     }
-    case 'result-back': state.results = null; break;
+    case 'result-back': state.results = null; state.tab = 'main'; state.detailId = null; window.scrollTo(0, 0); break;
     case 'result-pick': state.resultPick = Number(el.dataset.i); break;
     case 'detail':
       zukanScrollY = window.scrollY;

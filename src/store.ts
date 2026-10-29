@@ -1,4 +1,4 @@
-import { CONFIG } from './config.ts';
+import { CONFIG, RARITIES } from './config.ts';
 import type { CardRarity, Rarity } from './items.ts';
 import { emptyWalk, localDate, type WalkState } from './walk.ts';
 import { stationItemId } from './gacha.ts';
@@ -170,6 +170,24 @@ export function applySpin(
     },
     result: { itemId, rarity, isNew: !owned, shardsGained },
   };
+}
+
+/** 行ったことのある駅か。範囲内に入った記録があるか、その駅のカードを1枚でも持っている(記録を取り始める前に行った駅のため) */
+export function hasVisited(data: SaveData, spotId: string): boolean {
+  return data.visitedAt[spotId] != null || RARITIES.some((r) => data.collection[stationItemId(spotId, r)]);
+}
+
+/** かけらで駅のガチャを回せるか */
+export const canShardSpin = (data: SaveData, spotId: string) => hasVisited(data, spotId) && data.shards >= CONFIG.shardSpinCost;
+
+/**
+ * かけらで駅のガチャを回した結果を記録する。かけらを使い、カードは普通に回したときと同じく記録する(かぶればかけらが増える)。
+ * 待ち時間・回す権利とは関係ないので、その駅の最後に回した時刻は変えない。回せないときは null
+ */
+export function applyShardSpin(data: SaveData, spotId: string, rarity: Rarity, now: number): { data: SaveData; result: SpinResult } | null {
+  if (!canShardSpin(data, spotId)) return null;
+  const r = applySpin({ ...data, shards: data.shards - CONFIG.shardSpinCost }, spotId, rarity, now);
+  return { data: { ...r.data, spots: data.spots }, result: r.result };
 }
 
 export interface Spin { spotId: string; rarity: CardRarity; itemId: string }

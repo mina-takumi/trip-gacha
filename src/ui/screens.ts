@@ -96,7 +96,7 @@ export function mainScreen(v: MainView): string {
   </div>`;
   return `
     ${v.storageOk ? '' : '<div class="notice panel warn"><b>記録が、残せません。</b>このブラウザでは端末に記録を保存できないため、閉じると集めたカードが消えます。プライベートブラウズなら、通常のモードで開いてください。</div>'}
-    <div class="top"><span class="logo">トリップガチャ</span><span class="top-r"><button class="reload" data-act="reload" aria-label="最新版に更新">${icon('reload')}<span class="reload-t">更新</span></button><span class="shard"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</span></span></div>
+    <div class="top"><span class="logo">トリップガチャ</span><span class="top-r"><button class="reload" data-act="reload" aria-label="最新版に更新">${icon('reload')}<span class="reload-t">更新</span></button><button class="shard" data-act="shard-info" aria-label="かけら ${v.shards}。使い道を見る"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</button></span></div>
     <div class="lead">今日、歩いた。</div>
     <div class="huge">${km(v.distanceM)}<small>km</small></div>
     <div class="feet" role="img" aria-label="${km(MAX_M)}kmまでのうち${km(v.distanceM)}km">${feet}</div>
@@ -260,7 +260,8 @@ export function busDetailScreen(card: CommonCard, collection: SaveData['collecti
   </div>`;
 }
 
-export function detailScreen(spot: Spot, card: StationCard, collection: SaveData['collection']): string {
+/** 駅の詳細。shardSpin なら(行ったことがあり、かけらが足りる)かけらで回すボタンを出す */
+export function detailScreen(spot: Spot, card: StationCard, collection: SaveData['collection'], shardSpin: boolean): string {
   const have = ownedRarities(collection, spot.id);
   const best = have[have.length - 1];
   const trio = RARITIES.map((r) => {
@@ -272,8 +273,35 @@ export function detailScreen(spot: Spot, card: StationCard, collection: SaveData
     ${best ? cardHtml(card, best, 'big') : `<div class="big">${placeholderHtml(card.number)}</div>`}
     ${best ? '' : `<p class="say" style="text-align:center">${esc(spot.name)}駅の近くで、回す。</p>`}
     <div class="trio">${trio}</div>
-    <div class="acts"><button class="btn paper" data-act="close-detail">図鑑に戻る</button></div>
+    <div class="acts">
+      ${shardSpin ? `<button class="btn mustard" data-act="shard-spin" data-spot="${esc(spot.id)}">${icon('shard')}かけら${CONFIG.shardSpinCost}個で回す</button>` : ''}
+      <button class="btn paper" data-act="close-detail">図鑑に戻る</button>
+    </div>
   </div>`;
+}
+
+/** かけらで回す前にたずねるシート */
+export function shardSpinSheet(stationName: string, shards: number): string {
+  return `<div class="sheet-bg" data-act="shard-cancel"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="かけらで回す">
+      <h3>かけらで回す?</h3>
+      <p>かけら${CONFIG.shardSpinCost}個を使って、${esc(stationName)}駅のガチャを一回まわす。<br>かけら ${shards} → ${shards - CONFIG.shardSpinCost}</p>
+      <button class="btn" data-act="shard-spin-go">${icon('capsule')}回す</button>
+      <button class="btn paper" data-act="shard-cancel">やめる</button>
+    </div>`;
+}
+
+/** ホームのかけらを押したときの、使い道のシート。2つ目は伏せる */
+export function shardInfoSheet(): string {
+  return `<div class="sheet-bg" data-act="shard-info-close"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="かけらの使い道">
+      <h3>かけらの使い道</h3>
+      <ol class="shard-uses">
+        <li>行ったことのある駅なら、その場にいなくても、かけら${CONFIG.shardSpinCost}個でガチャを一回まわせる。図鑑で駅を開くと、ボタンが出る。</li>
+        <li>???</li>
+      </ol>
+      <button class="btn paper" data-act="shard-info-close">とじる</button>
+    </div>`;
 }
 
 const GPS_MODES: [GpsMode, string, string][] = [

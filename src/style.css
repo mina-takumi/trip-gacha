@@ -79,6 +79,7 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .logo, .reload, .shard { white-space: nowrap; }
 .reload svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .shard { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 15px; }
+button.shard { padding: 0; border: 0; background: none; font-family: inherit; color: inherit; cursor: pointer; }
 .shard .ic { width: 26px; height: 26px; border: 2px solid var(--line); background: var(--mustard); }
 .shard .ic svg { width: 13px; height: 13px; stroke: var(--navy); }
 /* 幅の狭いスマホ(iPhone SE 初代など)では、更新ボタンを絵だけにして1行に収める */
@@ -316,6 +317,8 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .sheet h3 { font: 400 24px var(--hand); }
 .sheet p { font-size: 13.5px; font-weight: 900; color: var(--ink-soft); margin-bottom: 4px; }
 .sheet .btn { height: 50px; font-size: 16px; }
+.shard-uses { margin: 4px 0 8px 1.4em; font-size: 14px; font-weight: 900; line-height: 1.6; }
+.shard-uses li + li { margin-top: 6px; }
 @media (prefers-reduced-motion: no-preference) {
   .sheet { animation: sheet-up .22s ease-out both; }
   @keyframes sheet-up { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }

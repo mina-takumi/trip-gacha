@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  applySpin, applySpins, cooldownRemainingMs, emptySave, exportJson, hasTicket, load, markVisited, parseSave, save, spinDistanceM, type StorageLike,
+  applyShardSpin, applySpin, applySpins, canShardSpin, cooldownRemainingMs, emptySave, exportJson, hasTicket, hasVisited, load, markVisited, parseSave, save, spinDistanceM, type StorageLike,
 } from '../src/store.ts';
 
 const memoryStorage = (): StorageLike => {
@@ -208,4 +208,42 @@ test('まとめて回すとき、前の場所で増減したかけらを見て�
   // b1 のかぶりで41、b2 の裏カード(初めて)で0、b3 のかぶりで1
   assert.deepEqual(seen, [40, 41, 0]);
   assert.equal(data.shards, 1);
+});
+
+test('行ったことのある駅: 範囲に入った記録があるか、その駅のカードを持っている', () => {
+  let d = emptySave();
+  assert.equal(hasVisited(d, 'n1'), false);
+  assert.equal(hasVisited(markVisited(d, ['n1'], T, 0), 'n1'), true);
+  ({ data: d } = applySpin(d, 'n2', 'NORMAL', T));
+  assert.equal(hasVisited(d, 'n2'), true);
+  assert.equal(hasVisited(d, 'n1'), false);
+});
+
+test('かけらで回す: 300個使い、カードは記録し、待ち時間と回す権利は変えない', () => {
+  let d = markVisited({ ...emptySave(), shards: 350 }, ['n1'], T, 0);
+  ({ data: d } = applySpin(d, 'n1', 'NORMAL', T + MIN));
+  assert.equal(canShardSpin(d, 'n1'), true);
+  const r = applyShardSpin(d, 'n1', 'RARE', T + 2 * MIN)!;
+  assert.equal(r.result.isNew, true);
+  assert.equal(r.data.shards, 50);
+  assert.equal(r.data.collection['station:n1:RARE'].count, 1);
+  assert.equal(r.data.totalSpins, d.totalSpins + 1);
+  assert.deepEqual(r.data.spots, d.spots);
+  assert.equal(cooldownRemainingMs(r.data, 'n1', T + 2 * MIN), cooldownRemainingMs(d, 'n1', T + 2 * MIN));
+  // かぶれば、いつもどおりかけらが増える
+  const dup = applyShardSpin({ ...d, shards: 300 }, 'n1', 'NORMAL', T + 3 * MIN)!;
+  assert.equal(dup.result.shardsGained, 1);
+  assert.equal(dup.data.shards, 1);
+  // 待ち時間の後に範囲内にいて戻った権利も、かけらで回したあとに残る
+  const later = markVisited(d, ['n1'], T + 30 * MIN, 0);
+  assert.equal(hasTicket(applyShardSpin(later, 'n1', 'NORMAL', T + 31 * MIN)!.data, 'n1', T + 31 * MIN), true);
+});
+
+test('かけらが足りないとき、行ったことのない駅では回せず、記録も変えない', () => {
+  const d = markVisited({ ...emptySave(), shards: 299 }, ['n1'], T, 0);
+  assert.equal(canShardSpin(d, 'n1'), false);
+  assert.equal(applyShardSpin(d, 'n1', 'NORMAL', T), null);
+  const rich = { ...emptySave(), shards: 1000 };
+  assert.equal(canShardSpin(rich, 'n1'), false);
+  assert.equal(applyShardSpin(rich, 'n1', 'NORMAL', T), null);
 });

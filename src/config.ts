@@ -46,6 +46,8 @@ export const CONFIG = {
   secretPerShardPpm: 1,
   /** 裏カードの確率の上限(百万分率。2000 = 0.2%。かけら1900個で到達) */
   secretMaxPpm: 2000,
+  /** 行ったことのある駅のガチャを、かけらで1回回すときに使う数 */
+  shardSpinCost: 300,
 };
 
 export const RARITIES: Rarity[] = ['NORMAL', 'RARE', 'SUPER_RARE'];

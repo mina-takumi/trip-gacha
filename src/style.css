@@ -220,6 +220,9 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .count { font: 400 76px/0.9 var(--hand); text-shadow: 4px 4px 0 rgba(47, 169, 160, .55); }
 .count small { font-size: 22px; text-shadow: none; }
 .z-lead { font-weight: 900; font-size: 13.5px; margin: 12px 0 16px; }
+.z-city { display: flex; align-items: baseline; gap: 8px; margin: 24px 0 10px; font-size: 15px; font-weight: 900; }
+.z-city small { font-size: 12px; font-weight: 700; opacity: .7; }
+.z-lead + .z-city { margin-top: 0; }
 .z-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
 .z-tabs.three { grid-template-columns: 1fr 1fr .8fr; }
 .z-tab { height: 44px; border: 2px solid var(--line); border-radius: 22px; background: var(--paper); color: var(--navy); box-shadow: 2px 2px 0 var(--line);
@@ -319,6 +322,9 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .sheet .btn { height: 50px; font-size: 16px; }
 .shard-uses { margin: 4px 0 8px 1.4em; font-size: 14px; font-weight: 900; line-height: 1.6; }
 .shard-uses li + li { margin-top: 6px; }
+.shard-gain { display: flex; gap: 8px; margin: 2px 0 12px; }
+.shard-gain span { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border: 2px solid var(--line); border-radius: 12px; font-size: 12px; font-weight: 900; }
+.shard-gain b { font-size: 17px; }
 @media (prefers-reduced-motion: no-preference) {
   .sheet { animation: sheet-up .22s ease-out both; }
   @keyframes sheet-up { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }

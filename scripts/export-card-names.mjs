@@ -17,7 +17,7 @@ const HEADER = [
 ];
 
 function publicList() {
-  const stations = Object.values(catalog.stations).map((s) => ({ ...s, station: spots.find((p) => p.id === s.spotId).name }));
+  const stations = Object.values(catalog.stations).map((s) => ({ ...s, station: spots.find((p) => p.id === s.spotId).name, city: spots.find((p) => p.id === s.spotId).city ?? '八王子市' }));
   return [
     ...HEADER,
     '# カードの名前一覧(確定版 v4)',
@@ -26,11 +26,11 @@ function publicList() {
     '',
     `## 駅カード(${stations.length}枚)`,
     '',
-    '各駅にふつう・レア・超レアの3段階があり、名前は3段階とも同じ(枠が銅・銀・金になる)。',
+    '各駅にふつう・レア・超レアの3段階があり、名前は3段階とも同じ(枠が銅・銀・金になる)。2026-10-29 に日野市・町田市・多摩市の23駅(XXII〜XLIV)を足した。八王子市の22駅の名前と番号は変えていない。',
     '',
-    '| 番号 | 名前 | 駅 |',
-    '|---|---|---|',
-    ...stations.map((s) => `| ${s.number} | ${s.name} | ${s.station} |`),
+    '| 番号 | 名前 | 駅 | 市 |',
+    '|---|---|---|---|',
+    ...stations.map((s) => `| ${s.number} | ${s.name} | ${s.station} | ${s.city} |`),
     '',
     `## バス停カード(${catalog.common.length}枚)`,
     '',

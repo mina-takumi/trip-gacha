@@ -22,6 +22,16 @@ export const SPECIAL_NOUNS = [
   '門', '羅針盤', '旗', '灯台', '橋', '船', '燭台', '竪琴', '書', '巻物', '松明', '泉',
   '樹', '山', '階段', '窓', '歯車', '風車', '仮面', '指輪', '宝珠', '印章', '鎌', '天球儀',
 ];
+// 周りの市の駅と物(2026-10-29 決定)。物は上の24語とも、バス停の物とも重ならない。
+// 八王子の22駅の物と裏カードの割り当てを動かさないよう、決め方を使わず表で持つ
+export const NEIGHBOR_CITIES = ['日野市', '町田市', '多摩市'];
+export const NEIGHBOR_NOUNS: Record<string, string> = {
+  '日野': '錠前', '豊田': '兜', '高幡不動': '弓', '百草園': '結晶', '多摩動物公園': '鳥籠', '程久保': '柱',
+  '甲州街道': '気球', '万願寺': '風見鶏', '平山城址公園': '首飾り', '南平': '馬車',
+  '町田': '斧', '相原': '玉座', '鶴川': '瓶', '玉川学園前': '宝箱', '成瀬': '神殿', 'すずかけ台': '傘',
+  'つくし野': '城', '南町田グランベリーパーク': '壺', '多摩境': '盾',
+  '多摩センター': '扇', '永山': '鏡', '聖蹟桜ヶ丘': '貝', '唐木田': '望遠鏡',
+};
 // 絵のファイル名に使う英字。カードの名前には影響しない
 export const ART_KEYS: Record<string, string> = {
   '銀の': 'silver', '金の': 'gold', '黒い': 'black', '翠の': 'emerald', '紅い': 'crimson', '蒼い': 'azure',
@@ -34,6 +44,10 @@ export const ART_KEYS: Record<string, string> = {
   '燭台': 'candlestick', '竪琴': 'harp', '書': 'book', '巻物': 'scroll', '松明': 'torch', '泉': 'fountain',
   '樹': 'tree', '山': 'mountain', '階段': 'staircase', '窓': 'window', '歯車': 'gear', '風車': 'windmill',
   '仮面': 'mask', '指輪': 'ring', '宝珠': 'orb', '印章': 'seal', '鎌': 'scythe', '天球儀': 'armillary',
+  '鏡': 'mirror', '扇': 'fan', '盾': 'shield', '兜': 'helmet', '弓': 'bow', '玉座': 'throne', '宝箱': 'chest',
+  '望遠鏡': 'telescope', '鳥籠': 'birdcage', '気球': 'balloon', '貝': 'shell', '結晶': 'snowflake', '錠前': 'padlock',
+  '壺': 'urn', '瓶': 'bottle', '城': 'castle', '神殿': 'temple', '柱': 'column', '傘': 'umbrella',
+  '首飾り': 'necklace', '斧': 'axe', '馬車': 'carriage', '風見鶏': 'weathervane',
 };
 
 export interface Spot {
@@ -42,6 +56,8 @@ export interface Spot {
   kind: string;
   lat: number;
   lon: number;
+  /** 周りの市の駅だけ(日野市など)。八王子市のスポットには付かない */
+  city?: string;
 }
 
 export interface CommonCard {
@@ -139,9 +155,10 @@ function sharesChar(name: string, noun: string): boolean {
   return false;
 }
 
-// 駅: 番号(0〜XXI)はスポット番号順、物はハッシュ順に、重ならないように割り当てる
+// 駅: 八王子の22駅は、番号(0〜XXI)はスポット番号順、物はハッシュ順に、重ならないように割り当てる。
+// 周りの市の駅は、その続き(XXII〜)に市の順・市の中はスポット番号順で並べ、物は NEIGHBOR_NOUNS の表から
 function buildStations(spots: Spot[]): Record<string, StationCard> {
-  const stations = spots.filter((s) => s.kind === 'station').slice().sort(idOrder);
+  const stations = spots.filter((s) => s.kind === 'station' && !s.city).slice().sort(idOrder);
   const used = new Set<string>();
   const nounOf: Record<string, string> = {};
   stations.map((s) => ({ key: s.id, spot: s }))
@@ -156,6 +173,14 @@ function buildStations(spots: Spot[]): Record<string, StationCard> {
   stations.forEach((s, i) => {
     out[s.id] = { spotId: s.id, name: s.name + 'の' + nounOf[s.id], noun: nounOf[s.id], number: toRoman(i), art: specialArt(nounOf[s.id]) };
   });
+  const cityOrder = (s: Spot) => NEIGHBOR_CITIES.indexOf(s.city!);
+  spots.filter((s) => s.kind === 'station' && s.city)
+    .sort((a, b) => cityOrder(a) - cityOrder(b) || idOrder(a, b))
+    .forEach((s, i) => {
+      const noun = NEIGHBOR_NOUNS[s.name];
+      if (!noun) throw new Error('周りの市の駅の物が決まっていない: ' + s.name);
+      out[s.id] = { spotId: s.id, name: s.name + 'の' + noun, noun, number: toRoman(stations.length + i), art: specialArt(noun) };
+    });
   return out;
 }
 

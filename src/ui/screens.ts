@@ -1,7 +1,7 @@
 import { CONFIG, RARITIES, RARITY_LABEL } from '../config.ts';
 import type { Odds } from '../gacha.ts';
 import { stationItemId } from '../gacha.ts';
-import type { CardRarity, CommonCard, Rarity, Spot, StationCard } from '../items.ts';
+import { NEIGHBOR_CITIES, type CardRarity, type CommonCard, type Rarity, type Spot, type StationCard } from '../items.ts';
 import type { GpsMode } from '../location.ts';
 import type { SaveData } from '../store.ts';
 import { cardHtml, placeholderHtml, type CardFace } from './card.ts';
@@ -223,8 +223,10 @@ export function secretDetailScreen(card: SecretFace, count: number): string {
   </div>`;
 }
 
+/** 駅は市ごとに見出しを付けて分け、市の中は番号順 */
 function stationTiles(stations: Spot[], cards: Record<string, StationCard>, collection: SaveData['collection'], owned: number, total: number): string {
-  const tiles = stations.map((s) => {
+  const order = Object.keys(cards);
+  const tile = (s: Spot) => {
     const have = ownedRarities(collection, s.id);
     const best = have[have.length - 1];
     return `<button class="tile ${best ? '' : 'none'}" data-act="detail" data-spot="${esc(s.id)}" aria-label="${esc(s.name)}">
@@ -232,9 +234,12 @@ function stationTiles(stations: Spot[], cards: Record<string, StationCard>, coll
       <div class="sn">${esc(s.name)}</div>
       <div class="ox" aria-label="${have.map((r) => RARITY_LABEL[r]).join('・') || 'まだなし'}">${ox(have)}</div>
     </button>`;
+  };
+  const groups = ['八王子市', ...NEIGHBOR_CITIES].map((city) => {
+    const list = stations.filter((s) => (s.city ?? '八王子市') === city).sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+    return list.length ? `<h3 class="z-city">${city}<small>${list.length}駅</small></h3><div class="grid">${list.map(tile).join('')}</div>` : '';
   }).join('');
-  return `<div class="z-lead">${stations.length}駅 × 3段階。${zukanLead(owned, total, '駅')}</div>
-    <div class="grid">${tiles}</div>`;
+  return `<div class="z-lead">${stations.length}駅 × 3段階。${zukanLead(owned, total, '駅')}</div>${groups}`;
 }
 
 /** バス停カードは番号順に4列。持っていないカードも、珍しさだけは見せる */
@@ -300,6 +305,8 @@ export function shardInfoSheet(): string {
         <li>行ったことのある駅なら、その場にいなくても、かけら${CONFIG.shardSpinCost}個でガチャを一回まわせる。図鑑で駅を開くと、ボタンが出る。</li>
         <li>???</li>
       </ol>
+      <p>持っているカードがまた出ると、かけらになる。</p>
+      <div class="shard-gain">${RARITIES.map((r) => `<span><i class="dot ${r}"></i>${RARITY_LABEL[r]}<b>${CONFIG.shardsFor[r]}個</b></span>`).join('')}</div>
       <button class="btn paper" data-act="shard-info-close">とじる</button>
     </div>`;
 }

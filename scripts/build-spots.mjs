@@ -3,12 +3,14 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { haversineDistanceM } from '../src/geofence.ts';
+import { groupStations } from './neighbor-map.mjs';
 
 // 同名の停留所をまとめる距離。上り・下りの組は最大310m、別の場所にある同名は3.7km以上離れている。
 const MERGE_RADIUS_M = 500;
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const SRC = root + 'data/source/hachioji_stops.csv';
+const NEIGHBORS = root + 'data/source/neighbors.json';
 const OUT = root + 'data/spots.json';
 
 function parseCsv(text) {
@@ -89,6 +91,15 @@ for (const members of groups.values()) {
   }
 }
 
+// 周りの市(日野市・町田市・多摩市)の駅。バス停は入れない(2026-10-29)。
+// 会社ごとに別名の同じ駅(京王多摩センターと小田急多摩センターなど)は1つにまとめ、市の名前を付ける
+const ownIds = new Set(spots.flatMap((s) => s.sourceIds));
+for (const g of groupStations(JSON.parse(readFileSync(NEIGHBORS, 'utf8')).stations)) {
+  const sourceIds = [...g.ids].sort(byId);
+  if (sourceIds.some((id) => ownIds.has(id))) throw new Error('八王子市の停留所と同じ id: ' + g.name);
+  spots.push({ id: sourceIds[0], name: g.name, kind: 'station', city: g.city, lat: round7(g.lat), lon: round7(g.lon), sourceIds });
+}
+
 const kindOrder = { station: 0, bus_stop: 1 };
 spots.sort((a, b) => kindOrder[a.kind] - kindOrder[b.kind] || byId(a.id, b.id));
 
@@ -100,7 +111,7 @@ writeFileSync(OUT, JSON.stringify({
 
 const count = (kind) => spots.filter((s) => s.kind === kind).length;
 console.log(`元データ: ${raw.length}行 / 名前なしで除外: ${unnamed.length}件`);
-console.log(`スポット: 駅 ${count('station')} / バス停 ${count('bus_stop')} / 合計 ${spots.length}`);
+console.log(`スポット: 駅 ${count('station')}(うち周りの市 ${spots.filter((s) => s.city).length})/ バス停 ${count('bus_stop')} / 合計 ${spots.length}`);
 console.log(`同名だが離れているため別スポットにしたもの: ${keptApart.length}組`);
 for (const k of keptApart) console.log(`  ${k.name} (${k.kind}) → ${k.count}か所`);
 console.log(`出力: data/spots.json`);

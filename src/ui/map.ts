@@ -27,7 +27,11 @@ const LABEL_DIR: Record<string, L.Direction> = {
 const LABEL_OFFSET: Record<string, L.PointTuple> = { right: [10, 0], left: [-10, 0], top: [0, -10], bottom: [0, 10] };
 
 type Encoded = number[];
-interface BaseData { city: Encoded; big: Encoded[]; mid: Encoded[]; small: Encoded[] }
+interface BaseData {
+  city: Encoded; big: Encoded[]; mid: Encoded[]; small: Encoded[];
+  /** 周りの市(日野市・町田市・多摩市)の形。駅は八王子市の駅と同じく stations で描く */
+  neighbors: Encoded[];
+}
 interface DetailData { roads: Encoded[] }
 
 /** scripts/build-map-data.mjs の形(1/100000 度の整数、2点目からは差)を緯度経度に戻す */
@@ -67,7 +71,10 @@ export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[
     L.polyline(pts.map(decode), { color, weight, renderer, interactive: false, lineCap: 'round', lineJoin: 'round', smoothFactor: 1.5 });
 
   loadJson<BaseData>('base').then((d) => {
-    L.polygon(decode(d.city), { renderer: cityRenderer, color: NAVY, weight: 3, fillColor: PANEL, fillOpacity: 1, interactive: false }).addTo(map);
+    // 周りの市も八王子市と同じ見た目。影は面ごとに付くので、外側の縁にだけ出る
+    for (const ring of [...d.neighbors, d.city]) {
+      L.polygon(decode(ring), { renderer: cityRenderer, color: NAVY, weight: 3, fillColor: PANEL, fillOpacity: 1, interactive: false }).addTo(map);
+    }
     // 太い道は「紺の縁+中を白抜き」の二重線、県道は細い1本線
     line(d.small, NAVY, 1.3, roadRenderer).addTo(map);
     line(d.mid, NAVY, 4.5, roadRenderer).addTo(map);

@@ -21,10 +21,10 @@ import {
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.5.0';
+const VERSION = '0.6.0';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
-const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon }) => ({ id, name, kind, lat, lon }));
+const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
 const stations = spots.filter((s) => s.kind === 'station');
 const busStops = spots.filter((s) => s.kind === 'bus_stop');
 const catalog = createCatalog(spots);

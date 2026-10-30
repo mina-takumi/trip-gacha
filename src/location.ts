@@ -88,6 +88,8 @@ export function createAdaptiveLocation(device: GpsDevice, clock: Clock): Omit<Lo
 
   function onReading(r: Reading) {
     if (stopped) return;
+    // iPhone は開き直した直後に、閉じる前に測った位置をもう一度渡してくることがある(測った時刻が同じ)。今の位置として扱わない
+    if (prev && r.t <= prev.t) return;
     fixCb({ lat: r.lat, lon: r.lon, accuracyM: r.accuracyM, t: r.t });
     // 精度の悪い位置は速さの計算にも使わない(大きく跳んで、速く動いたように見えるため)
     if (r.accuracyM > CONFIG.accuracyLimitM) return;
@@ -134,8 +136,10 @@ export function createAdaptiveLocation(device: GpsDevice, clock: Clock): Omit<Lo
   };
 }
 
+// 時刻は受け取った時刻ではなく測った時刻にする(古い位置を受け取ったとき、今いる所と取り違えないように)
 const toReading = (p: GeolocationPosition, now: number): Reading => ({
-  lat: p.coords.latitude, lon: p.coords.longitude, accuracyM: p.coords.accuracy, speedMps: p.coords.speed ?? null, t: now,
+  lat: p.coords.latitude, lon: p.coords.longitude, accuracyM: p.coords.accuracy, speedMps: p.coords.speed ?? null,
+  t: p.timestamp > 0 ? Math.min(now, p.timestamp) : now,
 });
 const toError = (e: GeolocationPositionError): LocationError => (e.code === e.PERMISSION_DENIED ? 'denied' : 'unavailable');
 

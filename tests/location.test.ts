@@ -187,3 +187,24 @@ test('精度の悪い位置は届けるが、速さの判定には使わない',
   assert.deepEqual(fixes, [8, 500, 8]);
   assert.deepEqual(modes, ['slow']);
 });
+
+test('開き直した直後に、前と同じ時刻に測った古い位置が来ても、今の位置として渡さない', () => {
+  const c = fakeClock();
+  let stale = false;
+  const device: GpsDevice = {
+    getOnce: (ok) => ok({ lat: LAT, lon: LON, accuracyM: 8, speedMps: 0, t: stale ? T0 : c.now() }),
+    watch: () => 1,
+    clearWatch: () => {},
+  };
+  const fixes: number[] = [];
+  const loc = createAdaptiveLocation(device, c.clock);
+  loc.start((f) => fixes.push(f.t), () => {});
+  c.advance(10 * 60_000);
+  stale = true;
+  loc.wake();
+  stale = false;
+  loc.wake();
+  assert.equal(fixes[0], T0);
+  assert.ok(fixes.slice(1).every((t) => t > T0));
+  assert.equal(fixes.filter((t) => t === T0).length, 1);
+});

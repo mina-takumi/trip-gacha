@@ -23,7 +23,7 @@ import {
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.7.0';
+const VERSION = '0.7.1';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -90,6 +90,27 @@ const writeLocal = (key: string, value: unknown) => {
 let drawPassLines = readLocal<boolean>(PASS_DRAW_KEY, true);
 let passLines = readLocal<{ date: string; lines: LatLon[][] }>(PASS_LINES_KEY, { date: '', lines: [] });
 let passLinesShown = '';
+
+// ベータ版だけ: 閉じている間の通過が働いたかを、設定で見られるように書き残す(位置そのものは残さない)
+const PASS_LOG_KEY = 'trip-gacha:pass-log';
+let passLogLines = readLocal<string[]>(PASS_LOG_KEY, []);
+function passLog(text: string): void {
+  const d = new Date();
+  const hm = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+  passLogLines = [`${hm} ${text}`, ...passLogLines].slice(0, 80);
+  writeLocal(PASS_LOG_KEY, passLogLines);
+}
+/** 開いた直後・表に戻った直後の、何回分の位置を書き残すか */
+let logFixes = 3;
+passLog('アプリを起動');
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    passLog('表に戻った');
+    logFixes = 3;
+  } else {
+    passLog('裏に回った・画面を消した');
+  }
+});
 
 // 地図の範囲の表示は見た目の好みなので、記録(書き出すJSON)とは別に置く
 const RANGES_KEY = 'trip-gacha:map-ranges';
@@ -241,7 +262,7 @@ function screenHtml(now: number): string {
     case 'settings': {
       if (state.showNotes) return notesScreen(ownedSecrets().length > 0);
       const cardCount = Object.keys(state.save.collection).filter((id) => id.startsWith('station:') || id.startsWith('common:')).length;
-      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines);
+      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines, passLogLines);
     }
     case 'map':
       return '';
@@ -601,11 +622,13 @@ async function processPending(): Promise<void> {
     while (state.save.pending.length > 0 && !state.passAsk) {
       const seg = state.save.pending[0];
       const r = inferSegment(net, seg.from, seg.to);
+      passLog(`推測の結果: ${r.kind === 'route' ? `${PASS_MODE_LABEL[r.candidate.mode]}・${r.candidate.passes.length}か所` : r.kind === 'ask' ? '乗り物を聞く' : r.kind === 'count' ? `バス停の回数 ${r.count}回` : '何も付けない'}`);
       if (r.kind === 'ask') state.passAsk = { seg, options: r.options };
       else resolveSegment(seg, r);
     }
-  } catch {
+  } catch (e) {
     // 道のデータが読めない(まだ端末に保存できていない)。区間は残し、次に位置が来たときにもう一度
+    passLog(`推測できなかった: ${e instanceof Error ? e.message : String(e)}`);
   } finally {
     processing = false;
     render();
@@ -622,12 +645,22 @@ function onFix(fix: Fix): void {
   // 範囲内にいた記録が、回す権利になる(この後は範囲の外でも回せる)。そのときの移動距離で、外で回すときの確率を決める
   const visited = accepted ? markVisited(state.save, geofence.insideStopIds(), fix.t, distanceToday(walk, fix.t)) : state.save;
   let next: SaveData = { ...visited, walk };
-  if (accepted) {
+  const last = state.save.lastFix;
+  // 閉じる前に測った古い位置は、区間の端にしない(使うと、閉じていた時間が消えて推測されなくなる)
+  const fresh = Date.now() - fix.t <= CONFIG.passFreshMs && (!last || fix.t > last.t);
+  if (logFixes > 0) {
+    logFixes--;
+    const since = last ? `前回の位置から${Math.round((fix.t - last.t) / 60000)}分・${Math.round(haversineDistanceM(last.lat, last.lon, fix.lat, fix.lon))}m` : '前回の位置なし';
+    passLog(`位置 精度${Math.round(fix.accuracyM ?? 0)}m・${Math.round((Date.now() - fix.t) / 1000)}秒前に測った・${since}${accepted ? '' : '・精度待ち'}${fresh ? '' : '・古いので使わない'}`);
+  }
+  if (accepted && fresh) {
     // 前の位置から時間がたち、離れた所で開き直したら、その間の道すじを推測する区間をためる。
     // 移動距離にはこの位置を受け取ったときにまっすぐの距離が足されているので、推測した道のりからはその分を引いて足す
-    if (isPassSegment(state.save.lastFix, fix)) {
+    if (isPassSegment(last, fix)) {
       const addedM = walk.distanceDate === prevWalk.distanceDate ? Math.max(0, walk.dailyDistanceM - prevWalk.dailyDistanceM) : 0;
-      next = { ...next, pending: [...next.pending, { from: state.save.lastFix!, to: { lat: fix.lat, lon: fix.lon, t: fix.t }, addedM }] };
+      next = { ...next, pending: [...next.pending, { from: last!, to: { lat: fix.lat, lon: fix.lon, t: fix.t }, addedM }] };
+      passLog('区間をためた(推測する)');
+      logFixes = 0;
     }
     next = { ...next, lastFix: { lat: fix.lat, lon: fix.lon, t: fix.t, distanceM: distanceToday(walk, fix.t) } };
   }

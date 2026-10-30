@@ -282,6 +282,8 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .settings .panel h4 { font: 400 19px var(--hand); margin-bottom: 4px; }
 .settings .panel p { font-size: 13.5px; line-height: 1.75; color: var(--ink-soft); }
 .settings .panel .btn { margin-top: 12px; }
+.settings .pass-log { margin-top: 12px; font-size: 13px; }
+.settings .pass-log pre { margin-top: 8px; white-space: pre-wrap; font: 12px/1.6 ui-monospace, monospace; color: var(--ink-soft); max-height: 320px; overflow: auto; }
 .notes ul { margin: 6px 0 0; padding-left: 1.2em; }
 .notes li { font-size: 13.5px; line-height: 1.7; }
 .notes li + li { margin-top: 6px; }

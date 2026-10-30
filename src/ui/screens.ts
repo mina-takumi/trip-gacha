@@ -351,7 +351,7 @@ function gpsModeLine(gpsMode: GpsMode | 'sim' | null): string {
 
 export function settingsScreen(
   save: SaveData, pendingImport: { data: SaveData; fileName: string } | null, cardCount: number, version: string, gpsMode: GpsMode | 'sim' | null,
-  drawPassLines: boolean,
+  drawPassLines: boolean, passLogLines: string[],
 ): string {
   const confirm = pendingImport
     ? `<div class="panel">
@@ -386,6 +386,10 @@ export function settingsScreen(
       <h4>ベータ版の確かめ用</h4>
       <p>アプリを閉じている間に通ったと推測した道を、地図に点線で描きます(今日の分)。</p>
       <button class="btn paper" data-act="toggle-pass-lines" aria-pressed="${drawPassLines}">推測した道を地図に描く: ${drawPassLines ? 'オン' : 'オフ'}</button>
+      <details class="pass-log">
+        <summary>閉じている間の通過の記録(新しい順)</summary>
+        <pre>${passLogLines.length ? passLogLines.map(esc).join('\n') : 'まだありません'}</pre>
+      </details>
     </div>
     <div class="foot">
       ${gpsModeLine(gpsMode)}

@@ -2,6 +2,7 @@ import { CONFIG, RARITIES } from './config.ts';
 import type { CardRarity, Rarity } from './items.ts';
 import { emptyWalk, localDate, type WalkState } from './walk.ts';
 import { stationItemId } from './gacha.ts';
+import { haversineDistanceM } from './geofence.ts';
 
 export const SCHEMA_VERSION = 1;
 const KEY = 'trip-gacha:save';
@@ -19,7 +20,19 @@ export interface SaveData {
   shards: number;
   totalSpins: number;
   walk: WalkState;
+  /** 最後に使えた位置と、そのときのその日の移動距離。閉じている間の通過を推測する区間の始まり(0.7.0 で追加。以下同じ) */
+  lastFix: LastFix | null;
+  /** spotId -> 通過(推測)で回す権利が付いた日時。visitedAt と同じなら、今の権利は通過で付いたもの */
+  passedAt: Record<string, number>;
+  /** 道すじが出なかった区間で付いた、バス停を回せる回数(その日のうち) */
+  busPass: { date: string; count: number };
+  /** 乗り物を聞いている途中の区間(答えるまで残す。日付が変わったら捨てる) */
+  pending: PassSegment[];
 }
+
+export interface LastFix { lat: number; lon: number; t: number; distanceM: number }
+/** 閉じている間の区間。addedM は、開き直した位置を受け取ったときに移動距離へもう足してある分(まっすぐの距離) */
+export interface PassSegment { from: LastFix; to: { lat: number; lon: number; t: number }; addedM: number }
 
 export interface StorageLike {
   getItem(key: string): string | null;
@@ -29,6 +42,7 @@ export interface StorageLike {
 
 export const emptySave = (): SaveData => ({
   schemaVersion: SCHEMA_VERSION, collection: {}, spots: {}, visitedAt: {}, visitedDistanceM: {}, shards: 0, totalSpins: 0, walk: emptyWalk(),
+  lastFix: null, passedAt: {}, busPass: { date: '', count: 0 }, pending: [],
 });
 
 /** 端末に保存できるか(プライベートブラウズなどで使えないことがある) */
@@ -86,6 +100,16 @@ export function parseSave(text: string): SaveData {
   if (!isNum(shards) || shards < 0 || !isNum(totalSpins) || totalSpins < 0) throw new Error('かけらか回した回数が壊れています');
   if (!isObj(walk) || !isNum(walk.dailyDistanceM) || typeof walk.distanceDate !== 'string') throw new Error('移動距離の記録が壊れています');
   const point = (v: unknown) => isObj(v) && isNum(v.lat) && isNum(v.lon) && isNum(v.accM) ? { lat: v.lat, lon: v.lon, accM: v.accM } : null;
+  // 0.7.0 で足した項目は、無い・形が違うときは空として読む(古い書き出しファイルも読めるように)
+  const fixOf = (v: unknown): LastFix | null => isObj(v) && isNum(v.lat) && isNum(v.lon) && isNum(v.t) && isNum(v.distanceM) ? { lat: v.lat, lon: v.lon, t: v.t, distanceM: v.distanceM } : null;
+  const passedAt = isObj(raw.passedAt) && Object.values(raw.passedAt).every(isNum) ? raw.passedAt as Record<string, number> : {};
+  const bp = raw.busPass;
+  const busPass = isObj(bp) && typeof bp.date === 'string' && isNum(bp.count) && bp.count >= 0 ? { date: bp.date, count: bp.count } : { date: '', count: 0 };
+  const pending = Array.isArray(raw.pending) ? raw.pending.flatMap((s: unknown) => {
+    if (!isObj(s) || !isObj(s.to) || !isNum(s.addedM)) return [];
+    const from = fixOf(s.from), to = s.to;
+    return from && isNum(to.lat) && isNum(to.lon) && isNum(to.t) ? [{ from, to: { lat: to.lat, lon: to.lon, t: to.t }, addedM: s.addedM }] : [];
+  }) : [];
   return {
     schemaVersion: SCHEMA_VERSION,
     collection: collection as SaveData['collection'],
@@ -94,7 +118,52 @@ export function parseSave(text: string): SaveData {
     visitedDistanceM: visitedDistanceM as SaveData['visitedDistanceM'],
     shards, totalSpins,
     walk: { dailyDistanceM: walk.dailyDistanceM, distanceDate: walk.distanceDate, smooth: point(walk.smooth), anchor: point(walk.anchor), lastFixAt: isNum(walk.lastFixAt) ? walk.lastFixAt : null },
+    lastFix: fixOf(raw.lastFix), passedAt, busPass, pending,
   };
+}
+
+/** 前の位置から時間がたち、離れた所で開き直したか(同じ日のうちだけ)。そうなら閉じている間の通過を推測する */
+export function isPassSegment(last: LastFix | null, fix: { lat: number; lon: number; t: number }): boolean {
+  if (!last || fix.t - last.t < CONFIG.passMinGapMs || localDate(last.t) !== localDate(fix.t)) return false;
+  return haversineDistanceM(last.lat, last.lon, fix.lat, fix.lon) >= CONFIG.passMinMoveM;
+}
+
+/**
+ * 推測した道すじで通過した場所に、回す権利を付けた記録を返す。通過した時刻と移動距離は、道のりの割合で決める
+ * (区間を始めたときの距離 + その場所までの道のり)。今日もっと後に範囲内にいた記録があれば、そちらを残す。
+ * 推測した道のりは、まだ足していない分(addedM を引いた分)をその日の移動距離に足す
+ */
+export function applyPassRoute(data: SaveData, seg: PassSegment, lengthM: number, passes: { spotId: string; alongM: number }[]): SaveData {
+  const visitedAt = { ...data.visitedAt }, visitedDistanceM = { ...data.visitedDistanceM }, passedAt = { ...data.passedAt };
+  const span = seg.to.t - seg.from.t;
+  for (const { spotId, alongM } of passes) {
+    const t = Math.round(seg.from.t + span * Math.min(1, lengthM ? alongM / lengthM : 1));
+    if ((visitedAt[spotId] ?? -Infinity) >= t) continue;
+    visitedAt[spotId] = t;
+    visitedDistanceM[spotId] = seg.from.distanceM + alongM;
+    passedAt[spotId] = t;
+  }
+  const today = localDate(seg.to.t);
+  const extra = Math.max(0, lengthM - seg.addedM);
+  const walk = data.walk.distanceDate === today ? { ...data.walk, dailyDistanceM: data.walk.dailyDistanceM + extra } : data.walk;
+  return { ...data, visitedAt, visitedDistanceM, passedAt, walk };
+}
+
+/** 道すじが出なかった区間で、バス停を回せる回数を足す */
+export function applyPassCount(data: SaveData, now: number, count: number): SaveData {
+  const date = localDate(now);
+  const base = data.busPass.date === date ? data.busPass.count : 0;
+  return { ...data, busPass: { date, count: base + count } };
+}
+
+/** 今日使える、通過したバス停の回数 */
+export const busPassToday = (data: SaveData, now: number) => data.busPass.date === localDate(now) ? data.busPass.count : 0;
+
+/** 通過したバス停の回数で1回回した結果を記録する。どのバス停かは決まっていないので、場所ごとの記録(待ち時間)は変えない */
+export function applyBusPassSpin(data: SaveData, rarity: Rarity, itemId: string, now: number): { data: SaveData; result: SpinResult } | null {
+  if (busPassToday(data, now) <= 0) return null;
+  const r = applySpin(data, 'bus-pass', rarity, now, itemId);
+  return { data: { ...r.data, spots: data.spots, busPass: { ...data.busPass, count: data.busPass.count - 1 } }, result: r.result };
 }
 
 /** あと何ミリ秒で回せるか。0 なら回せる。端末の時計が戻されて最後に回した日時が未来なら、回せることにする */

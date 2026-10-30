@@ -140,8 +140,19 @@ export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[
   const me = L.marker([0, 0], { icon: L.divIcon({ className: '', html: '<div class="me-dot"></div>', iconSize: [18, 18] }), interactive: false });
   if (onTap) map.on('click', (e) => onTap(e.latlng.lat, e.latlng.lng));
 
+  // 推測した道すじ(ベータ版だけ。設定で描くときだけ)。駅の点の下、道の上
+  map.createPane('pass').style.zIndex = '278';
+  const passLines = L.layerGroup().addTo(map);
+
   let lastFix: Fix | null = null;
   return {
+    /** 推測した道すじを描き直す(空なら消す) */
+    setPassLines(lines: { lat: number; lon: number }[][]) {
+      passLines.clearLayers();
+      for (const l of lines) {
+        L.polyline(l.map((p) => [p.lat, p.lon] as L.LatLngTuple), { pane: 'pass', color: OWNED, weight: 4, opacity: .8, dashArray: '2 8', lineCap: 'round', interactive: false }).addTo(passLines);
+      }
+    },
     /** 持っている駅はオレンジ、まだの駅は灰色。ポップアップには、持っていればカードの名前を出す */
     update(fix: Fix | null, ownedSpotIds: Set<string>) {
       for (const s of stations) {

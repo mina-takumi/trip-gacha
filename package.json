@@ -1,7 +1,7 @@
 {
   "name": "trip-gacha",
   "private": true,
-  "version": "0.6.0",
+  "version": "0.7.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,7 +13,10 @@
     "names:check": "node scripts/export-card-names.mjs --check",
     "map": "node scripts/build-map.mjs",
     "map:roads": "node scripts/fetch-roads.mjs",
-    "map:data": "node scripts/build-map-data.mjs"
+    "map:data": "node scripts/build-map-data.mjs",
+    "route:fetch": "node scripts/fetch-transit.mjs",
+    "route:data": "node scripts/build-route-data.mjs",
+    "route:check": "node scripts/route-accuracy.mjs"
   },
   "dependencies": {
     "@fontsource/yusei-magic": "^5.3.0",

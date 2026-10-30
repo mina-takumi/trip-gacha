@@ -23,8 +23,11 @@ export function tabbar(tab: Tab): string {
     `<button class="tab ${t === tab ? 'on' : ''}" data-act="tab" data-tab="${t}" aria-current="${t === tab ? 'page' : 'false'}"><span class="ic ${color}">${icon(ic)}</span>${label}</button>`).join('');
 }
 
-/** 回す権利がある駅・バス停。badge は駅ならカードの番号、バス停なら「バス」。distanceM は現在地が分からなければ null */
-export interface NearSpot { spot: Spot; badge: string; distanceM: number | null; remainingMs: number }
+/**
+ * 回す権利がある駅・バス停。badge は駅ならカードの番号、バス停なら「バス」。distanceM は現在地が分からなければ null。
+ * passed は、今の権利が閉じている間の通過(推測)で付いたもの
+ */
+export interface NearSpot { spot: Spot; badge: string; distanceM: number | null; remainingMs: number; passed: boolean }
 
 export interface MainView {
   distanceM: number;
@@ -37,6 +40,8 @@ export interface MainView {
   near: NearSpot[];
   nearest: { spot: Spot; distanceM: number } | null;
   storageOk: boolean;
+  /** 道すじが出なかった区間で付いた、どのバス停かは決まっていない回す回数 */
+  busPass: number;
 }
 
 function geoNotice(v: MainView): string {
@@ -66,25 +71,30 @@ export function mainScreen(v: MainView): string {
     const right = ready
       ? `<button class="spin-btn" data-act="spin" data-spot="${esc(n.spot.id)}">${icon('capsule')}回す</button>`
       : `<span class="wait-t">あと${Math.ceil(n.remainingMs / 60000)}分</span>`;
-    return `<div class="spot ${ready ? '' : 'waiting'}"><span class="no${n.spot.kind === 'bus_stop' ? ' bus' : ''}">${esc(n.badge)}</span><span class="name">${esc(n.spot.name)}</span><span class="d">${n.distanceM == null ? '' : distanceLabel(n.distanceM)}</span>${right}</div>`;
+    return `<div class="spot ${ready ? '' : 'waiting'}"><span class="no${n.spot.kind === 'bus_stop' ? ' bus' : ''}">${esc(n.badge)}</span><span class="name">${esc(n.spot.name)}${n.passed ? '<span class="pass-tag">通過</span>' : ''}</span><span class="d">${n.distanceM == null ? '' : distanceLabel(n.distanceM)}</span>${right}</div>`;
   };
+  // どのバス停かは決まっていない回数は、バス停の一覧の先頭に1行
+  const passRow = v.busPass > 0
+    ? `<div class="spot"><span class="no bus">バス</span><span class="name">通過したバス停 ×${v.busPass}</span><button class="spin-btn" data-act="spin-pass">${icon('capsule')}回す</button></div>`
+    : '';
   // 駅とバス停は出るカードが違うので、見出しを分けて並べる(駅が上)
   const group = (kind: string, title: string) => {
     const spots = v.near.filter((n) => n.spot.kind === kind);
-    if (spots.length === 0) return '';
+    const extra = kind === 'bus_stop' ? passRow : '';
+    if (spots.length === 0 && !extra) return '';
     const ready = spots.filter((n) => n.remainingMs <= 0);
     const waiting = spots.filter((n) => n.remainingMs > 0);
     return `<div class="sub-sec ${kind === 'bus_stop' ? 'bus' : ''}">${title}</div>
-      ${ready.length > 0 ? `<div class="spots panel">${ready.map(row).join('')}</div>` : ''}
+      ${ready.length > 0 || extra ? `<div class="spots panel">${extra}${ready.map(row).join('')}</div>` : ''}
       ${waiting.length > 0 ? `<div class="spots wait-list">${waiting.map(row).join('')}</div>` : ''}`;
   };
   // 今日もらった権利は、位置が取れていなくても使える
-  const list = v.near.length > 0
+  const list = v.near.length > 0 || v.busPass > 0
     ? `<div class="sec"><span>回せる場所</span>${icon('gachapon', 'deco')}</div>
       ${group('station', '駅')}${group('bus_stop', 'バス停')}
       ${v.near.some((n) => n.remainingMs > 0) ? '<p class="wait-say">少し、寄り道を。</p>' : ''}`
     : '';
-  const empty = v.geo === 'ok' && v.near.length === 0
+  const empty = v.geo === 'ok' && v.near.length === 0 && v.busPass === 0
     ? `<p class="say">近くに駅・バス停なし。${v.nearest ? `${esc(v.nearest.spot.name)}まで、あと${distanceLabel(v.nearest.distanceM)}。` : ''}</p>`
     : '';
   // 確率は小さな表1つ。横が珍しさ、縦が駅・バス停。スーパーレアの列だけ色を付ける
@@ -174,6 +184,20 @@ export function chooserSheet(spotName: string, count: number): string {
       <button class="btn" data-act="spin-one">${icon('capsule')}${esc(spotName)}だけ回す</button>
       <button class="btn mustard" data-act="spin-all">${icon('capsule')}バス停 ${count}か所をまとめて回す</button>
       <button class="btn paper" data-act="chooser-cancel">やめる</button>
+    </div>`;
+}
+
+/**
+ * 閉じている間の移動を、かかった時間だけでは乗り物を1つに絞れないときに聞く。
+ * options は乗り物の名前と、それを選んだときに通過になる場所の数
+ */
+export function passModeSheet(options: { label: string; count: number }[], minutes: number): string {
+  return `<div class="sheet-bg"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="移動のしかたを選ぶ">
+      <h3>何で移動した?</h3>
+      <p>アプリを閉じていた${minutes}分の間の移動。選んだ乗り物で、通った駅・バス停を決めます。</p>
+      ${options.map((o, i) => `<button class="btn ${i ? 'paper' : ''}" data-act="pass-mode" data-i="${i}">${esc(o.label)}(通過 ${o.count}か所)</button>`).join('')}
+      <button class="btn paper" data-act="pass-mode-unknown">わからない</button>
     </div>`;
 }
 
@@ -327,6 +351,7 @@ function gpsModeLine(gpsMode: GpsMode | 'sim' | null): string {
 
 export function settingsScreen(
   save: SaveData, pendingImport: { data: SaveData; fileName: string } | null, cardCount: number, version: string, gpsMode: GpsMode | 'sim' | null,
+  drawPassLines: boolean,
 ): string {
   const confirm = pendingImport
     ? `<div class="panel">
@@ -357,6 +382,11 @@ export function settingsScreen(
       </div>
     </div>
     ${confirm}
+    <div class="panel">
+      <h4>ベータ版の確かめ用</h4>
+      <p>アプリを閉じている間に通ったと推測した道を、地図に点線で描きます(今日の分)。</p>
+      <button class="btn paper" data-act="toggle-pass-lines" aria-pressed="${drawPassLines}">推測した道を地図に描く: ${drawPassLines ? 'オン' : 'オフ'}</button>
+    </div>
     <div class="foot">
       ${gpsModeLine(gpsMode)}
       <p>駅・バス停の位置と地図: © OpenStreetMap contributors。駅・バス停の位置のデータは ODbL(Open Database License)のもとで提供しています。</p>
@@ -374,9 +404,11 @@ const NOTES: [string, string[]][] = [
     `範囲(${CONFIG.enterRadiusM}m)に入ると、その場所の回す権利がもらえる。権利はその日のうちだけ。日付が変わると消える。`,
     '範囲の外で回すと、その場所の範囲を出たときの確率で引く。出たあとに歩いて確率が上がっても、その場所の確率は上がらない。',
     `同じ場所は、回してから${CONFIG.cooldownMs / 60000}分待つ。待ち時間が終わったあと、もう一度その範囲に入ると、また回せる。`,
+    'アプリを閉じている間に通った駅・バス停は、次に開いたときに、前に開いていた場所との間の道すじを推測して「通過」として回せる。推測なので、通っていない場所が付いたり、通った場所が付かなかったりする。日付をまたいだ移動は推測しない。',
+    'かかった時間で乗り物が決められないときは、何で移動したかを聞く。道すじが分からないときは、どのバス停かは決めずに「通過したバス停」の回数だけ付く。',
   ]],
   ['確率と移動距離', [
-    '移動距離は、アプリを開いている間だけ数える。画面を消したり、ほかのアプリに切り替えたりすると数えない。',
+    '移動距離は、アプリを開いている間に数える。閉じている間の移動は、次に開いたときに推測した道のりを足す。',
     '移動距離は、日付が変わると0に戻る。電車・バスの移動も数える。',
     `${km1(CONFIG.bonusStepM)}進むごとに、ノーマルの確率${CONFIG.bonusPerStepBp / 100}%がスーパーレアに移る。${km1(MAX_M)}で最大。レアの確率は変わらない。`,
     '止まっているときの位置の揺れは数えない。そのため、少しの移動は距離に入らないことがある。',

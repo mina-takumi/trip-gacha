@@ -120,6 +120,8 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .spot .no.bus { background: var(--mustard); color: var(--navy); font: 900 11px var(--maru); }
 .spot .name { font: 400 18px/1.25 var(--hand); flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .spot .d { font-weight: 900; font-size: 12px; color: var(--ink-soft); flex: none; }
+.spot .pass-tag { display: inline-block; margin-left: 6px; padding: 1px 6px; border: 1.5px solid var(--line); border-radius: 8px;
+  font: 900 10.5px var(--maru); vertical-align: 3px; background: var(--paper); color: var(--ink-soft); }
 .spin-btn { flex: none; display: flex; align-items: center; gap: 4px; height: 40px; padding: 0 14px; border: 2px solid var(--line); border-radius: 20px;
   background: var(--orange); color: var(--paper); box-shadow: 2px 2px 0 var(--line); font: 900 14px var(--maru); cursor: pointer; }
 .spin-btn:active { transform: translate(2px, 2px); box-shadow: none; }

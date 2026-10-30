@@ -48,6 +48,37 @@ export const CONFIG = {
   secretMaxPpm: 2000,
   /** 行ったことのある駅のガチャを、かけらで1回回すときに使う数 */
   shardSpinCost: 300,
+
+  // ---- 閉じている間の通過(前に開いていた最後の位置と、開き直した位置の間の道すじを推測する) ----
+  /** 前の位置からこれ以上たち、passMinMoveM 以上離れて開き直したら推測する(開いたまま歩いている間は15秒ごとに位置が来るので動かない) */
+  passMinGapMs: 2 * 60 * 1000,
+  passMinMoveM: 300,
+  /** 道すじから、この距離以内の駅・バス停を通過にする */
+  passNearM: 200,
+  /** 候補ごとにかかる最短の時間の目安。バス・電車は待ち時間を足し、乗り場までは歩き */
+  passWalkKmh: 4,
+  passBusKmh: 15,
+  passBusWaitMs: 10 * 60 * 1000,
+  passTrainKmh: 40,
+  passTrainWaitMs: 10 * 60 * 1000,
+  /** これより速くは移動できない、という上限(走る・快速電車も入るように速めに)。かかった時間がこれで足りない候補は使えない */
+  passWalkMaxKmh: 8,
+  passBusMaxKmh: 40,
+  passTrainMaxKmh: 90,
+  /** 選べる候補が2つ以上でも、通過する場所がこの割合以上同じなら聞かずに歩きに近いほうを使う */
+  passSameRatio: 0.8,
+  /** かかった時間が「(ふつうの時間 − passFitSlackMs) ÷ passFitFactor」から「ふつうの時間 × passFitFactor + passFitSlackMs」までなら、その候補に合う */
+  passFitFactor: 1.5,
+  passFitSlackMs: 10 * 60 * 1000,
+  /** 出発地・到着地から道までがこれより遠ければ、その道は使えない */
+  passSnapM: 300,
+  /** バス路線が出発地・到着地のこの距離以内を通れば、その路線に乗れたとみなす */
+  passBusLineM: 400,
+  /** 出発地・到着地からこの距離以内の駅に歩いて行けるとみなす(電車の候補) */
+  passStationWalkM: 1500,
+  /** 道すじが出ないときは、バス停の回す権利を直線距離1kmあたりこの回数、1区間で passCountMax 回まで */
+  passCountPerKm: 4,
+  passCountMax: 10,
 };
 
 export const RARITIES: Rarity[] = ['NORMAL', 'RARE', 'SUPER_RARE'];

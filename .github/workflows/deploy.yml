@@ -1,5 +1,5 @@
-# main に送るたびに、テスト → 組み立て → GitHub Pages に公開 を自動で行う
-name: Deploy to GitHub Pages
+# main に送るたびに、テスト → 組み立て → GitHub Pages と Cloudflare Pages に公開 を自動で行う
+name: Deploy
 
 on:
   push:
@@ -30,6 +30,11 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+      # Cloudflare 用に、組み立てた dist をもう1つ別の形で渡す
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
 
   deploy:
     needs: build
@@ -40,3 +45,21 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Cloudflare のアカウントID(変数)を登録するまでは飛ばす。トークンは秘密(CLOUDFLARE_API_TOKEN)に置く
+  cloudflare:
+    needs: build
+    if: ${{ vars.CLOUDFLARE_ACCOUNT_ID != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # 初めての公開ではプロジェクトを作る(2回目からは「もうある」で失敗するので無視する)
+          npx --yes wrangler@4 pages project create trip-gacha --production-branch=main || true
+          npx --yes wrangler@4 pages deploy dist --project-name=trip-gacha --branch=main

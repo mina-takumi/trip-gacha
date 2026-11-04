@@ -1,0 +1,43 @@
+# iPhoneアプリ版(自分のiPhone用)を組み立てる。署名はしないので、Windows の Sideloadly で署名して入れる
+name: Build iOS
+
+on:
+  push:
+    branches: [feature/ios-app]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npx cap sync ios
+      - name: Build unsigned app
+        run: |
+          xcodebuild build \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+      - name: Package IPA
+        run: |
+          mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qry trip-gacha.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trip-gacha-ipa
+          path: trip-gacha.ipa
+          retention-days: 7

@@ -9,3 +9,4 @@ dev-dist/
 
 # 使わなくなった古いファイル(TypeScriptに移す前のJS)。手元に控えとして残すだけ
 old/
+*.ipa

@@ -3,6 +3,7 @@ import '@fontsource/yusei-magic/400.css';
 import '@fontsource/zen-maru-gothic/700.css';
 import '@fontsource/zen-maru-gothic/900.css';
 import './style.css';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import spotsJson from '../data/spots.json';
 import { CONFIG, RARITIES } from './config.ts';
 import { createGeofence, haversineDistanceM, type Fix } from './geofence.ts';
@@ -15,6 +16,7 @@ import {
 } from './store.ts';
 import { buildNetwork, inferSegment, passCount, PASS_MODE_LABEL, type Candidate, type Inference, type LatLon, type Network } from './route.ts';
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
+import { createNativeLocation, type NativeWatcher } from './native-location.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
@@ -97,16 +99,26 @@ let passLogLines = readLocal<string[]>(PASS_LOG_KEY, []);
 function passLog(text: string): void {
   const d = new Date();
   const hm = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
-  passLogLines = [`${hm} ${text}`, ...passLogLines].slice(0, 80);
+  passLogLines = [`${hm} ${text}`, ...passLogLines].slice(0, 300);
   writeLocal(PASS_LOG_KEY, passLogLines);
 }
 /** 開いた直後・表に戻った直後の、何回分の位置を書き残すか */
 let logFixes = 3;
+// iPhoneアプリ版を確かめる用: 今日受け取った位置の回数と、そのうち閉じている間の回数
+const FIX_COUNT_KEY = 'trip-gacha:fix-count';
+let fixCount = readLocal<{ date: string; total: number; hidden: number }>(FIX_COUNT_KEY, { date: '', total: 0, hidden: 0 });
+function countFix(t: number, hidden: boolean): void {
+  const date = localDate(t);
+  const base = fixCount.date === date ? fixCount : { date, total: 0, hidden: 0 };
+  fixCount = { date, total: base.total + 1, hidden: base.hidden + (hidden ? 1 : 0) };
+  writeLocal(FIX_COUNT_KEY, fixCount);
+}
 passLog('アプリを起動');
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     passLog('表に戻った');
     logFixes = 3;
+    render();
   } else {
     passLog('裏に回った・画面を消した');
   }
@@ -262,7 +274,7 @@ function screenHtml(now: number): string {
     case 'settings': {
       if (state.showNotes) return notesScreen(ownedSecrets().length > 0);
       const cardCount = Object.keys(state.save.collection).filter((id) => id.startsWith('station:') || id.startsWith('common:')).length;
-      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines, passLogLines);
+      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines, [`今日 受信${fixCount.total}回(閉じている間 ${fixCount.hidden}回)`, ...passLogLines]);
     }
     case 'map':
       return '';
@@ -648,6 +660,12 @@ function onFix(fix: Fix): void {
   const last = state.save.lastFix;
   // 閉じる前に測った古い位置は、区間の端にしない(使うと、閉じていた時間が消えて推測されなくなる)
   const fresh = Date.now() - fix.t <= CONFIG.passFreshMs && (!last || fix.t > last.t);
+  const hidden = document.visibilityState !== 'visible';
+  countFix(fix.t, hidden);
+  // 2分以上届かなかったら書き残す。遠くへ動いていれば取りこぼし、動いていなければ止まっていただけ
+  if (last && hidden && accepted && fresh && fix.t - last.t >= CONFIG.passMinGapMs) {
+    passLog(`閉じている間 ${Math.round((fix.t - last.t) / 60000)}分空いて${Math.round(haversineDistanceM(last.lat, last.lon, fix.lat, fix.lon))}m動いた`);
+  }
   if (logFixes > 0) {
     logFixes--;
     const since = last ? `前回の位置から${Math.round((fix.t - last.t) / 60000)}分・${Math.round(haversineDistanceM(last.lat, last.lon, fix.lat, fix.lon))}m` : '前回の位置なし';
@@ -667,7 +685,8 @@ function onFix(fix: Fix): void {
   state.save = next;
   persist();
   processPending();
-  render();
+  // 閉じている間は描かない(電池のため)。表に戻ったときに描く
+  if (!hidden) render();
   if (centerOnNextFix) {
     centerOnNextFix = false;
     mapView?.center();
@@ -684,7 +703,9 @@ function onLocationError(kind: 'denied' | 'unavailable'): void {
 }
 
 async function startLocation(): Promise<void> {
-  let source: LocationSource = browserLocation;
+  let source: LocationSource = Capacitor.isNativePlatform()
+    ? createNativeLocation(registerPlugin<NativeWatcher>('BackgroundGeolocation'), { setTimeout: (fn, ms) => window.setTimeout(fn, ms), clearTimeout: (id) => window.clearTimeout(id) }, CONFIG.nativeFirstFixWaitMs, CONFIG.nativeDistanceFilterM)
+    : browserLocation;
   if (import.meta.env.DEV && new URLSearchParams(location.search).has('sim')) {
     const { createSimLocation } = await import('./dev/sim.ts');
     const hachioji = stations.find((s) => s.name === '八王子')!;

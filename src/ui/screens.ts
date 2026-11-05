@@ -7,6 +7,7 @@ import type { SaveData } from '../store.ts';
 import { cardHtml, placeholderHtml, type CardFace } from './card.ts';
 import { distanceLabel, esc, km } from './html.ts';
 import { icon } from './icons.ts';
+import { digitsHtml } from './roll.ts';
 
 export type Tab = 'main' | 'zukan' | 'map' | 'settings';
 export type GeoStatus = 'starting' | 'denied' | 'unavailable' | 'waiting-accuracy' | 'ok';
@@ -108,7 +109,7 @@ export function mainScreen(v: MainView): string {
     ${v.storageOk ? '' : '<div class="notice panel warn"><b>記録が、残せません。</b>このブラウザでは端末に記録を保存できないため、閉じると集めたカードが消えます。プライベートブラウズなら、通常のモードで開いてください。</div>'}
     <div class="top"><span class="logo">トリップガチャ</span><span class="top-r"><button class="reload" data-act="reload" aria-label="最新版に更新">${icon('reload')}<span class="reload-t">更新</span></button><button class="shard" data-act="shard-info" aria-label="かけら ${v.shards}。使い道を見る"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</button></span></div>
     <div class="lead">今日、歩いた。</div>
-    <div class="huge">${km(v.distanceM)}<small>km</small></div>
+    <div class="huge" role="img" aria-label="${km(v.distanceM)}km"><span class="huge-n">${digitsHtml(km(v.distanceM))}</span><small>km</small></div>
     <div class="feet" role="img" aria-label="${km(MAX_M)}kmまでのうち${km(v.distanceM)}km">${feet}</div>
     <div class="feet-cap">${caption}</div>
     ${oddsTable}

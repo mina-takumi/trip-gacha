@@ -1,7 +1,7 @@
 {
   "name": "trip-gacha",
   "private": true,
-  "version": "0.7.1",
+  "version": "0.8.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,6 +24,7 @@
     "@capacitor/ios": "^8.6.0",
     "@fontsource/yusei-magic": "^5.3.0",
     "@fontsource/zen-maru-gothic": "^5.3.0",
+    "gsap": "^3.15.1",
     "leaflet": "^1.9.4"
   },
   "devDependencies": {

@@ -92,8 +92,14 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
   .shard .ic { width: 22px; height: 22px; }
 }
 .lead { font-weight: 900; font-size: 14px; margin-top: 18px; color: var(--ink-soft); letter-spacing: .06em; }
-.huge { font: 400 108px/0.95 var(--hand); color: var(--navy); text-shadow: 4px 4px 0 rgba(232, 85, 47, .55); letter-spacing: -.02em; }
-.huge small { font-size: 32px; text-shadow: none; margin-left: 6px; letter-spacing: 0; }
+.huge { display: flex; align-items: flex-end; margin: -8px 0; font: 400 108px/1.1 var(--hand); color: var(--navy); text-shadow: 4px 4px 0 rgba(232, 85, 47, .55); }
+.huge small { font-size: 32px; line-height: 1.6; text-shadow: none; margin-left: 6px; }
+/* 桁ごとに同じ幅の箱へ入れる(回っている途中と止まったあとで幅が変わらないように)。箱の外は見せない */
+.huge-n { display: flex; }
+.huge-n .d { display: block; width: .6em; height: 1.1em; overflow: hidden; text-align: center; }
+.huge-n .strip { display: block; will-change: transform; }
+.huge-n b { display: block; height: 1.1em; font-weight: 400; }
+.huge-n .p { width: .3em; text-align: center; font-style: normal; }
 .feet { display: flex; gap: 1px; margin: 16px 0 8px; }
 .feet svg { flex: 1; max-width: 22px; height: 30px; }
 .feet svg:nth-child(odd) { transform: translateY(5px) rotate(-8deg); }
@@ -339,3 +345,26 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .m-tile.dup .card { opacity: .55; }
 .m-tag { margin-top: 4px; text-align: center; font: 900 10.5px var(--maru); color: var(--cream); white-space: nowrap; }
 .m-tag .new { display: inline-block; padding: 1px 6px; border-radius: 8px; background: var(--orange); color: var(--paper); }
+
+/* ---------- 全画面の演出(開いたとき・回す) ---------- */
+.fx { position: fixed; inset: 0; z-index: 3000; background: var(--cream); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+.fx-bar { position: absolute; top: 0; left: 0; right: 0; height: calc(env(safe-area-inset-top) + 6px); display: flex; transform-origin: left; }
+.fx-bar i { flex: 1; } .fx-bar i:nth-child(1) { background: var(--orange); } .fx-bar i:nth-child(2) { background: var(--mustard); }
+.fx-bar i:nth-child(3) { background: var(--teal); } .fx-bar i:nth-child(4) { background: var(--navy); }
+.fx-logo { position: absolute; left: 50%; top: 42%; margin-left: -148px; width: 296px; padding: 14px 0; text-align: center; font: 400 34px/1.2 var(--hand); color: var(--navy);
+  background: var(--paper); border: 2px solid var(--line); border-radius: 22px; box-shadow: 4px 4px 0 var(--line); transform: rotate(-3deg); }
+.fx-stage { position: absolute; left: 50%; top: 50%; width: 240px; height: 400px; margin: -210px 0 0 -120px; }
+.fx-mach { position: absolute; inset: 0 0 auto 0; height: 300px; transform-origin: 50% 100%; }
+.fx-dome { position: absolute; left: 30px; top: 0; width: 180px; height: 180px; border-radius: 50%; background: var(--paper); border: 2px solid var(--line); box-shadow: 4px 4px 0 var(--line); overflow: hidden; }
+.fx-dome i { position: absolute; width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--line); }
+.fx-dome i:nth-child(1) { left: 22px; top: 92px; background: var(--orange); } .fx-dome i:nth-child(2) { left: 74px; top: 112px; background: var(--mustard); }
+.fx-dome i:nth-child(3) { left: 112px; top: 72px; background: var(--teal); } .fx-dome i:nth-child(4) { left: 60px; top: 56px; background: var(--cream); }
+.fx-base { position: absolute; left: 10px; top: 150px; width: 220px; height: 150px; background: var(--orange); border: 2px solid var(--line); border-radius: 16px; box-shadow: 4px 4px 0 var(--line); }
+.fx-knob { position: absolute; left: 76px; top: 18px; width: 64px; height: 64px; border-radius: 50%; background: var(--mustard); border: 2px solid var(--line); }
+.fx-knob::after { content: ""; position: absolute; left: 24px; top: 4px; width: 12px; height: 52px; border-radius: 6px; background: var(--navy); }
+.fx-slot { position: absolute; left: 60px; bottom: 14px; width: 96px; height: 30px; border-radius: 15px 15px 6px 6px; background: var(--navy); }
+.fx-cap { position: absolute; left: 76px; top: 310px; width: 88px; height: 88px; }
+.fx-cap i { position: absolute; left: 0; width: 88px; height: 45px; border: 2px solid var(--line); box-sizing: border-box; }
+.fx-cap .t { top: 0; background: var(--orange); border-radius: 44px 44px 0 0; }
+.fx-cap .b { bottom: 0; background: var(--paper); border-radius: 0 0 44px 44px; }
+.fx-skip { position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 28px); text-align: center; font-size: 13px; font-weight: 900; color: var(--ink-soft); }

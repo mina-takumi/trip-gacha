@@ -16,6 +16,8 @@ import {
 import { buildNetwork, inferSegment, passCount, PASS_MODE_LABEL, type Candidate, type Inference, type LatLon, type Network } from './route.ts';
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
+import { holdDistance, markLongRoll, playIntro, playSpin, releaseDistance, syncDistance } from './ui/fx.ts';
+import { km } from './ui/html.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
 import {
@@ -23,7 +25,7 @@ import {
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.7.2';
+const VERSION = '0.8.0';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -107,6 +109,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     passLog('表に戻った');
     logFixes = 3;
+    markLongRoll();
   } else {
     passLog('裏に回った・画面を消した');
   }
@@ -285,6 +288,7 @@ function render(): void {
     screenEl.innerHTML = html;
     lastHtml = html;
   }
+  syncDistance(screenEl, km(distanceToday(state.save.walk, now)));
   screenEl.hidden = showMap;
   mapScreenEl.hidden = !showMap;
   if (showMap) {
@@ -388,6 +392,16 @@ function spin(spotId: string): void {
   spinSpots([spotId]);
 }
 
+/** 回す演出のあとに結果を出す。記録はもう保存してある */
+function showResults(results: NonNullable<typeof state.results>): void {
+  playSpin(() => {
+    state.results = results;
+    state.resultPick = null;
+    render();
+    window.scrollTo(0, 0);
+  });
+}
+
 function spinSpots(spotIds: string[]): void {
   const now = Date.now();
   const inside = new Set(geofence.insideStopIds());
@@ -397,10 +411,8 @@ function spinSpots(spotIds: string[]): void {
   const { data, results } = applySpins(state.save, ready, now, (d, id) => draw(d, id, inside, now));
   state.save = data;
   persist();
-  state.results = results;
-  state.resultPick = null;
   render();
-  window.scrollTo(0, 0);
+  showResults(results);
 }
 
 /** かけらで駅のガチャを回す。確率はホームの表と同じ(今日の移動距離で上がる)。待ち時間・回す権利は変えない */
@@ -412,10 +424,8 @@ function shardSpin(spotId: string): void {
   if (!r) { render(); return; }
   state.save = r.data;
   persist();
-  state.results = [{ ...r.result, spotId }];
-  state.resultPick = null;
   render();
-  window.scrollTo(0, 0);
+  showResults([{ ...r.result, spotId }]);
 }
 
 /** 通過したバス停の回数で1回回す。どのバス停かは決まっていないので、共通のカードだけ(裏カードは出ない)。確率は今の距離 */
@@ -426,10 +436,8 @@ function spinBusPass(): void {
   if (!r) { render(); return; }
   state.save = r.data;
   persist();
-  state.results = [{ ...r.result, spotId: 'bus-pass' }];
-  state.resultPick = null;
   render();
-  window.scrollTo(0, 0);
+  showResults([{ ...r.result, spotId: 'bus-pass' }]);
 }
 
 function exportSave(): void {
@@ -698,7 +706,13 @@ async function startLocation(): Promise<void> {
   source.start(onFix, onLocationError, (mode) => { state.gpsMode = mode; render(); });
 }
 
+// 起動の演出の間、距離は 0.0 で止めておき、終わったら今日の距離まで回す
+holdDistance('0.0');
 render();
 startLocation();
+playIntro().then(() => {
+  releaseDistance();
+  render();
+});
 // 待ち時間の残りと、日付の変わり目を表示に反映する
 setInterval(render, 15_000);

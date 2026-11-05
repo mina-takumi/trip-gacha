@@ -14,7 +14,7 @@ import {
   applyBusPassSpin, applyPassCount, applyPassRoute, applyShardSpin, applySpins, busPassToday, canShardSpin, cooldownRemainingMs, exportJson, hasTicket, isPassSegment, load, markVisited, parseSave, save, spinDistanceM, storageAvailable,
   type PassSegment, type SaveData, type Spin, type SpinResult,
 } from './store.ts';
-import { buildNetwork, inferSegment, passCount, PASS_MODE_LABEL, type Candidate, type Inference, type LatLon, type Network } from './route.ts';
+import { buildNetwork, inferSegment, passCount, PASS_MODE_LABEL, type Candidate, type Inference, type Network } from './route.ts';
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
 import { createNativeLocation, type NativeWatcher } from './native-location.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
@@ -72,9 +72,6 @@ const state = {
   passAsk: null as { seg: PassSegment; options: Candidate[] } | null,
 };
 
-// ベータ版だけ: 推測した道すじを地図に描く(確かめ用)。描くかどうかと、今日の道すじは記録とは別に置く
-const PASS_LINES_KEY = 'trip-gacha:pass-lines';
-const PASS_DRAW_KEY = 'trip-gacha:pass-draw';
 const readLocal = <T>(key: string, fallback: T): T => {
   try {
     return (JSON.parse(localStorage.getItem(key) ?? 'null') as T) ?? fallback;
@@ -89,9 +86,6 @@ const writeLocal = (key: string, value: unknown) => {
     // 覚えられなくても遊びは続ける
   }
 };
-let drawPassLines = readLocal<boolean>(PASS_DRAW_KEY, true);
-let passLines = readLocal<{ date: string; lines: LatLon[][] }>(PASS_LINES_KEY, { date: '', lines: [] });
-let passLinesShown = '';
 
 // ベータ版だけ: 閉じている間の通過が働いたかを、設定で見られるように書き残す(位置そのものは残さない)
 const PASS_LOG_KEY = 'trip-gacha:pass-log';
@@ -274,7 +268,7 @@ function screenHtml(now: number): string {
     case 'settings': {
       if (state.showNotes) return notesScreen(ownedSecrets().length > 0);
       const cardCount = Object.keys(state.save.collection).filter((id) => id.startsWith('station:') || id.startsWith('common:')).length;
-      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines, [`今日 受信${fixCount.total}回(閉じている間 ${fixCount.hidden}回)`, ...passLogLines]);
+      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, [`今日 受信${fixCount.total}回(閉じている間 ${fixCount.hidden}回)`, ...passLogLines]);
     }
     case 'map':
       return '';
@@ -306,12 +300,6 @@ function render(): void {
     }
     mapView.resize();
     mapView.update(state.fix, ownedSpotIds());
-    const lines = drawPassLines && passLines.date === localDate(now) ? passLines.lines : [];
-    const key = `${lines.length}:${passLines.date}`;
-    if (key !== passLinesShown) {
-      mapView.setPassLines(lines);
-      passLinesShown = key;
-    }
     document.getElementById('map-msg')!.textContent = onMapTap
       ? '位置シミュレーター: 地図をタップした場所にいることにします'
       : `大きな丸は駅。オレンジは、カードを持っている駅。黄色の小さな点はバス停。点をタップすると、名前と回せるかどうかが出る。駅やバス停の${CONFIG.enterRadiusM}m以内に入ると、その日のうちは、どこでも回せる。`;
@@ -475,10 +463,6 @@ app.addEventListener('click', (e) => {
     case 'spin-pass': spinBusPass(); return;
     case 'pass-mode': answerPassMode(Number(el.dataset.i)); return;
     case 'pass-mode-unknown': answerPassMode(null); return;
-    case 'toggle-pass-lines':
-      drawPassLines = !drawPassLines;
-      writeLocal(PASS_DRAW_KEY, drawPassLines);
-      break;
     case 'spin-one': if (state.chooser) spinSpots([state.chooser.spotId]); return;
     case 'spin-all': spinSpots(readyBusStops(Date.now(), new Set(geofence.insideStopIds()))); return;
     case 'chooser-cancel': state.chooser = null; break;
@@ -594,9 +578,6 @@ function resolveSegment(seg: PassSegment, r: Inference): void {
     data = applyPassRoute(data, seg, r.candidate.lengthM, r.candidate.passes);
     const added = Object.keys(data.passedAt).filter((id) => data.passedAt[id] !== before[id]).length;
     if (added > 0) message = `閉じている間に、${added}か所を通過。`;
-    const today = localDate(seg.to.t);
-    passLines = { date: today, lines: [...(passLines.date === today ? passLines.lines : []), r.candidate.line] };
-    writeLocal(PASS_LINES_KEY, passLines);
   } else if (r.kind === 'count') {
     data = applyPassCount(data, seg.to.t, r.count);
     message = `閉じている間に、バス停を${r.count}回ぶん通過。`;

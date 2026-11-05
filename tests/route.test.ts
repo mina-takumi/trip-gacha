@@ -61,7 +61,7 @@ test('ありえない速さの区間は何も付けない。どの道も出な�
 });
 
 const cand = (mode: Candidate['mode'], fastestMin: number, typicalMin: number, ids: string[]): Candidate => ({
-  mode, lengthM: 1000, fastestMs: fastestMin * MIN, typicalMs: typicalMin * MIN, line: [], passes: ids.map((spotId, i) => ({ spotId, alongM: i * 100 })),
+  mode, lengthM: 1000, fastestMs: fastestMin * MIN, typicalMs: typicalMin * MIN, passes: ids.map((spotId, i) => ({ spotId, alongM: i * 100 })),
 });
 
 test('かかった時間に合う候補が1つなら、それを使う', () => {

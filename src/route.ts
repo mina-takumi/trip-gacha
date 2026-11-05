@@ -21,7 +21,6 @@ export interface Candidate {
   fastestMs: number;
   /** ふつうにかかる時間(待ち時間を含む) */
   typicalMs: number;
-  line: LatLon[];
   passes: Pass[];
 }
 export type Inference =
@@ -36,7 +35,6 @@ const MY = 111_320;
 const MX = MY * Math.cos((LAT0 * Math.PI) / 180);
 type P = [number, number];
 const toP = (lat: number, lon: number): P => [lon * MX, lat * MY];
-const toLatLon = (p: P): LatLon => ({ lat: p[1] / MY, lon: p[0] / MX });
 const dist = (a: P, b: P) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const msFor = (m: number, kmh: number) => (m / (kmh * 1000)) * 3_600_000;
 
@@ -273,7 +271,7 @@ function walkCandidate(net: Network, A: P, B: P): Candidate | null {
   const m = lineLength(pts);
   return {
     mode: 'walk', lengthM: m, fastestMs: msFor(m, CONFIG.passWalkMaxKmh), typicalMs: msFor(m, CONFIG.passWalkKmh),
-    line: pts.map(toLatLon), passes: passesAlong(net, pts, CONFIG.passNearM),
+    passes: passesAlong(net, pts, CONFIG.passNearM),
   };
 }
 
@@ -304,7 +302,7 @@ function busCandidate(net: Network, A: P, B: P): Candidate | null {
     mode: 'bus', lengthM: best.walkM + best.rideM,
     fastestMs: msFor(best.walkM, CONFIG.passWalkMaxKmh) + msFor(best.rideM, CONFIG.passBusMaxKmh),
     typicalMs: cost(best.walkM, best.rideM) + CONFIG.passBusWaitMs,
-    line: best.pts.map(toLatLon), passes: passesAlong(net, best.pts, CONFIG.passNearM),
+    passes: passesAlong(net, best.pts, CONFIG.passNearM),
   };
 }
 
@@ -358,7 +356,6 @@ function trainCandidate(net: Network, A: P, B: P): Candidate | null {
     mode: 'train', lengthM: legA + rideM + legB,
     fastestMs: msFor(legA + legB, CONFIG.passWalkMaxKmh) + msFor(rideM, CONFIG.passTrainMaxKmh),
     typicalMs: walkMs(legA + legB) + msFor(rideM, CONFIG.passTrainKmh) + CONFIG.passTrainWaitMs,
-    line: [A, ...railPts, B].map(toLatLon),
     passes: [...passes].map(([spotId, alongM]) => ({ spotId, alongM })).sort((x, y) => x.alongM - y.alongM),
   };
 }

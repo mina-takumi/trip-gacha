@@ -144,7 +144,7 @@ export interface MultiItem { face: CardFace; rarity: CardRarity; isNew: boolean;
 
 /**
  * まとめて回した結果。いちばん珍しい1枚を大きく、全部を小さく4列で並べる(バス停カードなので絵の色味は変えない)。
- * 小さいカードを押すと、そのカード(pick 番目)を大きく出す。スタンプと文は全体のまとめなので変えない
+ * 小さいカードを押すと、そのカード(pick 番目)を大きく出す。スタンプは大きいカードの珍しさ。文は全体のまとめなので変えない
  */
 export function multiResultScreen(items: MultiItem[], totalShards: number, pick: number | null): string {
   // 同じ珍しさなら、はじめての1枚を大きく見せる
@@ -163,7 +163,7 @@ export function multiResultScreen(items: MultiItem[], totalShards: number, pick:
       <div class="m-tag">${tag(i)}</div>
     </button>`).join('');
   return `<div class="res-wrap"><div class="res">
-    <div class="stamp ${best.rarity}"><span>${stampLabel(best.rarity)}</span></div>
+    <div class="stamp ${shown.rarity}"><span>${stampLabel(shown.rarity)}</span></div>
     <h2>${items.length}回、出た。</h2>
     <div class="sub">${newCount > 0 ? `<span class="mark o">はじめて ${newCount}枚。</span>` : 'ぜんぶ、もう持ってた。'}${shardText}</div>
     <div class="rays">${cardHtml(shown.face, shown.rarity, 'big', false)}</div>

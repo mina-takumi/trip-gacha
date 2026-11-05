@@ -17,6 +17,8 @@ import {
 import { buildNetwork, inferSegment, passCount, PASS_MODE_LABEL, type Candidate, type Inference, type Network } from './route.ts';
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
 import { createNativeLocation, type NativeWatcher } from './native-location.ts';
+import { exportOnNative } from './native-export.ts';
+import { exportOnWeb, isShareCanceled } from './export-file.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
 import { holdDistance, markLongRoll, playIntro, playSpin, releaseDistance, syncDistance } from './ui/fx.ts';
 import { km } from './ui/html.ts';
@@ -27,7 +29,7 @@ import {
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.8.0';
+const VERSION = '0.8.1';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -440,15 +442,26 @@ function spinBusPass(): void {
   showResults([{ ...r.result, spotId: 'bus-pass' }]);
 }
 
-function exportSave(): void {
-  const blob = new Blob([exportJson(state.save)], { type: 'application/json' });
+function downloadFile(file: File): void {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `trip-gacha-${localDate(Date.now())}.json`;
+  a.href = URL.createObjectURL(file);
+  a.download = file.name;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
+}
+
+async function exportSave(): Promise<void> {
+  const name = `trip-gacha-${localDate(Date.now())}.json`;
+  const text = exportJson(state.save);
+  try {
+    await (Capacitor.isNativePlatform() ? exportOnNative(name, text) : exportOnWeb(name, text, navigator, downloadFile));
+  } catch (e) {
+    if (isShareCanceled(e)) return;
+    showToast('書き出せませんでした。もう一度試してください。');
+    render();
+  }
 }
 
 app.addEventListener('click', (e) => {

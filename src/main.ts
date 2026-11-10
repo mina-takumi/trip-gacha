@@ -17,7 +17,7 @@ import { buildNetwork, inferSegment, passCount, PASS_MODE_LABEL, type Candidate,
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
 import { exportOnWeb, isShareCanceled } from './export-file.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
-import { holdDistance, markLongRoll, playIntro, playSpin, releaseDistance, syncDistance } from './ui/fx.ts';
+import { holdDistance, markLongRoll, playIntro, playSecretBurst, playSecretCard, playSpin, releaseDistance, syncDistance } from './ui/fx.ts';
 import { km } from './ui/html.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
@@ -26,7 +26,7 @@ import {
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.8.2';
+const VERSION = '0.8.3';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -57,6 +57,8 @@ const state = {
   results: null as (SpinResult & { spotId: string })[] | null,
   /** まとめて回した結果で、大きく出しているカードの番号。null ならいちばん珍しい1枚 */
   resultPick: null as number | null,
+  /** まとめて回して裏カードが混ざったとき、結果の画面から離れるまで見せずに残しておく裏カード */
+  secretQueue: null as (SpinResult & { spotId: string })[] | null,
   /** バス停の「回す」を押したときの、1か所だけかまとめてかを選ぶシート */
   chooser: null as { spotId: string; count: number } | null,
   /** かけらで回す前にたずねている駅 */
@@ -239,11 +241,14 @@ function screenHtml(now: number): string {
   if (state.results) {
     const faceOf = (r: SpinResult & { spotId: string }) => r.itemId.startsWith('station:') ? cards[r.spotId]
       : r.rarity === 'SECRET' ? secretFace(r.itemId) : catalog.common.find((c) => c.itemId === r.itemId)!;
+    // 裏カードを残している間は、かけらの数も裏カードが出る前の数で見せる
+    const hold = !!state.secretQueue;
+    const shards = state.save.shards - (state.secretQueue ?? []).reduce((n, r) => n + r.shardsGained, 0);
     if (state.results.length > 1) {
-      return multiResultScreen(state.results.map((r) => ({ face: faceOf(r), rarity: r.rarity, isNew: r.isNew, shardsGained: r.shardsGained })), state.save.shards, state.resultPick);
+      return multiResultScreen(state.results.map((r) => ({ face: faceOf(r), rarity: r.rarity, isNew: r.isNew, shardsGained: r.shardsGained })), shards, state.resultPick, hold);
     }
     const r = state.results[0];
-    return resultScreen(faceOf(r), r.rarity, r.itemId.startsWith('station:'), r.isNew, r.shardsGained, state.save.shards);
+    return resultScreen(faceOf(r), r.rarity, r.itemId.startsWith('station:'), r.isNew, r.shardsGained, shards, hold);
   }
   switch (state.tab) {
     case 'main': {
@@ -393,14 +398,38 @@ function spin(spotId: string): void {
   spinSpots([spotId]);
 }
 
-/** 回す演出のあとに結果を出す。記録はもう保存してある */
+/**
+ * 回す演出のあとに結果を出す。記録はもう保存してある。裏カードだけなら特別な演出。
+ * まとめて回して裏カードが混ざったときは、先にほかのカードを見せ、結果の画面から離れるときに裏カードの演出(revealHeldSecrets)
+ */
 function showResults(results: NonNullable<typeof state.results>): void {
+  const secrets = results.filter((r) => r.rarity === 'SECRET');
+  const hold = secrets.length > 0 && secrets.length < results.length;
+  const special = secrets.length > 0 && !hold;
   playSpin(() => {
-    state.results = results;
+    state.results = hold ? results.filter((r) => r.rarity !== 'SECRET') : results;
+    state.secretQueue = hold ? secrets : null;
     state.resultPick = null;
     render();
     window.scrollTo(0, 0);
+    if (special) playSecretCard(screenEl);
+  }, special);
+}
+
+/** 残しておいた裏カードがあれば、特別な演出のあとに裏カードの結果の画面を出す。出したら true */
+function revealHeldSecrets(): boolean {
+  const secrets = state.secretQueue;
+  if (!secrets) return false;
+  // 演出の間も裏で画面は描き直されるので、結果を出すまで残している印は消さない
+  playSecretBurst(() => {
+    state.secretQueue = null;
+    state.results = secrets;
+    state.resultPick = null;
+    render();
+    window.scrollTo(0, 0);
+    playSecretCard(screenEl);
   });
+  return true;
 }
 
 function spinSpots(spotIds: string[]): void {
@@ -467,6 +496,7 @@ app.addEventListener('click', (e) => {
   if (!el) return;
   switch (el.dataset.act) {
     case 'tab':
+      if (revealHeldSecrets()) return;
       state.tab = el.dataset.tab as Tab;
       state.results = null;
       state.chooser = null;
@@ -507,7 +537,7 @@ app.addEventListener('click', (e) => {
       window.scrollTo(0, 0);
       break;
     }
-    case 'result-back': state.results = null; state.tab = 'main'; state.detailId = null; window.scrollTo(0, 0); break;
+    case 'result-back': if (revealHeldSecrets()) return; state.results = null; state.tab = 'main'; state.detailId = null; window.scrollTo(0, 0); break;
     case 'result-pick': state.resultPick = Number(el.dataset.i); break;
     case 'detail':
       zukanScrollY = window.scrollY;

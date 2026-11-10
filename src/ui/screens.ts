@@ -120,10 +120,19 @@ export function mainScreen(v: MainView): string {
     ${list}${empty}`;
 }
 
+/**
+ * 結果の画面の下のボタン。hold は、まとめて回して裏カードを残しているとき。
+ * 図鑑を開くと裏カードが先に見えてしまうので「図鑑で見る」を出さず、「ホームに戻る」を目立たせる(押すと裏カードの演出)
+ */
+const resultActs = (hold: boolean) => `<div class="acts">
+      ${hold ? '' : `<button class="btn mustard" data-act="result-zukan">${icon('book')}図鑑で見る</button>`}
+      <button class="btn ${hold ? 'mustard' : 'cream'}" data-act="result-back">ホームに戻る</button>
+    </div>`;
+
 /** 結果のスタンプの文字。裏カードは「???」(裏カードとは名乗らない) */
 const stampLabel = (rarity: CardRarity) => rarity === 'SECRET' ? '???' : RARITY_LABEL[rarity].replace('スーパー', 'スーパー<br>');
 
-export function resultScreen(card: CardFace, rarity: CardRarity, tint: boolean, isNew: boolean, shardsGained: number, totalShards: number): string {
+export function resultScreen(card: CardFace, rarity: CardRarity, tint: boolean, isNew: boolean, shardsGained: number, totalShards: number, hold = false): string {
   // 裏カードのかぶりは、かけらが減ったことだけ書く(初めてのときは書かない)
   const sub = rarity === 'SECRET'
     ? isNew ? '<span class="mark o">見たことのない1枚。</span>図鑑に入りました。'
@@ -135,10 +144,7 @@ export function resultScreen(card: CardFace, rarity: CardRarity, tint: boolean, 
     <h2>出た。</h2>
     <div class="sub">${sub}</div>
     <div class="rays">${cardHtml(card, rarity, 'big', tint)}</div>
-    <div class="acts">
-      <button class="btn mustard" data-act="result-zukan">${icon('book')}図鑑で見る</button>
-      <button class="btn cream" data-act="result-back">ホームに戻る</button>
-    </div>
+    ${resultActs(hold)}
   </div></div>`;
 }
 
@@ -150,7 +156,7 @@ export interface MultiItem { face: CardFace; rarity: CardRarity; isNew: boolean;
  * まとめて回した結果。いちばん珍しい1枚を大きく、全部を小さく4列で並べる(バス停カードなので絵の色味は変えない)。
  * 小さいカードを押すと、そのカード(pick 番目)を大きく出す。スタンプは大きいカードの珍しさ。文は全体のまとめなので変えない
  */
-export function multiResultScreen(items: MultiItem[], totalShards: number, pick: number | null): string {
+export function multiResultScreen(items: MultiItem[], totalShards: number, pick: number | null, hold = false): string {
   // 同じ珍しさなら、はじめての1枚を大きく見せる
   const best = items.reduce((a, b) => RANK[b.rarity] > RANK[a.rarity] || (RANK[b.rarity] === RANK[a.rarity] && b.isNew && !a.isNew) ? b : a);
   const newCount = items.filter((i) => i.isNew).length;
@@ -172,10 +178,7 @@ export function multiResultScreen(items: MultiItem[], totalShards: number, pick:
     <div class="sub">${newCount > 0 ? `<span class="mark o">はじめて ${newCount}枚。</span>` : 'ぜんぶ、もう持ってた。'}${shardText}</div>
     <div class="rays">${cardHtml(shown.face, shown.rarity, 'big', false)}</div>
     <div class="m-grid">${tiles}</div>
-    <div class="acts">
-      <button class="btn mustard" data-act="result-zukan">${icon('book')}図鑑で見る</button>
-      <button class="btn cream" data-act="result-back">ホームに戻る</button>
-    </div>
+    ${resultActs(hold)}
   </div></div>`;
 }
 

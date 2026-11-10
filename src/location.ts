@@ -11,6 +11,8 @@ export interface LocationSource {
   start(onFix: (fix: Fix) => void, onError: (e: LocationError) => void, onMode?: (mode: GpsMode) => void): void;
   /** 次の時刻を待たずに、すぐ1回位置を取りに行く(地図の「現在地へ」用) */
   refresh(): void;
+  /** 閉じている間も位置を受け取るかを切り替える(アプリ版だけ) */
+  setBackground?(on: boolean): void;
 }
 
 /** GPSから届く1回分の位置。speedMps は端末が教えてくれる速さ(m/秒)。分からなければ null */

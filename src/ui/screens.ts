@@ -43,6 +43,8 @@ export interface MainView {
   storageOk: boolean;
   /** 道すじが出なかった区間で付いた、どのバス停かは決まっていない回す回数 */
   busPass: number;
+  /** iPhoneアプリ版か */
+  app: boolean;
 }
 
 function geoNotice(v: MainView): string {
@@ -50,6 +52,7 @@ function geoNotice(v: MainView): string {
     case 'starting':
       return `<div class="notice panel"><b>現在地を、さがしています。</b>位置情報の確認が出たら「許可」を選んでください。</div>`;
     case 'denied':
+      if (v.app) return `<div class="notice panel warn"><b>位置情報が、オフ。</b>駅やバス停の近くにいるかを調べるのに使います。iPhone の「設定」アプリの「プライバシーとセキュリティ」→「位置情報サービス」→「トリップガチャ」で許可してから開き直してください。</div>`;
       return `<div class="notice panel warn"><b>位置情報が、オフ。</b>駅やバス停の近くにいるかを調べるのに使います。ブラウザの設定で、このページに位置情報の利用を許可してから開き直してください。iPhone では「設定」アプリの「プライバシーとセキュリティ」→「位置情報サービス」で、Safari の位置情報がオンになっているかも確かめてください。</div>`;
     case 'unavailable':
       return `<div class="notice panel warn"><b>現在地が、取れない。</b>空の見える場所で少し待つか、アプリを開き直してください。</div>`;
@@ -106,8 +109,8 @@ export function mainScreen(v: MainView): string {
     <span class="ok">バス停</span>${RARITIES.map((r) => cell(v.busOdds, r)).join('')}
   </div>`;
   return `
-    ${v.storageOk ? '' : '<div class="notice panel warn"><b>記録が、残せません。</b>このブラウザでは端末に記録を保存できないため、閉じると集めたカードが消えます。プライベートブラウズなら、通常のモードで開いてください。</div>'}
-    <div class="top"><span class="logo">トリップガチャ</span><span class="top-r"><button class="reload" data-act="reload" aria-label="最新版に更新">${icon('reload')}<span class="reload-t">更新</span></button><button class="shard" data-act="shard-info" aria-label="かけら ${v.shards}。使い道を見る"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</button></span></div>
+    ${v.storageOk ? '' : `<div class="notice panel warn"><b>記録が、残せません。</b>${v.app ? '端末に記録を保存できないため、閉じると集めたカードが消えます。' : 'このブラウザでは端末に記録を保存できないため、閉じると集めたカードが消えます。プライベートブラウズなら、通常のモードで開いてください。'}</div>`}
+    <div class="top"><span class="logo">トリップガチャ</span><span class="top-r">${v.app ? '' : `<button class="reload" data-act="reload" aria-label="最新版に更新">${icon('reload')}<span class="reload-t">更新</span></button>`}<button class="shard" data-act="shard-info" aria-label="かけら ${v.shards}。使い道を見る"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</button></span></div>
     <div class="lead">今日、歩いた。</div>
     <div class="huge" role="img" aria-label="${km(v.distanceM)}km"><span class="huge-n">${digitsHtml(km(v.distanceM))}</span><small>km</small></div>
     <div class="feet" role="img" aria-label="${km(MAX_M)}kmまでのうち${km(v.distanceM)}km">${feet}</div>
@@ -352,7 +355,7 @@ function gpsModeLine(gpsMode: GpsMode | 'sim' | null): string {
 
 export function settingsScreen(
   save: SaveData, pendingImport: { data: SaveData; fileName: string } | null, cardCount: number, version: string, gpsMode: GpsMode | 'sim' | null,
-  passLogLines: string[],
+  passLogLines: string[], background: boolean | null,
 ): string {
   const confirm = pendingImport
     ? `<div class="panel">
@@ -383,6 +386,13 @@ export function settingsScreen(
       </div>
     </div>
     ${confirm}
+    ${background == null ? '' : `<div class="panel">
+      <div class="switch-row">
+        <h4>閉じている間も記録する</h4>
+        <button class="switch" data-act="background" role="switch" aria-checked="${background}" aria-label="閉じている間も記録する">${background ? 'オン' : 'オフ'}</button>
+      </div>
+      <p>オンにすると、アプリを閉じていても、通った駅・バス停と移動距離を記録する。電池は多めに使う。位置情報の許可は「常に」がおすすめ。オフでも、閉じている間の移動は、次に開いたときに道すじから推測する。</p>
+    </div>`}
     <div class="panel">
       <h4>ベータ版の確かめ用</h4>
       <details class="pass-log">
@@ -402,28 +412,36 @@ export function settingsScreen(
 const km1 = (m: number) => `${m / 1000}km`;
 
 /** 使ううえで誤解しやすいこと。かけらの使い道は書かない(企画で説明しないと決めている。裏カードを持ってからは SECRET_NOTE を足す) */
-const NOTES: [string, string[]][] = [
+const notesFor = (app: boolean): [string, string[]][] => [
   ['回す権利', [
     `範囲(${CONFIG.enterRadiusM}m)に入ると、その場所の回す権利がもらえる。権利はその日のうちだけ。日付が変わると消える。`,
     '範囲の外で回すと、その場所の範囲を出たときの確率で引く。出たあとに歩いて確率が上がっても、その場所の確率は上がらない。',
     `同じ場所は、回してから${CONFIG.cooldownMs / 60000}分待つ。待ち時間が終わったあと、もう一度その範囲に入ると、また回せる。`,
-    'アプリを閉じている間に通った駅・バス停は、次に開いたときに、前に開いていた場所との間の道すじを推測して「通過」として回せる。推測なので、通っていない場所が付いたり、通った場所が付かなかったりする。日付をまたいだ移動は推測しない。',
+    app
+      ? 'アプリを閉じている間も位置を受け取り、通った駅・バス停は、開いたときに回せる。「閉じている間も記録する」がオフのときや、アプリを上にスワイプして終了したときなど、位置が届かなかった間の移動は、次に開いたときに道すじを推測して「通過」として回せる。推測なので、通っていない場所が付いたり、通った場所が付かなかったりする。日付をまたいだ移動は推測しない。'
+      : 'アプリを閉じている間に通った駅・バス停は、次に開いたときに、前に開いていた場所との間の道すじを推測して「通過」として回せる。推測なので、通っていない場所が付いたり、通った場所が付かなかったりする。日付をまたいだ移動は推測しない。',
     'かかった時間で乗り物が決められないときは、何で移動したかを聞く。道すじが分からないときは、どのバス停かは決めずに「通過したバス停」の回数だけ付く。',
   ]],
   ['確率と移動距離', [
-    '移動距離は、アプリを開いている間に数える。閉じている間の移動は、次に開いたときに推測した道のりを足す。',
+    app
+      ? '移動距離は、アプリを閉じている間も数える。位置が届かなかった間の移動は、次に開いたときに推測した道のりを足す。'
+      : '移動距離は、アプリを開いている間に数える。閉じている間の移動は、次に開いたときに推測した道のりを足す。',
     '移動距離は、日付が変わると0に戻る。電車・バスの移動も数える。',
     `${km1(CONFIG.bonusStepM)}進むごとに、ノーマルの確率${CONFIG.bonusPerStepBp / 100}%がスーパーレアに移る。${km1(MAX_M)}で最大。レアの確率は変わらない。`,
     '止まっているときの位置の揺れは数えない。そのため、少しの移動は距離に入らないことがある。',
   ]],
   ['位置', [
     `位置の誤差が${CONFIG.accuracyLimitM}mより大きいときは、範囲に入ったかの判定に使わない。`,
-    `歩いているときは${CONFIG.gpsSlowIntervalMs / 1000}秒ごとに位置を取る。範囲の端をかすめただけだと、入ったことにならないことがある。`,
+    `${app ? `約${CONFIG.nativeDistanceFilterM}m動くごとに位置を受け取る` : `歩いているときは${CONFIG.gpsSlowIntervalMs / 1000}秒ごとに位置を取る`}。範囲の端をかすめただけだと、入ったことにならないことがある。`,
   ]],
   ['カード', [
     '駅のカードは、その駅でしか出ない。バス停のカードは、どのバス停でも同じ120枚から出る。',
   ]],
-  ['記録', [
+  ['記録', app ? [
+    '記録は、このiPhoneのアプリの中にだけある。アプリを消すと、記録も消える。機種変更のときは、書き出しと読み込みを使う。',
+    'ブラウザで開いたトリップガチャとは、記録が別々になる。',
+    '新しい版は、Sideloadly で入れ直す。念のため、入れ直す前に書き出しておく。',
+  ] : [
     '記録は、この端末のブラウザの中にだけある。ブラウザのデータを消すと、記録も消える。機種変更のときは、書き出しと読み込みを使う。',
     'iPhone では、Safari で開いたときと、ホーム画面に追加したアプリとで、記録が別々になる。',
     '「更新」ボタンを押しても、記録は消えない。',
@@ -440,10 +458,11 @@ const SECRET_NOTE: [string, string[]] = ['???のカード', [
   '初めて出ると、かけらは0に戻る。もう持っている「???」のカードがまた出ると、かけらは半分になる。',
 ]];
 
-export function notesScreen(hasSecret: boolean): string {
+export function notesScreen(hasSecret: boolean, app: boolean): string {
+  const base = notesFor(app);
   // 「カード」の次に入れる
-  const at = NOTES.findIndex(([title]) => title === 'カード') + 1;
-  const notes = hasSecret ? [...NOTES.slice(0, at), SECRET_NOTE, ...NOTES.slice(at)] : NOTES;
+  const at = base.findIndex(([title]) => title === 'カード') + 1;
+  const notes = hasSecret ? [...base.slice(0, at), SECRET_NOTE, ...base.slice(at)] : base;
   // 長い画面なので、戻るボタンは左上に固定する(スクロールしても押せる)
   return `<div class="settings notes">
     <button class="back-fixed" data-act="close-notes">← 設定に戻る</button>

@@ -5,7 +5,9 @@ import { stationItemId } from './gacha.ts';
 import { haversineDistanceM } from './geofence.ts';
 
 export const SCHEMA_VERSION = 1;
-const KEY = 'trip-gacha:save';
+export const SAVE_KEY = 'trip-gacha:save';
+/** アプリ版の「閉じている間も記録する」。端末ごとの設定なので、書き出す記録には入れない */
+export const BACKGROUND_KEY = 'trip-gacha:background';
 
 export interface SaveData {
   schemaVersion: number;
@@ -49,8 +51,8 @@ export const emptySave = (): SaveData => ({
 export function storageAvailable(storage: StorageLike | undefined): boolean {
   try {
     if (!storage) return false;
-    storage.setItem(KEY + ':test', '1');
-    storage.removeItem(KEY + ':test');
+    storage.setItem(SAVE_KEY + ':test', '1');
+    storage.removeItem(SAVE_KEY + ':test');
     return true;
   } catch {
     return false;
@@ -59,7 +61,7 @@ export function storageAvailable(storage: StorageLike | undefined): boolean {
 
 export function load(storage: StorageLike): SaveData {
   try {
-    const text = storage.getItem(KEY);
+    const text = storage.getItem(SAVE_KEY);
     return text ? parseSave(text) : emptySave();
   } catch {
     // 保存が壊れていても起動はする(上書きはしない。次に保存したときに置き換わる)
@@ -68,7 +70,13 @@ export function load(storage: StorageLike): SaveData {
 }
 
 export function save(storage: StorageLike, data: SaveData): void {
-  storage.setItem(KEY, JSON.stringify(data));
+  storage.setItem(SAVE_KEY, JSON.stringify(data));
+}
+
+export const loadBackground = (storage: StorageLike): boolean => storage.getItem(BACKGROUND_KEY) !== 'off';
+
+export function saveBackground(storage: StorageLike, on: boolean): void {
+  storage.setItem(BACKGROUND_KEY, on ? 'on' : 'off');
 }
 
 export const exportJson = (data: SaveData): string => JSON.stringify(data, null, 1);

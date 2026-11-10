@@ -25,9 +25,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>近くの駅・バス停でガチャを回すために現在地を使います</string>
+	<string>近くの駅・バス停でガチャを回すために現在地を使います。位置はこの端末の中だけで使い、外へ送りません</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>アプリを閉じている間も、通った駅・バス停と移動距離を記録するために現在地を使います</string>
+	<string>アプリを閉じている間も、通った駅・バス停と移動距離を記録するために現在地を使います。位置はこの端末の中だけで使い、外へ送りません</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

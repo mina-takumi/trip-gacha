@@ -11,13 +11,14 @@ import { createCatalog, type Spot } from './items.ts';
 import { drawRarity, metersToNextStep, oddsFor, pickCommon, secretChance, stationItemId } from './gacha.ts';
 import { addFix, distanceToday, localDate } from './walk.ts';
 import {
-  applyBusPassSpin, applyPassCount, applyPassRoute, applyShardSpin, applySpins, busPassToday, canShardSpin, cooldownRemainingMs, exportJson, hasTicket, isPassSegment, load, markVisited, parseSave, save, spinDistanceM, storageAvailable,
-  type PassSegment, type SaveData, type Spin, type SpinResult,
+  applyBusPassSpin, applyPassCount, applyPassRoute, applyShardSpin, applySpins, busPassToday, canShardSpin, cooldownRemainingMs, exportJson, hasTicket, isPassSegment, load, loadBackground, markVisited, parseSave, save, saveBackground, spinDistanceM, storageAvailable,
+  type PassSegment, type SaveData, type Spin, type SpinResult, type StorageLike,
 } from './store.ts';
 import { buildNetwork, inferSegment, passCount, PASS_MODE_LABEL, type Candidate, type Inference, type Network } from './route.ts';
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
 import { createNativeLocation, type NativeWatcher } from './native-location.ts';
 import { exportOnNative } from './native-export.ts';
+import { openNativeStorage } from './native-storage.ts';
 import { exportOnWeb, isShareCanceled } from './export-file.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
 import { holdDistance, markLongRoll, playIntro, playSpin, releaseDistance, syncDistance } from './ui/fx.ts';
@@ -42,7 +43,14 @@ const geofence = createGeofence(spots, {
   enterRadiusM: CONFIG.enterRadiusM, exitRadiusM: CONFIG.exitRadiusM, accuracyLimitM: CONFIG.accuracyLimitM,
 });
 
-const storageOk = storageAvailable(globalThis.localStorage);
+const isNative = Capacitor.isNativePlatform();
+// 開発中だけ: ?app でアプリ版の画面を見る(記録の置き場所と位置の取り方はブラウザのまま)
+const isApp = isNative || (import.meta.env.DEV && new URLSearchParams(location.search).has('app'));
+const deviceStorage = isNative
+  ? await import('@capacitor/preferences').then((m) => openNativeStorage(m.Preferences, localStorage)).catch(() => localStorage)
+  : globalThis.localStorage;
+const storageOk = storageAvailable(deviceStorage);
+const storage: StorageLike = storageOk ? deviceStorage : { getItem: () => null, setItem() {}, removeItem() {} };
 // 開発中だけ: ?all で「全部集めた」画面を見る。端末の記録は読まず、書きもしない
 const allCards = import.meta.env.DEV && new URLSearchParams(location.search).has('all');
 // 開発中だけ: ?secret でバス停では必ず裏カードが出る(結果の画面を確かめる用)
@@ -50,7 +58,7 @@ const forceSecret = import.meta.env.DEV && new URLSearchParams(location.search).
 
 const state = {
   save: allCards ? allCardsSave(stations, catalog.common, busStops, catalog, Date.now())
-    : storageOk ? load(localStorage) : load({ getItem: () => null, setItem() {}, removeItem() {} }),
+    : load(storage),
   tab: 'main' as Tab,
   geo: 'starting' as GeoStatus,
   fix: null as Fix | null,
@@ -74,6 +82,8 @@ const state = {
   toast: null as string | null,
   /** 閉じている間の移動で、乗り物を聞いている区間と、その候補 */
   passAsk: null as { seg: PassSegment; options: Candidate[] } | null,
+  /** アプリ版の「閉じている間も記録する」 */
+  background: loadBackground(storage),
 };
 
 const readLocal = <T>(key: string, fallback: T): T => {
@@ -153,7 +163,7 @@ function toggleRange(kind: keyof MapRanges): void {
 function persist(): void {
   if (!storageOk || allCards) return;
   try {
-    save(localStorage, state.save);
+    save(storage, state.save);
   } catch {
     // 容量不足などで保存できなくても遊びは続ける(起動時の警告はできないので、ここでは黙る)
   }
@@ -257,7 +267,7 @@ function screenHtml(now: number): string {
       const distanceM = distanceToday(state.save.walk, now);
       return mainScreen({
         distanceM, odds: oddsFor(CONFIG.stationOddsBp, distanceM), busOdds: oddsFor(CONFIG.busOddsBp, distanceM), nextStepM: metersToNextStep(distanceM), shards: state.save.shards,
-        geo: state.geo, accuracyM: state.accuracyM, near: ticketSpots(now), nearest: nearestSpot(), storageOk, busPass: busPassToday(state.save, now),
+        geo: state.geo, accuracyM: state.accuracyM, near: ticketSpots(now), nearest: nearestSpot(), storageOk, busPass: busPassToday(state.save, now), app: isApp,
       });
     }
     case 'zukan': {
@@ -271,9 +281,9 @@ function screenHtml(now: number): string {
       return zukanScreen(state.zukanTab, stations, cards, catalog.common, secrets, state.save.collection);
     }
     case 'settings': {
-      if (state.showNotes) return notesScreen(ownedSecrets().length > 0);
+      if (state.showNotes) return notesScreen(ownedSecrets().length > 0, isApp);
       const cardCount = Object.keys(state.save.collection).filter((id) => id.startsWith('station:') || id.startsWith('common:')).length;
-      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, [`今日 受信${fixCount.total}回(閉じている間 ${fixCount.hidden}回)`, ...passLogLines]);
+      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, [`今日 受信${fixCount.total}回(閉じている間 ${fixCount.hidden}回)`, ...passLogLines], isApp ? state.background : null);
     }
     case 'map':
       return '';
@@ -456,12 +466,23 @@ async function exportSave(): Promise<void> {
   const name = `trip-gacha-${localDate(Date.now())}.json`;
   const text = exportJson(state.save);
   try {
-    await (Capacitor.isNativePlatform() ? exportOnNative(name, text) : exportOnWeb(name, text, navigator, downloadFile));
+    await (isNative ? exportOnNative(name, text) : exportOnWeb(name, text, navigator, downloadFile));
   } catch (e) {
     if (isShareCanceled(e)) return;
     showToast('書き出せませんでした。もう一度試してください。');
     render();
   }
+}
+
+/** 閉じている間も記録するかの切り替え。今の監視を止めて、新しい設定で始め直す */
+function toggleBackground(): void {
+  state.background = !state.background;
+  try {
+    saveBackground(storage, state.background);
+  } catch {
+    // 覚えられなくても、今の動きは切り替える
+  }
+  locationSource?.setBackground?.(state.background);
 }
 
 app.addEventListener('click', (e) => {
@@ -524,6 +545,7 @@ app.addEventListener('click', (e) => {
     }
     case 'zukan-tab': state.zukanTab = el.dataset.z as ZukanTab; break;
     case 'export': exportSave(); return;
+    case 'background': toggleBackground(); break;
     case 'import-apply':
       if (state.pendingImport) {
         state.save = state.pendingImport.data;
@@ -705,8 +727,8 @@ function onLocationError(kind: 'denied' | 'unavailable'): void {
 }
 
 async function startLocation(): Promise<void> {
-  let source: LocationSource = Capacitor.isNativePlatform()
-    ? createNativeLocation(registerPlugin<NativeWatcher>('BackgroundGeolocation'), { setTimeout: (fn, ms) => window.setTimeout(fn, ms), clearTimeout: (id) => window.clearTimeout(id) }, CONFIG.nativeFirstFixWaitMs, CONFIG.nativeDistanceFilterM)
+  let source: LocationSource = isNative
+    ? createNativeLocation(registerPlugin<NativeWatcher>('BackgroundGeolocation'), { setTimeout: (fn, ms) => window.setTimeout(fn, ms), clearTimeout: (id) => window.clearTimeout(id) }, CONFIG.nativeFirstFixWaitMs, CONFIG.nativeDistanceFilterM, state.background)
     : browserLocation;
   if (import.meta.env.DEV && new URLSearchParams(location.search).has('sim')) {
     const { createSimLocation } = await import('./dev/sim.ts');

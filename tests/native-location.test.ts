@@ -4,19 +4,25 @@ import { createNativeLocation, type NativeTimer, type NativeWatcher } from '../s
 import type { Fix } from '../src/geofence.ts';
 
 const T0 = 1_790_000_000_000;
+const tick = () => new Promise((r) => setTimeout(r));
 
-function setup() {
+function setup(background = true) {
   let send: Parameters<NativeWatcher['addWatcher']>[1] = () => {};
   let options: Parameters<NativeWatcher['addWatcher']>[0] = {};
-  const plugin: NativeWatcher = { addWatcher: async (o, cb) => { options = o; send = cb; return '1'; } };
+  const calls: string[] = [];
+  let ids = 0;
+  const plugin: NativeWatcher = {
+    addWatcher: async (o, cb) => { options = o; send = cb; ids++; calls.push(`add${o.backgroundMessage ? '+閉じている間' : ''}`); return String(ids); },
+    removeWatcher: async ({ id }) => { calls.push(`remove ${id}`); },
+  };
   const timers = new Map<number, () => void>();
   let next = 1;
   const timer: NativeTimer = { setTimeout: (fn) => { timers.set(next, fn); return next++; }, clearTimeout: (id) => void timers.delete(id) };
   const fixes: Fix[] = [];
   const errors: string[] = [];
-  const loc = createNativeLocation(plugin, timer, 30_000, 50, () => T0);
+  const loc = createNativeLocation(plugin, timer, 30_000, 50, background, () => T0);
   loc.start((f) => fixes.push(f), (e) => errors.push(e));
-  return { loc, fixes, errors, timers, send: (...a: Parameters<typeof send>) => send(...a), options: () => options };
+  return { loc, fixes, errors, timers, calls, send: (...a: Parameters<typeof send>) => send(...a), options: () => options };
 }
 
 const at = (time: number | null) => ({ latitude: 35.6, longitude: 139.3, accuracy: 8, time });
@@ -57,4 +63,37 @@ test('refresh は最後の位置をもう一度渡す。まだ無ければ何も
   s.send(at(T0));
   s.loc.refresh();
   assert.equal(s.fixes.length, 2);
+});
+
+test('オフで始めると、閉じている間の合図なしで監視する', () => {
+  const s = setup(false);
+  assert.equal(s.options().backgroundMessage, undefined);
+  assert.equal(s.options().distanceFilter, 50);
+});
+
+test('切り替えると、前の監視を止めてから新しい監視を始める', async () => {
+  const s = setup();
+  s.loc.setBackground!(false);
+  await tick();
+  assert.deepEqual(s.calls, ['add+閉じている間', 'remove 1', 'add']);
+  s.loc.setBackground!(true);
+  await tick();
+  assert.deepEqual(s.calls.slice(3), ['remove 2', 'add+閉じている間']);
+});
+
+test('続けて切り替えても順に処理し、最後の状態になる', async () => {
+  const s = setup();
+  s.loc.setBackground!(false);
+  s.loc.setBackground!(true);
+  s.loc.setBackground!(false);
+  await tick();
+  assert.deepEqual(s.calls, ['add+閉じている間', 'remove 1', 'add', 'remove 2', 'add+閉じている間', 'remove 3', 'add']);
+});
+
+test('切り替えたあとも位置が届く', async () => {
+  const s = setup();
+  s.loc.setBackground!(false);
+  await tick();
+  s.send(at(T0));
+  assert.equal(s.fixes.length, 1);
 });

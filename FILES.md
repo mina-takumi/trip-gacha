@@ -4,6 +4,63 @@
 
 「公開」の列は、GitHub のリポジトリに入っている(人から見える)かどうか。「いいえ」は手元だけにあるもの。
 
+## フォルダの図
+
+点線の枠は手元だけにあるフォルダ(GitHub には入っていない)。
+
+```mermaid
+flowchart LR
+  root["トリップガチャ/"]
+  root --> src["src/<br/>アプリ本体"]
+  src --> ui["ui/<br/>画面・地図・演出"]
+  src --> dev["dev/<br/>開発中だけの道具"]
+  root --> tests["tests/<br/>自動テスト"]
+  root --> scripts["scripts/<br/>データや絵を作る道具"]
+  root --> data["data/<br/>元データ"]
+  data --> source["source/<br/>OpenStreetMap から取ったもの"]
+  root --> public["public/<br/>そのまま配るもの"]
+  public --> art["art/<br/>カードの絵"]
+  public --> map["map/<br/>地図のデータ"]
+  public --> route["route/<br/>道すじのデータ"]
+  public --> icons["icons/<br/>アイコン"]
+  root --> docs["docs/<br/>カードの名前・絵の指示書"]
+  root --> ios["ios/<br/>iPhoneアプリ版"]
+  root --> gh[".github/workflows/<br/>自動で動く手順"]
+  root --> mockups["mockups/<br/>見た目の見本"]
+  root --> claude[".claude/<br/>Claude Code の設定"]
+  root --> old["old/<br/>古いプログラムの控え"]
+  root --> nm["node_modules/<br/>部品"]
+  root --> dist["dist/<br/>組み立てた結果"]
+
+  classDef local stroke-dasharray: 5 5
+  class old,nm,dist local
+```
+
+## ファイルができる流れ
+
+元データや絵が、どの道具を通ってアプリになり、どこへ届くかの図。矢印の横は使う道具。
+
+```mermaid
+flowchart TD
+  osm["OpenStreetMap"] -->|"scripts/fetch-*.mjs"| source["data/source/"]
+  source -->|"build-spots.mjs"| spots["data/spots.json<br/>駅・バス停"]
+  source -->|"build-map-data.mjs"| map["public/map/<br/>地図"]
+  source -->|"build-route-data.mjs"| route["public/route/<br/>道すじ"]
+  cards["卒業制作フォルダの<br/>カードの絵"] -->|"copy-art.mjs"| art["public/art/<br/>カードの絵"]
+  items["src/items.ts<br/>カードの名前"] -->|"export-*.mjs"| docs["docs/<br/>名前の一覧・指示書"]
+
+  srcdir["src/<br/>アプリ本体"] --> build["npm run build<br/>組み立て"]
+  spots --> build
+  map --> build
+  route --> build
+  art --> build
+  build --> dist["dist/<br/>組み立てた結果"]
+
+  dist -->|"deploy.yml<br/>main に送ったとき"| pages["GitHub Pages と<br/>Cloudflare Pages<br/>(PWA版)"]
+  dist -->|"build-ios.yml<br/>feature/ios-app に送ったとき"| ipa["trip-gacha.ipa<br/>(iPhoneアプリ版)"]
+  ipa -->|"Sideloadly"| iphone["iPhone"]
+```
+
 ## 一番上の階層
 
 | 名前 | 公開 | 説明 |

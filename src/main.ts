@@ -7,7 +7,7 @@ import spotsJson from '../data/spots.json';
 import { CONFIG, RARITIES } from './config.ts';
 import { createGeofence, haversineDistanceM, type Fix } from './geofence.ts';
 import { createCatalog, type Spot } from './items.ts';
-import { drawRarity, metersToNextStep, oddsFor, pickCommon, secretChance, stationItemId } from './gacha.ts';
+import { drawRarity, metersToNextStep, pickCommon, secretChance, spotOdds, stationItemId } from './gacha.ts';
 import { addFix, distanceToday, localDate } from './walk.ts';
 import {
   applyBusPassSpin, applyPassCount, applyPassRoute, applyShardSpin, applySpins, busPassToday, canShardSpin, cooldownRemainingMs, exportJson, hasTicket, isPassSegment, load, markVisited, parseSave, save, spinDistanceM, storageAvailable,
@@ -26,7 +26,7 @@ import {
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.8.1';
+const VERSION = '0.8.2';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -249,7 +249,7 @@ function screenHtml(now: number): string {
     case 'main': {
       const distanceM = distanceToday(state.save.walk, now);
       return mainScreen({
-        distanceM, odds: oddsFor(CONFIG.stationOddsBp, distanceM), busOdds: oddsFor(CONFIG.busOddsBp, distanceM), nextStepM: metersToNextStep(distanceM), shards: state.save.shards,
+        distanceM, odds: spotOdds('station', distanceM), busOdds: spotOdds('bus_stop', distanceM), nextStepM: metersToNextStep(distanceM), shards: state.save.shards,
         geo: state.geo, accuracyM: state.accuracyM, near: ticketSpots(now), nearest: nearestSpot(), storageOk, busPass: busPassToday(state.save, now),
       });
     }
@@ -360,14 +360,14 @@ async function reloadLatest(): Promise<void> {
 }
 
 /**
- * 1か所ぶんの抽選。範囲内なら今の距離、範囲の外ならその範囲を出たときの距離で確率を決める。
+ * 1か所ぶんの抽選。駅は、範囲内なら今の距離、範囲の外ならその範囲を出たときの距離で確率を決める。バス停の確率は距離で変わらない。
  * バス停では先に裏カードを引く(確率はその時点のかけらで決まり、移動距離は関係しない)。出なければ共通のカード
  */
 function draw(data: SaveData, spotId: string, inside: Set<string>, now: number): Spin {
   const isStation = spotById.get(spotId)!.kind === 'station';
   if (!isStation && (forceSecret || Math.random() < secretChance(data.shards))) return { spotId, rarity: 'SECRET', itemId: catalog.secretAt(spotId) };
   const distanceM = spinDistanceM(data, spotId, inside.has(spotId), distanceToday(data.walk, now), now);
-  const rarity = drawRarity(oddsFor(isStation ? CONFIG.stationOddsBp : CONFIG.busOddsBp, distanceM), Math.random);
+  const rarity = drawRarity(spotOdds(isStation ? 'station' : 'bus_stop', distanceM), Math.random);
   const itemId = isStation ? stationItemId(spotId, rarity) : pickCommon(catalog.common, rarity, Math.random).itemId;
   return { spotId, rarity, itemId };
 }
@@ -420,7 +420,7 @@ function spinSpots(spotIds: string[]): void {
 function shardSpin(spotId: string): void {
   const now = Date.now();
   state.shardSpot = null;
-  const rarity = drawRarity(oddsFor(CONFIG.stationOddsBp, distanceToday(state.save.walk, now)), Math.random);
+  const rarity = drawRarity(spotOdds('station', distanceToday(state.save.walk, now)), Math.random);
   const r = applyShardSpin(state.save, spotId, rarity, now);
   if (!r) { render(); return; }
   state.save = r.data;
@@ -429,10 +429,10 @@ function shardSpin(spotId: string): void {
   showResults([{ ...r.result, spotId }]);
 }
 
-/** 通過したバス停の回数で1回回す。どのバス停かは決まっていないので、共通のカードだけ(裏カードは出ない)。確率は今の距離 */
+/** 通過したバス停の回数で1回回す。どのバス停かは決まっていないので、共通のカードだけ(裏カードは出ない) */
 function spinBusPass(): void {
   const now = Date.now();
-  const rarity = drawRarity(oddsFor(CONFIG.busOddsBp, distanceToday(state.save.walk, now)), Math.random);
+  const rarity = drawRarity(spotOdds('bus_stop', distanceToday(state.save.walk, now)), Math.random);
   const r = applyBusPassSpin(state.save, rarity, pickCommon(catalog.common, rarity, Math.random).itemId, now);
   if (!r) { render(); return; }
   state.save = r.data;

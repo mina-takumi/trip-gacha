@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CONFIG } from '../src/config.ts';
 import { readFileSync } from 'node:fs';
-import { drawRarity, metersToNextStep, oddsFor, pickCommon, secretChance } from '../src/gacha.ts';
+import { drawRarity, metersToNextStep, oddsFor, pickCommon, secretChance, spotOdds } from '../src/gacha.ts';
 import { createCatalog, SPECIAL_NOUNS, type Rarity, type Spot } from '../src/items.ts';
 import { seededRandom } from './helpers.ts';
 
@@ -47,9 +47,19 @@ test('抽選の境目', () => {
   assert.equal(drawRarity(odds, () => 0.99999), 'SUPER_RARE');
 });
 
-test('バス停の確率は 70/25/5 で、移動距離で同じように上がる', () => {
-  assert.deepEqual(oddsFor(CONFIG.busOddsBp, 0), { NORMAL: 7000, RARE: 2500, SUPER_RARE: 500 });
-  assert.deepEqual(oddsFor(CONFIG.busOddsBp, 15000), { NORMAL: 5500, RARE: 2500, SUPER_RARE: 2000 });
+test('バス停の確率は 70/25/5 で、移動距離では変わらない', () => {
+  for (const d of [0, 1000, 15000, 30000]) assert.deepEqual(spotOdds('bus_stop', d), { NORMAL: 7000, RARE: 2500, SUPER_RARE: 500 });
+});
+
+test('駅の確率は移動距離で上がる(60/30/10 → 15kmで 45/30/25)', () => {
+  assert.deepEqual(spotOdds('station', 0), { NORMAL: 6000, RARE: 3000, SUPER_RARE: 1000 });
+  assert.deepEqual(spotOdds('station', 15000), { NORMAL: 4500, RARE: 3000, SUPER_RARE: 2500 });
+});
+
+test('バス停の確率を返しても、設定の値は書き換わらない', () => {
+  const odds = spotOdds('bus_stop', 0);
+  odds.NORMAL = 0;
+  assert.equal(CONFIG.busOddsBp.NORMAL, 7000);
 });
 
 test('裏カードの確率: 0.01% + かけら1個につき0.0001%、0.2%で頭打ち', () => {

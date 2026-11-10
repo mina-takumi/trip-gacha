@@ -10,6 +10,11 @@ export function oddsFor(base: Odds, distanceM: number): Odds {
   return { NORMAL: base.NORMAL - shift, RARE: base.RARE, SUPER_RARE: base.SUPER_RARE + shift };
 }
 
+/** 駅は移動距離で確率が上がる。バス停は移動距離では変わらない(2026-11-10 ユーザー判断) */
+export function spotOdds(kind: string, distanceM: number): Odds {
+  return kind === 'station' ? oddsFor(CONFIG.stationOddsBp, distanceM) : { ...CONFIG.busOddsBp };
+}
+
 /** 次に確率が上がるまでの距離。上限に達していれば null */
 export function metersToNextStep(distanceM: number): number | null {
   const maxM = (CONFIG.bonusMaxBp / CONFIG.bonusPerStepBp) * CONFIG.bonusStepM;

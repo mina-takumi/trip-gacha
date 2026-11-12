@@ -3,6 +3,7 @@ import type { CardRarity, Rarity } from './items.ts';
 import { emptyWalk, localDate, type WalkState } from './walk.ts';
 import { stationItemId } from './gacha.ts';
 import { haversineDistanceM } from './geofence.ts';
+import { addDiary, parseDiary, parseNotes, pruneNotes, type DiaryEntry, type DiaryNotes } from './diary.ts';
 
 export const SCHEMA_VERSION = 1;
 const KEY = 'trip-gacha:save';
@@ -28,6 +29,10 @@ export interface SaveData {
   busPass: { date: string; count: number };
   /** 乗り物を聞いている途中の区間(答えるまで残す。日付が変わったら捨てる) */
   pending: PassSegment[];
+  /** 日記。回した1回ごとの時刻と場所。直近の決まった日数分だけ残る(0.9.0 で追加。古い記録には無い) */
+  diary: DiaryEntry[];
+  /** 日記の、日付ごとの自分のコメント。その日が残す日数より古くなると消える(0.9.0 で追加) */
+  diaryNotes: DiaryNotes;
 }
 
 export interface LastFix { lat: number; lon: number; t: number; distanceM: number }
@@ -42,7 +47,7 @@ export interface StorageLike {
 
 export const emptySave = (): SaveData => ({
   schemaVersion: SCHEMA_VERSION, collection: {}, spots: {}, visitedAt: {}, visitedDistanceM: {}, shards: 0, totalSpins: 0, walk: emptyWalk(),
-  lastFix: null, passedAt: {}, busPass: { date: '', count: 0 }, pending: [],
+  lastFix: null, passedAt: {}, busPass: { date: '', count: 0 }, pending: [], diary: [], diaryNotes: {},
 });
 
 /** 端末に保存できるか(プライベートブラウズなどで使えないことがある) */
@@ -118,7 +123,7 @@ export function parseSave(text: string): SaveData {
     visitedDistanceM: visitedDistanceM as SaveData['visitedDistanceM'],
     shards, totalSpins,
     walk: { dailyDistanceM: walk.dailyDistanceM, distanceDate: walk.distanceDate, smooth: point(walk.smooth), anchor: point(walk.anchor), lastFixAt: isNum(walk.lastFixAt) ? walk.lastFixAt : null },
-    lastFix: fixOf(raw.lastFix), passedAt, busPass, pending,
+    lastFix: fixOf(raw.lastFix), passedAt, busPass, pending, diary: parseDiary(raw.diary), diaryNotes: parseNotes(raw.diaryNotes),
   };
 }
 
@@ -236,6 +241,8 @@ export function applySpin(
       spots: { ...data.spots, [spotId]: { lastSpunAt: now, spinCount: (spot?.spinCount ?? 0) + 1 } },
       shards: data.shards + shardsGained,
       totalSpins: data.totalSpins + 1,
+      diary: addDiary(data.diary, spotId, now),
+      diaryNotes: pruneNotes(data.diaryNotes, now),
     },
     result: { itemId, rarity, isNew: !owned, shardsGained },
   };

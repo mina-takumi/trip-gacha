@@ -3,13 +3,14 @@ import type { Odds } from '../gacha.ts';
 import { stationItemId } from '../gacha.ts';
 import { NEIGHBOR_CITIES, type CardRarity, type CommonCard, type Rarity, type Spot, type StationCard } from '../items.ts';
 import type { GpsMode } from '../location.ts';
+import { BUS_PASS_SPOT, DIARY_NOTE_MAX, type DiaryDay, type DiaryNotes } from '../diary.ts';
 import type { SaveData } from '../store.ts';
 import { cardHtml, placeholderHtml, type CardFace } from './card.ts';
 import { distanceLabel, esc, km } from './html.ts';
 import { icon } from './icons.ts';
 import { digitsHtml } from './roll.ts';
 
-export type Tab = 'main' | 'zukan' | 'map' | 'settings';
+export type Tab = 'main' | 'zukan' | 'map' | 'diary' | 'settings';
 export type GeoStatus = 'starting' | 'denied' | 'unavailable' | 'waiting-accuracy' | 'ok';
 
 const pct = (bp: number) => (bp / 100).toFixed(0);
@@ -18,7 +19,7 @@ const STEPS = MAX_M / CONFIG.bonusStepM;
 
 export function tabbar(tab: Tab): string {
   const tabs: [Tab, string, string, string][] = [
-    ['main', 'ホーム', 'home', 'o'], ['zukan', '図鑑', 'book', 'm'], ['map', '地図', 'pin', 't'], ['settings', '設定', 'gear', 'n'],
+    ['main', 'ホーム', 'home', 'o'], ['zukan', '図鑑', 'book', 'm'], ['map', '地図', 'pin', 't'], ['diary', '日記', 'note', 'o'], ['settings', '設定', 'gear', 'n'],
   ];
   return tabs.map(([t, label, ic, color]) =>
     `<button class="tab ${t === tab ? 'on' : ''}" data-act="tab" data-tab="${t}" aria-current="${t === tab ? 'page' : 'false'}"><span class="ic ${color}">${icon(ic)}</span>${label}</button>`).join('');
@@ -445,6 +446,58 @@ const SECRET_NOTE: [string, string[]] = ['???のカード', [
   'かけらが多いほど、出やすくなる。移動距離では変わらない。',
   '初めて出ると、かけらは0に戻る。もう持っている「???」のカードがまた出ると、かけらは半分になる。',
 ]];
+
+const WEEK = ['日', '月', '火', '水', '木', '金', '土'];
+/** YYYY-MM-DD を「11月12日(木)」にする */
+const dateLabel = (date: string): string => {
+  const [y, m, d] = date.split('-').map(Number);
+  return `${m}月${d}日(${WEEK[new Date(y, m - 1, d).getDay()]})`;
+};
+const timeLabel = (t: number): string => {
+  const d = new Date(t);
+  return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
+
+/** その日のコメント。editing なら入力欄、そうでなければ文章(あれば)と書くボタン */
+function noteHtml(date: string, text: string, editing: boolean): string {
+  if (editing) {
+    return `<div class="panel diary-note">
+      <h4>コメント</h4>
+      <textarea id="diary-note" class="diary-input" rows="6" maxlength="${DIARY_NOTE_MAX}" placeholder="この日のこと(${DIARY_NOTE_MAX}文字まで)" aria-label="この日のコメント">${esc(text)}</textarea>
+      <div class="diary-btns"><button class="btn cream" data-act="diary-note-cancel">やめる</button><button class="btn" data-act="diary-note-save" data-date="${date}">保存する</button></div>
+    </div>`;
+  }
+  return `<div class="panel diary-note">
+    <h4>コメント</h4>
+    ${text ? `<p class="diary-text">${esc(text)}</p>` : '<p class="diary-empty">まだ書いていません。</p>'}
+    <button class="btn paper" data-act="diary-note-edit">${text ? 'コメントを直す' : 'コメントを書く'}</button>
+  </div>`;
+}
+
+/** 日記。date が null なら日ごとの一覧、日付があればその日の回した場所を時刻順に並べる */
+export function diaryScreen(days: DiaryDay[], date: string | null, spotOf: (id: string) => Spot | undefined, notes: DiaryNotes, editing: boolean): string {
+  const day = date ? days.find((d) => d.date === date) : undefined;
+  if (day) {
+    const rows = day.entries.map((e) => {
+      const spot = spotOf(e.spotId);
+      const name = e.spotId === BUS_PASS_SPOT ? '通過したバス停' : spot ? (spot.kind === 'station' ? `${spot.name}駅` : spot.name) : 'わからない場所';
+      const tag = spot?.kind === 'bus_stop' ? '<span class="pass-tag">バス</span>' : '';
+      return `<div class="diary-row"><span class="t">${timeLabel(e.t)}</span><span class="name">${esc(name)}${tag}</span></div>`;
+    }).join('');
+    return `<div class="settings diary">
+      <button class="back-fixed" data-act="diary-back">← 日記に戻る</button>
+      <h2>${dateLabel(day.date)}</h2>
+      <div class="panel diary-list">${rows}</div>
+      ${noteHtml(day.date, notes[day.date] ?? '', editing)}
+    </div>`;
+  }
+  const list = days.map((d) =>
+    `<button class="diary-day" data-act="diary-day" data-date="${d.date}"><span>${dateLabel(d.date)}</span><span class="n">${d.entries.length}回</span></button>`).join('');
+  return `<div class="settings diary">
+    <h2>日記</h2>
+    ${days.length ? list : '<p class="say">ガチャを回すと、ここに日ごとにたまります。</p>'}
+  </div>`;
+}
 
 export function notesScreen(hasSecret: boolean): string {
   // 「カード」の次に入れる

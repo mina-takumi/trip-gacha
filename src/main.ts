@@ -9,6 +9,7 @@ import { createGeofence, haversineDistanceM, type Fix } from './geofence.ts';
 import { createCatalog, type Spot } from './items.ts';
 import { drawRarity, metersToNextStep, pickCommon, secretChance, spotOdds, stationItemId } from './gacha.ts';
 import { addFix, distanceToday, localDate } from './walk.ts';
+import { diaryDays, setNote } from './diary.ts';
 import {
   applyBusPassSpin, applyPassCount, applyPassRoute, applyShardSpin, applySpins, busPassToday, canShardSpin, cooldownRemainingMs, exportJson, hasTicket, isPassSegment, load, markVisited, parseSave, save, spinDistanceM, storageAvailable,
   type PassSegment, type SaveData, type Spin, type SpinResult,
@@ -22,11 +23,11 @@ import { km } from './ui/html.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
 import {
-  busDetailScreen, chooserSheet, detailScreen, passModeSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
+  busDetailScreen, chooserSheet, detailScreen, diaryScreen, passModeSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.8.3';
+const VERSION = '0.9.0';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -66,6 +67,8 @@ const state = {
   /** かけらの使い道を見せているか */
   shardInfo: false,
   zukanTab: 'station' as ZukanTab,
+  diaryDate: null as string | null,
+  diaryEditing: false,
   /** 図鑑で開いているもの。駅なら spotId、バス停カード・裏カードなら itemId(common:... / secret:...) */
   detailId: null as string | null,
   showNotes: false,
@@ -273,6 +276,8 @@ function screenHtml(now: number): string {
       const cardCount = Object.keys(state.save.collection).filter((id) => id.startsWith('station:') || id.startsWith('common:')).length;
       return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines, passLogLines);
     }
+    case 'diary':
+      return diaryScreen(diaryDays(state.save.diary, now), state.diaryDate, (id) => spotById.get(id), state.save.diaryNotes, state.diaryEditing);
     case 'map':
       return '';
   }
@@ -498,6 +503,8 @@ app.addEventListener('click', (e) => {
     case 'tab':
       if (revealHeldSecrets()) return;
       state.tab = el.dataset.tab as Tab;
+      state.diaryDate = null;
+      state.diaryEditing = false;
       state.results = null;
       state.chooser = null;
       state.shardSpot = null;
@@ -553,6 +560,20 @@ app.addEventListener('click', (e) => {
       else document.querySelector(`[data-spot="${id}"], [data-item="${id}"]`)?.scrollIntoView({ block: 'center' });
       zukanScrollY = null;
       return;
+    }
+    case 'diary-day': state.diaryDate = el.dataset.date ?? null; state.diaryEditing = false; window.scrollTo(0, 0); break;
+    case 'diary-back': state.diaryDate = null; state.diaryEditing = false; window.scrollTo(0, 0); break;
+    case 'diary-note-edit': state.diaryEditing = true; break;
+    case 'diary-note-cancel': state.diaryEditing = false; break;
+    case 'diary-note-save': {
+      const text = document.getElementById('diary-note') instanceof HTMLTextAreaElement ? (document.getElementById('diary-note') as HTMLTextAreaElement).value : null;
+      const date = el.dataset.date;
+      if (text !== null && date) {
+        state.save = { ...state.save, diaryNotes: setNote(state.save.diaryNotes, date, text, Date.now()) };
+        persist();
+      }
+      state.diaryEditing = false;
+      break;
     }
     case 'zukan-tab': state.zukanTab = el.dataset.z as ZukanTab; break;
     case 'export': exportSave(); return;

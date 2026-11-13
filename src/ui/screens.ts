@@ -115,9 +115,9 @@ export function mainScreen(v: MainView): string {
   const f = v.friend;
   const friend = `<div class="sec"><span>友達の駅</span>${icon('gachapon', 'deco')}</div>
     <div class="panel friend">
-      <p class="friend-say">友達のQRを読むと、友達が回した駅が候補にたまる。週に1回、まとめて回せる。</p>
+      <p class="friend-say">友達のQRを読むと、その友達が回した駅が候補になる。回せるのは、その候補からランダムに1駅だけ。週に1回。</p>
       ${f.count > 0 ? `<p class="friend-n">いまの候補 <b>${f.count}</b>駅</p>
-      <button class="btn mustard" data-act="friend-spin" ${f.doneThisWeek ? 'disabled' : ''}>${icon('capsule')}友達の駅をまとめて回す</button>
+      <button class="btn mustard" data-act="friend-spin" ${f.doneThisWeek ? 'disabled' : ''}>${icon('capsule')}友達の駅を1駅回す</button>
       ${f.doneThisWeek ? '<p class="friend-note">今週は回した。次は月曜から。</p>' : ''}` : ''}
       <div class="pair"><button class="btn paper" data-act="friend-show">自分のQRを出す</button><button class="btn paper" data-act="friend-scan">友達のQRを読む</button></div>
     </div>`;
@@ -401,13 +401,13 @@ export function friendScanSheet(): string {
     </div>`;
 }
 
-/** 友達の駅をまとめて回す前の確認。週に1回しか回せない */
+/** 友達の駅を回す前の確認。候補からランダムに1駅だけ回り、残りは消える。週に1回しか回せない */
 export function friendConfirmSheet(count: number): string {
   return `<div class="sheet-bg" data-act="friend-cancel"></div>
     <div class="sheet panel" role="dialog" aria-modal="true" aria-label="友達の駅を回す">
       <h3>友達の駅を回す?</h3>
-      <p>候補の${count}駅を、まとめて回す。回せるのは週に1回で、次は来週の月曜から。</p>
-      <button class="btn" data-act="friend-spin-go">${icon('capsule')}${count}駅をまとめて回す</button>
+      <p>候補の${count}駅から、ランダムに1駅を回す。回さなかった候補は消える。回せるのは週に1回で、次は来週の月曜から。</p>
+      <button class="btn" data-act="friend-spin-go">${icon('capsule')}1駅を回す</button>
       <button class="btn paper" data-act="friend-cancel">やめる</button>
     </div>`;
 }

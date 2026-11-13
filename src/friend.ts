@@ -42,12 +42,15 @@ export function friendStations(order: string[], bits: boolean[], data: SaveData)
   return order.filter((id, i) => i < bits.length && bits[i] && !hasCard(data, id));
 }
 
-/** 候補に足す。すでにある駅は足さない。足した駅の数も返す */
-export function addToQueue(data: SaveData, ids: string[]): { data: SaveData; added: number } {
-  const queue = [...data.friendQueue];
-  for (const id of ids) if (!queue.includes(id)) queue.push(id);
-  const added = queue.length - data.friendQueue.length;
-  return { data: added ? { ...data, friendQueue: queue } : data, added };
+/**
+ * 今回読んだ1人分を候補にする(別のQRの分とは混ぜず、前の候補は入れ替える)。
+ * 新しい駅が無いとき(まだ持っていない駅が0、または今の候補と同じ)は前の候補を残す。replaced は前の候補を入れ替えたか
+ */
+export function setBatch(data: SaveData, ids: string[]): { data: SaveData; added: number; replaced: boolean } {
+  const cur = friendCandidates(data);
+  const same = ids.length === cur.length && ids.every((id) => cur.includes(id));
+  if (ids.length === 0 || same) return { data, added: 0, replaced: false };
+  return { data: { ...data, friendQueue: [...ids] }, added: ids.length, replaced: cur.length > 0 };
 }
 
 /** 今の候補(読んだあとに自分で手に入れた駅は除く) */
@@ -64,21 +67,19 @@ export function weekStart(now: number): string {
 export const canFriendSpin = (data: SaveData, now: number) => friendCandidates(data).length > 0 && data.friendWeek !== weekStart(now);
 
 /**
- * 候補をすべてまとめて回す。駅の待ち時間・回す権利・日記は変えず、行った駅にも数えない(friendCards に残す)。
- * 回せないときは null
+ * 候補からランダムに1駅だけ回す(pick は 0 以上 n 未満の番号を返す)。残りの候補は消える。
+ * 駅の待ち時間・回す権利・日記は変えず、行った駅にも数えない(friendCards に残す)。回せないときは null
  */
 export function applyFriendSpin(
-  data: SaveData, now: number, drawRarity: () => Rarity,
-): { data: SaveData; results: (SpinResult & { spotId: string })[] } | null {
+  data: SaveData, now: number, drawRarity: () => Rarity, pick: (n: number) => number = (n) => Math.floor(Math.random() * n),
+): { data: SaveData; result: SpinResult & { spotId: string } } | null {
   if (!canFriendSpin(data, now)) return null;
-  const results: (SpinResult & { spotId: string })[] = [];
-  const friendCards = { ...data.friendCards };
-  let cur = data;
-  for (const spotId of friendCandidates(data)) {
-    const r = applySpin(cur, spotId, drawRarity(), now);
-    cur = { ...r.data, spots: cur.spots, diary: cur.diary, diaryNotes: cur.diaryNotes };
-    friendCards[spotId] = now;
-    results.push({ ...r.result, spotId });
-  }
-  return { data: { ...cur, friendQueue: [], friendWeek: weekStart(now), friendCards }, results };
+  const candidates = friendCandidates(data);
+  const spotId = candidates[Math.min(Math.max(pick(candidates.length), 0), candidates.length - 1)];
+  const r = applySpin(data, spotId, drawRarity(), now);
+  const cur = { ...r.data, spots: data.spots, diary: data.diary, diaryNotes: data.diaryNotes };
+  return {
+    data: { ...cur, friendQueue: [], friendWeek: weekStart(now), friendCards: { ...data.friendCards, [spotId]: now } },
+    result: { ...r.result, spotId },
+  };
 }

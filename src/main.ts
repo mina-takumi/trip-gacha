@@ -23,14 +23,14 @@ import { km } from './ui/html.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
 import { claimRewards, progressOf } from './progress.ts';
-import { addToQueue, applyFriendSpin, decodeQr, encodeQr, friendCandidates, friendStations, weekStart } from './friend.ts';
+import { setBatch, applyFriendSpin, decodeQr, encodeQr, friendCandidates, friendStations, weekStart } from './friend.ts';
 import qrcode from 'qrcode-generator';
 import {
   busDetailScreen, chooserSheet, detailScreen, diaryScreen, friendConfirmSheet, friendScanSheet, friendShowSheet, passModeSheet, progressSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.11.0';
+const VERSION = '0.11.1';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -506,13 +506,13 @@ function onFriendQr(text: string): void {
     return;
   }
   scanDone = true;
-  const { data, added } = addToQueue(state.save, friendStations(stationOrder, bits, state.save));
+  const { data, added, replaced } = setBatch(state.save, friendStations(stationOrder, bits, state.save));
   state.save = data;
   persist();
   stopFriendScan();
   state.friendScan = false;
   render();
-  showToast(added > 0 ? `友達の駅が${added}駅、候補に入った。` : '新しい駅は、ありませんでした。');
+  showToast(added > 0 ? `友達の駅が${added}駅、候補に入った。${replaced ? '前の候補は、入れ替わった。' : ''}` : '新しい駅は、ありませんでした。');
 }
 
 async function startFriendScan(): Promise<void> {
@@ -533,7 +533,7 @@ async function startFriendScan(): Promise<void> {
   }
 }
 
-/** 友達の駅をまとめて回す。確率は駅ガチャと同じ(今日の移動距離)。待ち時間・回す権利・日記は変えない */
+/** 友達の駅を、候補からランダムに1駅回す。確率は駅ガチャと同じ(今日の移動距離)。待ち時間・回す権利・日記は変えない */
 function friendSpin(): void {
   state.friendConfirm = false;
   const now = Date.now();
@@ -543,7 +543,7 @@ function friendSpin(): void {
   state.save = r.data;
   persist();
   render();
-  showResults(r.results);
+  showResults([r.result]);
 }
 
 function shardSpin(spotId: string): void {

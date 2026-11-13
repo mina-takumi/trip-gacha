@@ -35,7 +35,7 @@ export interface SaveData {
   diaryNotes: DiaryNotes;
   /** 駅を全部まわってかけらをもらった路線・市 → もらった日時(キーは line:… / city:…。0.10.0 で追加。古い記録には無い) */
   rewards: Record<string, number>;
-  /** 友達のQRから集めた、まだ回していない駅(spotId)。週に1回まとめて回すと空になる(0.11.0 で追加。古い記録には無い) */
+  /** 友達のQRから集めた、まだ回していない駅(spotId)。週に1回、その中から1駅回すと空になる(0.11.0 で追加。古い記録には無い) */
   friendQueue: string[];
   /** 友達の駅を最後にまとめて回した週の月曜の日付(YYYY-MM-DD) */
   friendWeek: string;

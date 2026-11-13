@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { addToQueue, applyFriendSpin, canFriendSpin, decodeQr, encodeQr, friendCandidates, friendStations, spunByMe, weekStart } from '../src/friend.ts';
+import { setBatch, applyFriendSpin, canFriendSpin, decodeQr, encodeQr, friendCandidates, friendStations, spunByMe, weekStart } from '../src/friend.ts';
 import { stationItemId } from '../src/gacha.ts';
 import { createCatalog, type Spot } from '../src/items.ts';
 import { claimRewards, progressOf } from '../src/progress.ts';
@@ -60,18 +60,36 @@ test('駅の数が自分と友達で違っても、共通の先頭の分で読�
   assert.deepEqual(friendStations(order.slice(0, 30), decodeQr(encodeQr(order, spun(emptySave(), ['聖蹟桜ヶ丘'])))!, emptySave()), []);
 });
 
-test('候補に足す: 同じ駅は重ならず、同じQRをまた読んでも増えない', () => {
-  const a = idOf('高幡不動'), b = idOf('南大沢');
-  const r1 = addToQueue(emptySave(), [a, b]);
+test('候補にする: 読んだ1人分だけ。別のQRを読むと入れ替わり、混ざらない', () => {
+  const a = idOf('高幡不動'), b = idOf('南大沢'), c = idOf('日野');
+  const r1 = setBatch(emptySave(), [a, b]);
   assert.equal(r1.added, 2);
-  const r2 = addToQueue(r1.data, [a, idOf('日野')]);
-  assert.equal(r2.added, 1);
-  assert.equal(addToQueue(r2.data, [a, b]).added, 0);
-  assert.equal(r2.data.friendQueue.length, 3);
+  assert.equal(r1.replaced, false);
+  const r2 = setBatch(r1.data, [a, c]);
+  assert.deepEqual(r2.data.friendQueue, [a, c]);
+  assert.equal(r2.added, 2);
+  assert.equal(r2.replaced, true);
+});
+
+test('候補にする: 同じQRをまた読んでも変わらない。新しい駅が無いQRは前の候補を消さない', () => {
+  const a = idOf('高幡不動'), b = idOf('南大沢');
+  const r1 = setBatch(emptySave(), [a, b]);
+  const same = setBatch(r1.data, [b, a]);
+  assert.equal(same.added, 0);
+  assert.equal(same.data, r1.data);
+  const empty = setBatch(r1.data, []);
+  assert.equal(empty.added, 0);
+  assert.deepEqual(empty.data.friendQueue, [a, b]);
+});
+
+test('候補にする: 前の候補のうち自分で手に入れた駅は数えず、同じ中身なら変わらない', () => {
+  const a = idOf('高幡不動'), b = idOf('南大沢');
+  const owned = spun(setBatch(emptySave(), [a, b]).data, ['高幡不動']);
+  assert.equal(setBatch(owned, [b]).added, 0);
 });
 
 test('友達の駅で手に入れただけの駅は、自分のQRに入らない', () => {
-  const d0 = addToQueue(emptySave(), [idOf('高幡不動')]).data;
+  const d0 = setBatch(emptySave(), [idOf('高幡不動')]).data;
   const r = applyFriendSpin(d0, T, () => 'NORMAL')!;
   assert.equal(spunByMe(r.data, idOf('高幡不動')), false);
   assert.ok(decodeQr(encodeQr(order, r.data))!.every((b) => !b));
@@ -84,23 +102,27 @@ test('週は月曜0時で切り替わる', () => {
   assert.equal(weekStart(at(2026, 11, 13)), '2026-11-09');
 });
 
-test('まとめて回す: 全部の駅のカードが手に入り、候補が空になり、今週は回せなくなる', () => {
+test('回す: 候補からランダムに1駅だけ。残りの候補は消え、今週は回せなくなる', () => {
   const ids = [idOf('高幡不動'), idOf('南大沢'), idOf('日野')];
-  const d0 = addToQueue(emptySave(), ids).data;
+  const d0 = setBatch(emptySave(), ids).data;
   assert.equal(canFriendSpin(d0, T), true);
-  const r = applyFriendSpin(d0, T, () => 'RARE')!;
-  assert.deepEqual(r.results.map((x) => x.spotId), ids);
-  assert.ok(r.results.every((x) => x.isNew && x.rarity === 'RARE' && x.shardsGained === 0));
-  for (const id of ids) assert.ok(r.data.collection[stationItemId(id, 'RARE')]);
+  const r = applyFriendSpin(d0, T, () => 'RARE', () => 1)!;
+  assert.equal(r.result.spotId, ids[1]);
+  assert.ok(r.result.isNew && r.result.rarity === 'RARE' && r.result.shardsGained === 0);
+  assert.ok(r.data.collection[stationItemId(ids[1], 'RARE')]);
+  assert.equal(Object.keys(r.data.collection).length, 1);
+  assert.deepEqual(Object.keys(r.data.friendCards), [ids[1]]);
   assert.deepEqual(r.data.friendQueue, []);
   assert.equal(r.data.friendWeek, '2026-11-09');
-  assert.equal(r.data.totalSpins, 3);
-  assert.equal(canFriendSpin(addToQueue(r.data, [idOf('町田')]).data, at(2026, 11, 15, 20)), false);
-  assert.equal(canFriendSpin(addToQueue(r.data, [idOf('町田')]).data, at(2026, 11, 16, 0)), true);
+  assert.equal(r.data.totalSpins, 1);
+  assert.equal(applyFriendSpin(d0, T, () => 'RARE', () => 99)!.result.spotId, ids[2]);
+  assert.equal(applyFriendSpin(d0, T, () => 'RARE', () => -5)!.result.spotId, ids[0]);
+  assert.equal(canFriendSpin(setBatch(r.data, [idOf('町田')]).data, at(2026, 11, 15, 20)), false);
+  assert.equal(canFriendSpin(setBatch(r.data, [idOf('町田')]).data, at(2026, 11, 16, 0)), true);
 });
 
 test('友達の駅を回しても、待ち時間・回す権利・日記は変わらない', () => {
-  const d0 = addToQueue(emptySave(), [idOf('高幡不動')]).data;
+  const d0 = setBatch(emptySave(), [idOf('高幡不動')]).data;
   const r = applyFriendSpin(d0, T, () => 'NORMAL')!;
   assert.deepEqual(r.data.spots, {});
   assert.deepEqual(r.data.visitedAt, {});
@@ -110,16 +132,16 @@ test('友達の駅を回しても、待ち時間・回す権利・日記は変�
 test('候補が空・今週もう回した・読んだあとに自分で手に入れた駅だけのときは回せない', () => {
   assert.equal(applyFriendSpin(emptySave(), T, () => 'NORMAL'), null);
   const id = idOf('高幡不動');
-  const done = applyFriendSpin(addToQueue(emptySave(), [id]).data, T, () => 'NORMAL')!.data;
-  assert.equal(applyFriendSpin(addToQueue(done, [idOf('南大沢')]).data, T + 1000, () => 'NORMAL'), null);
-  const mine = spun(addToQueue(emptySave(), [id]).data, ['高幡不動']);
+  const done = applyFriendSpin(setBatch(emptySave(), [id]).data, T, () => 'NORMAL')!.data;
+  assert.equal(applyFriendSpin(setBatch(done, [idOf('南大沢')]).data, T + 1000, () => 'NORMAL'), null);
+  const mine = spun(setBatch(emptySave(), [id]).data, ['高幡不動']);
   assert.deepEqual(friendCandidates(mine), []);
   assert.equal(canFriendSpin(mine, T), false);
 });
 
 test('友達の駅で手に入れたカードは「行った駅」に数えない。本当に行くと数える', () => {
   const id = idOf('高幡不動');
-  let d = applyFriendSpin(addToQueue(emptySave(), [id]).data, T, () => 'NORMAL')!.data;
+  let d = applyFriendSpin(setBatch(emptySave(), [id]).data, T, () => 'NORMAL')!.data;
   assert.equal(hasVisited(d, id), false);
   const p = progressOf(d, stations);
   assert.equal(p.find((x) => x.key === 'line:keio-dobutsuen')!.done, 0);
@@ -132,15 +154,18 @@ test('友達の駅で手に入れたカードは「行った駅」に数えな�
 
 test('友達の駅だけで路線を埋めても、かけらは配られない', () => {
   const ids = ['高幡不動', '多摩動物公園'].map(idOf);
-  const d = applyFriendSpin(addToQueue(emptySave(), ids).data, T, () => 'NORMAL')!.data;
+  let d = setBatch(emptySave(), ids).data;
+  d = applyFriendSpin(d, T, () => 'NORMAL', () => 0)!.data;
+  d = applyFriendSpin(setBatch(d, [ids[1]]).data, T + 8 * 86400000, () => 'NORMAL', () => 0)!.data;
+  assert.equal(Object.keys(d.friendCards).length, 2);
   assert.equal(claimRewards(d, stations, T), null);
   assert.equal(d.shards, 0);
   assert.equal(CONFIG.completeShardsPerStation, 10);
 });
 
 test('候補・週・友達の駅は書き出しに入り、読み込んでも残る。古い記録は空として読む', () => {
-  const d = applyFriendSpin(addToQueue(emptySave(), [idOf('高幡不動')]).data, T, () => 'NORMAL')!.data;
-  const withQueue = addToQueue(d, [idOf('南大沢')]).data;
+  const d = applyFriendSpin(setBatch(emptySave(), [idOf('高幡不動')]).data, T, () => 'NORMAL')!.data;
+  const withQueue = setBatch(d, [idOf('南大沢')]).data;
   const back = parseSave(exportJson(withQueue));
   assert.deepEqual(back.friendQueue, [idOf('南大沢')]);
   assert.equal(back.friendWeek, '2026-11-09');

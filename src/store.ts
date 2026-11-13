@@ -37,6 +37,12 @@ export interface SaveData {
   diaryNotes: DiaryNotes;
   /** 駅を全部まわってかけらをもらった路線・市 → もらった日時(キーは line:… / city:…。0.10.0 で追加。古い記録には無い) */
   rewards: Record<string, number>;
+  /** 友達のQRから集めた、まだ回していない駅(spotId)。週に1回まとめて回すと空になる(0.11.0 で追加。古い記録には無い) */
+  friendQueue: string[];
+  /** 友達の駅を最後にまとめて回した週の月曜の日付(YYYY-MM-DD) */
+  friendWeek: string;
+  /** 友達の駅で手に入れた駅(spotId → 日時)。行った駅には数えない */
+  friendCards: Record<string, number>;
 }
 
 export interface LastFix { lat: number; lon: number; t: number; distanceM: number }
@@ -52,6 +58,7 @@ export interface StorageLike {
 export const emptySave = (): SaveData => ({
   schemaVersion: SCHEMA_VERSION, collection: {}, spots: {}, visitedAt: {}, visitedDistanceM: {}, shards: 0, totalSpins: 0, walk: emptyWalk(),
   lastFix: null, passedAt: {}, busPass: { date: '', count: 0 }, pending: [], diary: [], diaryNotes: {}, rewards: {},
+  friendQueue: [], friendWeek: '', friendCards: {},
 });
 
 /** 端末に保存できるか(プライベートブラウズなどで使えないことがある) */
@@ -135,6 +142,9 @@ export function parseSave(text: string): SaveData {
     walk: { dailyDistanceM: walk.dailyDistanceM, distanceDate: walk.distanceDate, smooth: point(walk.smooth), anchor: point(walk.anchor), lastFixAt: isNum(walk.lastFixAt) ? walk.lastFixAt : null },
     lastFix: fixOf(raw.lastFix), passedAt, busPass, pending, diary: parseDiary(raw.diary), diaryNotes: parseNotes(raw.diaryNotes),
     rewards: isObj(raw.rewards) && Object.values(raw.rewards).every(isNum) ? raw.rewards as Record<string, number> : {},
+    friendQueue: Array.isArray(raw.friendQueue) && raw.friendQueue.every((v: unknown) => typeof v === 'string') ? raw.friendQueue as string[] : [],
+    friendWeek: typeof raw.friendWeek === 'string' ? raw.friendWeek : '',
+    friendCards: isObj(raw.friendCards) && Object.values(raw.friendCards).every(isNum) ? raw.friendCards as Record<string, number> : {},
   };
 }
 
@@ -259,9 +269,9 @@ export function applySpin(
   };
 }
 
-/** 行ったことのある駅か。範囲内に入った記録があるか、その駅のカードを1枚でも持っている(記録を取り始める前に行った駅のため) */
+/** 行ったことのある駅か。範囲内に入った記録があるか、その駅のカードを1枚でも持っている(記録を取り始める前に行った駅のため)。友達の駅で手に入れただけのカードは数えない */
 export function hasVisited(data: SaveData, spotId: string): boolean {
-  return data.visitedAt[spotId] != null || RARITIES.some((r) => data.collection[stationItemId(spotId, r)]);
+  return data.visitedAt[spotId] != null || (data.friendCards[spotId] == null && RARITIES.some((r) => data.collection[stationItemId(spotId, r)]));
 }
 
 /** かけらで駅のガチャを回せるか */

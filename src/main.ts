@@ -27,12 +27,14 @@ import { km } from './ui/html.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
 import { claimRewards, progressOf } from './progress.ts';
+import { addToQueue, applyFriendSpin, decodeQr, encodeQr, friendCandidates, friendStations, weekStart } from './friend.ts';
+import qrcode from 'qrcode-generator';
 import {
-  busDetailScreen, chooserSheet, detailScreen, diaryScreen, passModeSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
+  busDetailScreen, chooserSheet, detailScreen, diaryScreen, friendConfirmSheet, friendScanSheet, friendShowSheet, passModeSheet, progressSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.10.0';
+const VERSION = '0.11.0';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -78,6 +80,12 @@ const state = {
   shardSpot: null as string | null,
   /** かけらの使い道を見せているか */
   shardInfo: false,
+  /** 自分のQRを見せているか・友達のQRを読んでいるか・友達の駅をまとめて回す前にたずねているか */
+  friendShow: false,
+  friendScan: false,
+  friendConfirm: false,
+  /** 達成率で押した路線・市(line:… / city:…) */
+  progDetail: null as string | null,
   zukanTab: 'station' as ZukanTab,
   diaryDate: null as string | null,
   diaryEditing: false,
@@ -287,6 +295,7 @@ function screenHtml(now: number): string {
       return mainScreen({
         distanceM, odds: spotOdds('station', distanceM), busOdds: spotOdds('bus_stop', distanceM), nextStepM: metersToNextStep(distanceM), shards: state.save.shards,
         geo: state.geo, accuracyM: state.accuracyM, near: ticketSpots(now), nearest: nearestSpot(), storageOk, busPass: busPassToday(state.save, now), app: isApp,
+        friend: { count: friendCandidates(state.save).length, doneThisWeek: state.save.friendWeek === weekStart(now) },
       });
     }
     case 'zukan': {
@@ -350,7 +359,12 @@ function render(): void {
   }
   toastEl.innerHTML = state.toast ? `<div class="toast" role="status">${state.toast}</div>` : '';
   const ask = state.passAsk;
-  const sheet = ask ? passModeSheet(ask.options.map((c) => ({ label: PASS_MODE_LABEL[c.mode], count: c.passes.length })), Math.round((ask.seg.to.t - ask.seg.from.t) / 60000))
+  const detail = state.progDetail ? progressOf(state.save, stations).find((q) => q.key === state.progDetail) : undefined;
+  const sheet = state.friendScan ? friendScanSheet()
+    : state.friendShow ? friendShowSheet(myQrSvg())
+    : state.friendConfirm ? friendConfirmSheet(friendCandidates(state.save).length)
+    : detail ? progressSheet(detail)
+    : ask ? passModeSheet(ask.options.map((c) => ({ label: PASS_MODE_LABEL[c.mode], count: c.passes.length })), Math.round((ask.seg.to.t - ask.seg.from.t) / 60000))
     : state.chooser ? chooserSheet(spotById.get(state.chooser.spotId)!.name, state.chooser.count)
     : state.shardSpot ? shardSpinSheet(spotById.get(state.shardSpot)!.name, state.save.shards)
     : state.shardInfo ? shardInfoSheet() : '';
@@ -473,6 +487,76 @@ function spinSpots(spotIds: string[]): void {
 }
 
 /** かけらで駅のガチャを回す。確率はホームの表と同じ(今日の移動距離で上がる)。待ち時間・回す権利は変えない */
+// ---------- 友達のQR ----------
+// QRに入れる駅の並びは、カードの番号順(毎回同じ並びになる)
+const stationOrder = Object.keys(cards);
+
+function myQrSvg(): string {
+  const qr = qrcode(0, 'M');
+  qr.addData(encodeQr(stationOrder, state.save));
+  qr.make();
+  return qr.createSvgTag({ cellSize: 6, margin: 0, scalable: true });
+}
+
+let scanner: { stop(): void; destroy(): void } | null = null;
+let scanDone = false;
+
+function stopFriendScan(): void {
+  scanner?.stop();
+  scanner?.destroy();
+  scanner = null;
+}
+
+/** 読めたQRを候補に足して、読み取りを終える。トリップガチャのQRでなければ読み続ける */
+function onFriendQr(text: string): void {
+  if (scanDone) return;
+  const bits = decodeQr(text);
+  if (!bits) {
+    const msg = document.getElementById('qr-msg');
+    if (msg) msg.textContent = 'トリップガチャのQRではありません。';
+    return;
+  }
+  scanDone = true;
+  const { data, added } = addToQueue(state.save, friendStations(stationOrder, bits, state.save));
+  state.save = data;
+  persist();
+  stopFriendScan();
+  state.friendScan = false;
+  render();
+  showToast(added > 0 ? `友達の駅が${added}駅、候補に入った。` : '新しい駅は、ありませんでした。');
+}
+
+async function startFriendScan(): Promise<void> {
+  const video = document.getElementById('qr-video') as HTMLVideoElement | null;
+  const say = (t: string) => { const m = document.getElementById('qr-msg'); if (m) m.textContent = t; };
+  if (!video) return;
+  scanDone = false;
+  try {
+    const { default: QrScanner } = await import('qr-scanner');
+    if (!state.friendScan) return;
+    const s = new QrScanner(video, (r) => onFriendQr(r.data), { preferredCamera: 'environment', maxScansPerSecond: 8, returnDetailedScanResult: true, highlightScanRegion: true });
+    scanner = s;
+    await s.start();
+    if (!state.friendScan) stopFriendScan();
+  } catch {
+    video.parentElement?.style.setProperty('display', 'none');
+    say('カメラが使えません。ブラウザやiPhoneの設定で、このアプリのカメラを許可してから、もう一度開いてください。');
+  }
+}
+
+/** 友達の駅をまとめて回す。確率は駅ガチャと同じ(今日の移動距離)。待ち時間・回す権利・日記は変えない */
+function friendSpin(): void {
+  state.friendConfirm = false;
+  const now = Date.now();
+  const distanceM = distanceToday(state.save.walk, now);
+  const r = applyFriendSpin(state.save, now, () => drawRarity(spotOdds('station', distanceM), Math.random));
+  if (!r) { render(); return; }
+  state.save = r.data;
+  persist();
+  render();
+  showResults(r.results);
+}
+
 function shardSpin(spotId: string): void {
   const now = Date.now();
   state.shardSpot = null;
@@ -561,6 +645,15 @@ app.addEventListener('click', (e) => {
     case 'shard-cancel': state.shardSpot = null; break;
     case 'shard-info': state.shardInfo = true; break;
     case 'shard-info-close': state.shardInfo = false; break;
+    case 'friend-show': state.friendShow = true; break;
+    case 'friend-close': state.friendShow = false; break;
+    case 'friend-scan': state.friendScan = true; render(); startFriendScan(); return;
+    case 'friend-scan-close': stopFriendScan(); state.friendScan = false; break;
+    case 'friend-spin': state.friendConfirm = true; break;
+    case 'friend-cancel': state.friendConfirm = false; break;
+    case 'friend-spin-go': friendSpin(); return;
+    case 'prog-detail': state.progDetail = el.dataset.key ?? null; break;
+    case 'prog-close': state.progDetail = null; break;
     case 'result-zukan': {
       // 1枚ならそのカードを開く。まとめて回したとき(バス停だけ)は、バス停の図鑑の一覧へ
       const rs = state.results ?? [];

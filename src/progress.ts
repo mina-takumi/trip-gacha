@@ -1,5 +1,6 @@
 import { CONFIG } from './config.ts';
 import type { Spot } from './items.ts';
+import { hasCard } from './friend.ts';
 import { hasVisited, type SaveData } from './store.ts';
 
 export interface Line { id: string; name: string; stations: string[] }
@@ -27,6 +28,9 @@ export const LINES: Line[] = [
 export const CITIES = ['八王子市', '日野市', '町田市', '多摩市'];
 export const cityOf = (s: Spot) => s.city ?? '八王子市';
 
+/** 駅ごとの状態。行った / 友達の駅で手に入れた(行ってはいない) / まだ */
+export interface Member { id: string; name: string; state: 'visited' | 'friend' | 'none' }
+
 export interface Progress {
   /** 受け取った印のキー(line:… / city:…) */
   key: string;
@@ -37,6 +41,7 @@ export interface Progress {
   /** 100%でもらえるかけら */
   reward: number;
   claimed: boolean;
+  members: Member[];
 }
 
 /** 路線と市ごとの「行った駅 / 全部の駅」。駅名がスポットに無いものは数えない */
@@ -47,6 +52,7 @@ export function progressOf(data: SaveData, stations: Spot[]): Progress[] {
     key: `${kind}:${id}`, kind, name,
     done: list.filter((s) => hasVisited(data, s.id)).length, total: list.length,
     reward: list.length * CONFIG.completeShardsPerStation, claimed: data.rewards[`${kind}:${id}`] != null,
+    members: list.map((s) => ({ id: s.id, name: s.name, state: hasVisited(data, s.id) ? 'visited' : hasCard(data, s.id) ? 'friend' : 'none' })),
   });
   return [
     ...LINES.map((l) => make('line', l.id, l.name, l.stations.flatMap((n) => byName.get(n) ?? []))),

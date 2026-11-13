@@ -4,6 +4,7 @@ import { stationItemId } from '../gacha.ts';
 import { NEIGHBOR_CITIES, type CardRarity, type CommonCard, type Rarity, type Spot, type StationCard } from '../items.ts';
 import type { GpsMode } from '../location.ts';
 import { BUS_PASS_SPOT, DIARY_NOTE_MAX, type DiaryDay, type DiaryNotes } from '../diary.ts';
+import type { Progress } from '../progress.ts';
 import type { SaveData } from '../store.ts';
 import { cardHtml, placeholderHtml, type CardFace } from './card.ts';
 import { distanceLabel, esc, km } from './html.ts';
@@ -212,7 +213,7 @@ export function passModeSheet(options: { label: string; count: number }[], minut
 const ownedRarities = (collection: SaveData['collection'], spotId: string) => RARITIES.filter((r) => collection[stationItemId(spotId, r)]);
 const ox = (have: Rarity[]) => RARITIES.map((r) => have.includes(r) ? '<span class="o">○</span>' : '<span class="x">×</span>').join('');
 
-export type ZukanTab = 'station' | 'bus' | 'secret';
+export type ZukanTab = 'station' | 'bus' | 'line' | 'secret';
 
 /** 持っている裏カード。図鑑には手に入れた順に並べる */
 export interface SecretFace extends CardFace { itemId: string }
@@ -222,19 +223,22 @@ const zukanLead = (owned: number, total: number, where: string) =>
 
 /** 裏カードの切り替え「???」は、1枚でも持っているときだけ出す。全部で何種あるかは見せない */
 export function zukanScreen(
-  tab: ZukanTab, stations: Spot[], cards: Record<string, StationCard>, common: CommonCard[], secrets: SecretFace[], collection: SaveData['collection'],
+  tab: ZukanTab, stations: Spot[], cards: Record<string, StationCard>, common: CommonCard[], secrets: SecretFace[], collection: SaveData['collection'], progress: Progress[],
 ): string {
   const stTotal = stations.length * RARITIES.length;
   const stOwned = stations.reduce((n, s) => n + ownedRarities(collection, s.id).length, 0);
   const busOwned = common.filter((c) => collection[c.itemId]).length;
   const tabBtn = (t: ZukanTab, label: string, n: number, of: number | null) =>
     `<button class="z-tab" data-act="zukan-tab" data-z="${t}" aria-pressed="${t === tab}">${label}<small>${of == null ? `${n}枚` : `${n} / ${of}`}</small></button>`;
+  const full = progress.filter((p) => p.total > 0 && p.done >= p.total).length;
   const count = tab === 'secret' ? `${secrets.length}<small>枚</small>`
-    : tab === 'station' ? `${stOwned}<small> / ${stTotal}枚</small>` : `${busOwned}<small> / ${common.length}枚</small>`;
+    : tab === 'station' ? `${stOwned}<small> / ${stTotal}枚</small>`
+      : tab === 'line' ? `${full}<small> / ${progress.length}</small>` : `${busOwned}<small> / ${common.length}枚</small>`;
   const body = tab === 'secret' ? secretTiles(secrets)
-    : tab === 'station' ? stationTiles(stations, cards, collection, stOwned, stTotal) : busTiles(common, collection, busOwned);
+    : tab === 'station' ? stationTiles(stations, cards, collection, stOwned, stTotal, progress)
+      : tab === 'line' ? progressList(progress) : busTiles(common, collection, busOwned);
   return `<div class="z-top"><h2>図鑑</h2><div class="count">${count}</div></div>
-    <div class="z-tabs ${secrets.length ? 'three' : ''}">${tabBtn('station', '駅', stOwned, stTotal)}${tabBtn('bus', 'バス停', busOwned, common.length)}${secrets.length ? tabBtn('secret', '???', secrets.length, null) : ''}</div>
+    <div class="z-tabs ${secrets.length ? 'four' : ''}">${tabBtn('station', '駅', stOwned, stTotal)}${tabBtn('bus', 'バス停', busOwned, common.length)}${tabBtn('line', '路線', full, progress.length)}${secrets.length ? tabBtn('secret', '???', secrets.length, null) : ''}</div>
     ${body}`;
 }
 
@@ -256,7 +260,7 @@ export function secretDetailScreen(card: SecretFace, count: number): string {
 }
 
 /** 駅は市ごとに見出しを付けて分け、市の中は番号順 */
-function stationTiles(stations: Spot[], cards: Record<string, StationCard>, collection: SaveData['collection'], owned: number, total: number): string {
+function stationTiles(stations: Spot[], cards: Record<string, StationCard>, collection: SaveData['collection'], owned: number, total: number, progress: Progress[]): string {
   const order = Object.keys(cards);
   const tile = (s: Spot) => {
     const have = ownedRarities(collection, s.id);
@@ -269,9 +273,28 @@ function stationTiles(stations: Spot[], cards: Record<string, StationCard>, coll
   };
   const groups = ['八王子市', ...NEIGHBOR_CITIES].map((city) => {
     const list = stations.filter((s) => (s.city ?? '八王子市') === city).sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
-    return list.length ? `<h3 class="z-city">${city}<small>${list.length}駅</small></h3><div class="grid">${list.map(tile).join('')}</div>` : '';
+    const pr = progress.find((p) => p.key === `city:${city}`);
+    return list.length ? `<h3 class="z-city">${city}<small>${pr ? `行った ${pr.done} / ${pr.total}駅` : `${list.length}駅`}</small></h3><div class="grid">${list.map(tile).join('')}</div>` : '';
   }).join('');
   return `<div class="z-lead">${stations.length}駅 × 3段階。${zukanLead(owned, total, '駅')}</div>${groups}`;
+}
+
+/** 路線と市ごとの「行った駅 / 全部の駅」。全部まわるとかけらがもらえる */
+function progressList(progress: Progress[]): string {
+  const row = (p: Progress) => {
+    const full = p.total > 0 && p.done >= p.total;
+    const pc = p.total ? Math.floor((p.done * 100) / p.total) : 0;
+    return `<div class="prog ${full ? 'full' : ''}">
+      <div class="prog-h"><b>${esc(p.name)}</b><span>${p.done} / ${p.total}駅 ${pc}%</span></div>
+      <div class="meter" role="img" aria-label="${pc}%"><i style="width:${pc}%"></i></div>
+      <div class="prog-f">${full ? `全部まわった。かけら +${p.reward}` : `あと${p.total - p.done}駅で、かけら +${p.reward}`}</div>
+    </div>`;
+  };
+  const lines = progress.filter((p) => p.kind === 'line'), cities = progress.filter((p) => p.kind === 'city');
+  const fullOf = (l: Progress[]) => l.filter((p) => p.total > 0 && p.done >= p.total).length;
+  return `<div class="z-lead">駅を全部まわると、1駅につきかけら${CONFIG.completeShardsPerStation}個。路線 ${fullOf(lines)} / ${lines.length}、市 ${fullOf(cities)} / ${cities.length}。</div>
+    <h3 class="z-city">路線<small>電車</small></h3>${lines.map(row).join('')}
+    <h3 class="z-city">市<small>駅だけ</small></h3>${cities.map(row).join('')}`;
 }
 
 /** バス停カードは番号順に4列。持っていないカードも、珍しさだけは見せる */
@@ -337,6 +360,7 @@ export function shardInfoSheet(): string {
         <li>行ったことのある駅なら、その場にいなくても、かけら${CONFIG.shardSpinCost}個でガチャを一回まわせる。図鑑で駅を開くと、ボタンが出る。</li>
         <li>???</li>
       </ol>
+      <p>路線や市の駅を全部まわると、1駅につきかけら${CONFIG.completeShardsPerStation}個もらえる。図鑑の「路線」で見られる。</p>
       <p>持っているカードがまた出ると、かけらになる。</p>
       <div class="shard-gain">${RARITIES.map((r) => `<span><i class="dot ${r}"></i>${RARITY_LABEL[r]}<b>${CONFIG.shardsFor[r]}個</b></span>`).join('')}</div>
       <button class="btn paper" data-act="shard-info-close">とじる</button>
@@ -469,10 +493,6 @@ const dateLabel = (date: string): string => {
   const [y, m, d] = date.split('-').map(Number);
   return `${m}月${d}日(${WEEK[new Date(y, m - 1, d).getDay()]})`;
 };
-const timeLabel = (t: number): string => {
-  const d = new Date(t);
-  return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-};
 
 /** その日のコメント。editing なら入力欄、そうでなければ文章(あれば)と書くボタン */
 function noteHtml(date: string, text: string, editing: boolean): string {
@@ -490,7 +510,7 @@ function noteHtml(date: string, text: string, editing: boolean): string {
   </div>`;
 }
 
-/** 日記。date が null なら日ごとの一覧、日付があればその日の回した場所を時刻順に並べる */
+/** 日記。date が null なら日ごとの一覧、日付があればその日の回した場所を回した順に並べる(時刻は出さない) */
 export function diaryScreen(days: DiaryDay[], date: string | null, spotOf: (id: string) => Spot | undefined, notes: DiaryNotes, editing: boolean): string {
   const day = date ? days.find((d) => d.date === date) : undefined;
   if (day) {
@@ -498,7 +518,7 @@ export function diaryScreen(days: DiaryDay[], date: string | null, spotOf: (id: 
       const spot = spotOf(e.spotId);
       const name = e.spotId === BUS_PASS_SPOT ? '通過したバス停' : spot ? (spot.kind === 'station' ? `${spot.name}駅` : spot.name) : 'わからない場所';
       const tag = spot?.kind === 'bus_stop' ? '<span class="pass-tag">バス</span>' : '';
-      return `<div class="diary-row"><span class="t">${timeLabel(e.t)}</span><span class="name">${esc(name)}${tag}</span></div>`;
+      return `<div class="diary-row"><span class="name">${esc(name)}${tag}</span></div>`;
     }).join('');
     return `<div class="settings diary">
       <button class="back-fixed" data-act="diary-back">← 日記に戻る</button>

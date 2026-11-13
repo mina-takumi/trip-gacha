@@ -35,6 +35,8 @@ export interface SaveData {
   diary: DiaryEntry[];
   /** 日記の、日付ごとの自分のコメント。その日が残す日数より古くなると消える(0.9.0 で追加) */
   diaryNotes: DiaryNotes;
+  /** 駅を全部まわってかけらをもらった路線・市 → もらった日時(キーは line:… / city:…。0.10.0 で追加。古い記録には無い) */
+  rewards: Record<string, number>;
 }
 
 export interface LastFix { lat: number; lon: number; t: number; distanceM: number }
@@ -49,7 +51,7 @@ export interface StorageLike {
 
 export const emptySave = (): SaveData => ({
   schemaVersion: SCHEMA_VERSION, collection: {}, spots: {}, visitedAt: {}, visitedDistanceM: {}, shards: 0, totalSpins: 0, walk: emptyWalk(),
-  lastFix: null, passedAt: {}, busPass: { date: '', count: 0 }, pending: [], diary: [], diaryNotes: {},
+  lastFix: null, passedAt: {}, busPass: { date: '', count: 0 }, pending: [], diary: [], diaryNotes: {}, rewards: {},
 });
 
 /** 端末に保存できるか(プライベートブラウズなどで使えないことがある) */
@@ -132,6 +134,7 @@ export function parseSave(text: string): SaveData {
     shards, totalSpins,
     walk: { dailyDistanceM: walk.dailyDistanceM, distanceDate: walk.distanceDate, smooth: point(walk.smooth), anchor: point(walk.anchor), lastFixAt: isNum(walk.lastFixAt) ? walk.lastFixAt : null },
     lastFix: fixOf(raw.lastFix), passedAt, busPass, pending, diary: parseDiary(raw.diary), diaryNotes: parseNotes(raw.diaryNotes),
+    rewards: isObj(raw.rewards) && Object.values(raw.rewards).every(isNum) ? raw.rewards as Record<string, number> : {},
   };
 }
 

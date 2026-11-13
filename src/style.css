@@ -231,11 +231,11 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .z-city { display: flex; align-items: baseline; gap: 8px; margin: 24px 0 10px; font-size: 15px; font-weight: 900; }
 .z-city small { font-size: 12px; font-weight: 700; opacity: .7; }
 .z-lead + .z-city { margin-top: 0; }
-.z-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
-.z-tabs.three { grid-template-columns: 1fr 1fr .8fr; }
-.z-tab { height: 44px; border: 2px solid var(--line); border-radius: 22px; background: var(--paper); color: var(--navy); box-shadow: 2px 2px 0 var(--line);
-  font: 900 15px var(--maru); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
-.z-tab small { font-size: 11.5px; color: var(--ink-soft); }
+.z-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+.z-tabs.four { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.z-tab { height: 52px; border: 2px solid var(--line); border-radius: 22px; background: var(--paper); color: var(--navy); box-shadow: 2px 2px 0 var(--line);
+  font: 900 14px/1.25 var(--maru); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; cursor: pointer; padding: 0 2px; white-space: nowrap; }
+.z-tab small { font-size: 11px; color: var(--ink-soft); }
 .z-tab[aria-pressed="true"] { background: var(--mustard); }
 .z-tab[aria-pressed="true"] small { color: var(--navy); }
 .ox .rl { color: var(--ink-soft); font-size: 10.5px; white-space: nowrap; }
@@ -315,14 +315,13 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .diary-list { padding: 4px 16px; }
 .diary-row { display: flex; gap: 14px; align-items: baseline; padding: 12px 0; border-bottom: 1.5px dashed var(--line); font-weight: 900; font-size: 15px; }
 .diary-row:last-child { border-bottom: 0; }
-.diary-note { padding: 16px 18px; margin-top: 14px; }
+.diary-note { padding: 16px 18px; margin-top: 14px; position: sticky; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); z-index: 10; max-height: 50vh; overflow-y: auto; }
 .diary-note h4 { font: 400 19px var(--hand); margin-bottom: 6px; }
 .diary-text { white-space: pre-wrap; overflow-wrap: anywhere; font-weight: 900; font-size: 15px; line-height: 1.8; margin-bottom: 14px; }
 .diary-empty { font-size: 13px; font-weight: 700; color: var(--ink-soft); margin-bottom: 14px; }
 .diary-input { width: 100%; box-sizing: border-box; padding: 12px; border: 2px solid var(--line); border-radius: 14px; background: var(--cream);
   font: 700 16px/1.7 var(--maru); color: var(--navy); resize: vertical; }
 .diary-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-.diary-row .t { flex: none; width: 3.2em; font: 400 20px var(--hand); }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; gap: 8px; }
 .stats b { display: block; font: 400 34px/1.1 var(--hand); }
 .stats span { font-size: 12px; font-weight: 900; color: var(--ink-soft); }
@@ -409,3 +408,13 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .card-back b { font: 400 96px/1 var(--hand); color: #ECE4F7; text-shadow: 0 0 18px rgba(201, 184, 232, .8); }
 body.secret .rays .card { animation: none; }
 .fx-skip { position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 28px); text-align: center; font-size: 13px; font-weight: 900; color: var(--ink-soft); }
+
+.prog { margin: 0 0 12px; padding: 10px 12px; border: 2px solid var(--line); border-radius: 12px; background: var(--paper); box-shadow: 2px 2px 0 var(--line); }
+.prog-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 900; }
+.prog-h span { font-size: 12px; font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
+.prog .meter { height: 10px; margin: 6px 0 4px; border: 2px solid var(--line); border-radius: 6px; background: var(--cream); overflow: hidden; }
+.prog .meter i { display: block; height: 100%; background: var(--teal); }
+.prog.full { background: var(--mustard); }
+.prog.full .prog-h span { color: var(--navy); }
+.prog.full .meter i { background: var(--navy); }
+.prog-f { font-size: 12px; font-weight: 900; }

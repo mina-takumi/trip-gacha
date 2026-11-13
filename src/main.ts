@@ -26,12 +26,13 @@ import { holdDistance, markLongRoll, playIntro, playSecretBurst, playSecretCard,
 import { km } from './ui/html.ts';
 import { ICON_DEFS } from './ui/icons.ts';
 import { allCardsSave } from './dev/all-cards.ts';
+import { claimRewards, progressOf } from './progress.ts';
 import {
   busDetailScreen, chooserSheet, detailScreen, diaryScreen, passModeSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.9.0';
+const VERSION = '0.10.0';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -165,7 +166,17 @@ function toggleRange(kind: keyof MapRanges): void {
   }
 }
 
+/** 駅を全部まわった路線・市があれば、かけらを配って知らせる(記録を保存するたびに見る) */
+function settleRewards(): void {
+  if (allCards) return;
+  const claim = claimRewards(state.save, stations, Date.now());
+  if (!claim) return;
+  state.save = claim.data;
+  showToast(claim.message);
+}
+
 function persist(): void {
+  settleRewards();
   if (!storageOk || allCards) return;
   try {
     save(storage, state.save);
@@ -286,7 +297,7 @@ function screenHtml(now: number): string {
       const secrets = ownedSecrets();
       // 記録を読み込み直して裏カードが無くなったら、「???」の切り替えは消えるので駅に戻す
       if (state.zukanTab === 'secret' && secrets.length === 0) state.zukanTab = 'station';
-      return zukanScreen(state.zukanTab, stations, cards, catalog.common, secrets, state.save.collection);
+      return zukanScreen(state.zukanTab, stations, cards, catalog.common, secrets, state.save.collection, progressOf(state.save, stations));
     }
     case 'settings': {
       if (state.showNotes) return notesScreen(ownedSecrets().length > 0, isApp);
@@ -795,6 +806,7 @@ async function startLocation(): Promise<void> {
 }
 
 // 起動の演出の間、距離は 0.0 で止めておき、終わったら今日の距離まで回す
+persist();
 holdDistance('0.0');
 render();
 startLocation();

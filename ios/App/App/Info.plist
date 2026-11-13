@@ -28,6 +28,8 @@
 	<string>近くの駅・バス停でガチャを回すために現在地を使います。位置はこの端末の中だけで使い、外へ送りません</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>アプリを閉じている間も、通った駅・バス停と移動距離を記録するために現在地を使います。位置はこの端末の中だけで使い、外へ送りません</string>
+	<key>NSCameraUsageDescription</key>
+	<string>友達のQRを読むためだけにカメラを使います。映像は端末の中だけで使い、保存も外への送信もしません</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

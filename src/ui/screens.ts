@@ -477,10 +477,6 @@ const dateLabel = (date: string): string => {
   const [y, m, d] = date.split('-').map(Number);
   return `${m}月${d}日(${WEEK[new Date(y, m - 1, d).getDay()]})`;
 };
-const timeLabel = (t: number): string => {
-  const d = new Date(t);
-  return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-};
 
 /** その日のコメント。editing なら入力欄、そうでなければ文章(あれば)と書くボタン */
 function noteHtml(date: string, text: string, editing: boolean): string {
@@ -498,7 +494,7 @@ function noteHtml(date: string, text: string, editing: boolean): string {
   </div>`;
 }
 
-/** 日記。date が null なら日ごとの一覧、日付があればその日の回した場所を時刻順に並べる */
+/** 日記。date が null なら日ごとの一覧、日付があればその日の回した場所を回した順に並べる(時刻は出さない) */
 export function diaryScreen(days: DiaryDay[], date: string | null, spotOf: (id: string) => Spot | undefined, notes: DiaryNotes, editing: boolean): string {
   const day = date ? days.find((d) => d.date === date) : undefined;
   if (day) {
@@ -506,7 +502,7 @@ export function diaryScreen(days: DiaryDay[], date: string | null, spotOf: (id: 
       const spot = spotOf(e.spotId);
       const name = e.spotId === BUS_PASS_SPOT ? '通過したバス停' : spot ? (spot.kind === 'station' ? `${spot.name}駅` : spot.name) : 'わからない場所';
       const tag = spot?.kind === 'bus_stop' ? '<span class="pass-tag">バス</span>' : '';
-      return `<div class="diary-row"><span class="t">${timeLabel(e.t)}</span><span class="name">${esc(name)}${tag}</span></div>`;
+      return `<div class="diary-row"><span class="name">${esc(name)}${tag}</span></div>`;
     }).join('');
     return `<div class="settings diary">
       <button class="back-fixed" data-act="diary-back">← 日記に戻る</button>

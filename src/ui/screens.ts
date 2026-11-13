@@ -45,6 +45,8 @@ export interface MainView {
   storageOk: boolean;
   /** 道すじが出なかった区間で付いた、どのバス停かは決まっていない回す回数 */
   busPass: number;
+  /** 友達の駅。count は候補の数、doneThisWeek は今週もう回したか */
+  friend: { count: number; doneThisWeek: boolean };
 }
 
 function geoNotice(v: MainView): string {
@@ -107,6 +109,15 @@ export function mainScreen(v: MainView): string {
     <span class="ok">駅</span>${RARITIES.map((r) => cell(v.odds, r)).join('')}
     <span class="ok">バス停</span>${RARITIES.map((r) => cell(v.busOdds, r)).join('')}
   </div>`;
+  const f = v.friend;
+  const friend = `<div class="sec"><span>友達の駅</span>${icon('gachapon', 'deco')}</div>
+    <div class="panel friend">
+      <p class="friend-say">友達のQRを読むと、友達が回した駅が候補にたまる。週に1回、まとめて回せる。</p>
+      ${f.count > 0 ? `<p class="friend-n">いまの候補 <b>${f.count}</b>駅</p>
+      <button class="btn mustard" data-act="friend-spin" ${f.doneThisWeek ? 'disabled' : ''}>${icon('capsule')}友達の駅をまとめて回す</button>
+      ${f.doneThisWeek ? '<p class="friend-note">今週は回した。次は月曜から。</p>' : ''}` : ''}
+      <div class="pair"><button class="btn paper" data-act="friend-show">自分のQRを出す</button><button class="btn paper" data-act="friend-scan">友達のQRを読む</button></div>
+    </div>`;
   return `
     ${v.storageOk ? '' : '<div class="notice panel warn"><b>記録が、残せません。</b>このブラウザでは端末に記録を保存できないため、閉じると集めたカードが消えます。プライベートブラウズなら、通常のモードで開いてください。</div>'}
     <div class="top"><span class="logo">トリップガチャ</span><span class="top-r"><button class="reload" data-act="reload" aria-label="最新版に更新">${icon('reload')}<span class="reload-t">更新</span></button><button class="shard" data-act="shard-info" aria-label="かけら ${v.shards}。使い道を見る"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</button></span></div>
@@ -116,7 +127,8 @@ export function mainScreen(v: MainView): string {
     <div class="feet-cap">${caption}</div>
     ${oddsTable}
     ${geoNotice(v)}
-    ${list}${empty}`;
+    ${list}${empty}
+    ${friend}`;
 }
 
 /**
@@ -281,15 +293,15 @@ function progressList(progress: Progress[]): string {
   const row = (p: Progress) => {
     const full = p.total > 0 && p.done >= p.total;
     const pc = p.total ? Math.floor((p.done * 100) / p.total) : 0;
-    return `<div class="prog ${full ? 'full' : ''}">
+    return `<button class="prog ${full ? 'full' : ''}" data-act="prog-detail" data-key="${esc(p.key)}" aria-label="${esc(p.name)}の駅を見る">
       <div class="prog-h"><b>${esc(p.name)}</b><span>${p.done} / ${p.total}駅 ${pc}%</span></div>
       <div class="meter" role="img" aria-label="${pc}%"><i style="width:${pc}%"></i></div>
       <div class="prog-f">${full ? `全部まわった。かけら +${p.reward}` : `あと${p.total - p.done}駅で、かけら +${p.reward}`}</div>
-    </div>`;
+    </button>`;
   };
   const lines = progress.filter((p) => p.kind === 'line'), cities = progress.filter((p) => p.kind === 'city');
   const fullOf = (l: Progress[]) => l.filter((p) => p.total > 0 && p.done >= p.total).length;
-  return `<div class="z-lead">駅を全部まわると、1駅につきかけら${CONFIG.completeShardsPerStation}個。路線 ${fullOf(lines)} / ${lines.length}、市 ${fullOf(cities)} / ${cities.length}。</div>
+  return `<div class="z-lead">駅を全部まわると、1駅につきかけら${CONFIG.completeShardsPerStation}個。路線 ${fullOf(lines)} / ${lines.length}、市 ${fullOf(cities)} / ${cities.length}。押すと、駅ごとの様子が見られる。</div>
     <h3 class="z-city">路線<small>電車</small></h3>${lines.map(row).join('')}
     <h3 class="z-city">市<small>駅だけ</small></h3>${cities.map(row).join('')}`;
 }
@@ -345,6 +357,55 @@ export function shardSpinSheet(stationName: string, shards: number): string {
       <p>かけら${CONFIG.shardSpinCost}個を使って、${esc(stationName)}駅のガチャを一回まわす。<br>かけら ${shards} → ${shards - CONFIG.shardSpinCost}</p>
       <button class="btn" data-act="shard-spin-go">${icon('capsule')}回す</button>
       <button class="btn paper" data-act="shard-cancel">やめる</button>
+    </div>`;
+}
+
+const MEMBER_LABEL = { visited: '行った', friend: '友達の駅で手に入れた', none: 'まだ' } as const;
+
+/** 路線・市の行を押したときの、駅ごとの様子。友達の駅で手に入れただけの駅は、行った駅には数えない */
+export function progressSheet(p: Progress): string {
+  const rows = p.members.map((m) => `<li class="mb ${m.state}"><span class="mk">${m.state === 'visited' ? '○' : m.state === 'friend' ? '△' : '×'}</span><span class="mn">${esc(m.name)}</span><span class="ml">${MEMBER_LABEL[m.state]}</span></li>`).join('');
+  const hasFriend = p.members.some((m) => m.state === 'friend');
+  return `<div class="sheet-bg" data-act="prog-close"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="${esc(p.name)}の駅">
+      <h3>${esc(p.name)}</h3>
+      <p>行った駅 ${p.done} / ${p.total}駅</p>
+      <ul class="mb-list">${rows}</ul>
+      ${hasFriend ? '<p>友達の駅で手に入れた駅は、本当に行くまで「行った」に数えない。</p>' : ''}
+      <button class="btn paper" data-act="prog-close">とじる</button>
+    </div>`;
+}
+
+/** 自分のQR。svg は qrcode-generator が作った絵 */
+export function friendShowSheet(svg: string): string {
+  return `<div class="sheet-bg" data-act="friend-close"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="自分のQR">
+      <h3>自分のQR</h3>
+      <p>友達に読み取ってもらう。自分が回した駅の印だけが入っていて、名前や日時、カードは入っていない。</p>
+      <div class="qr-box" role="img" aria-label="自分のQRコード">${svg}</div>
+      <button class="btn paper" data-act="friend-close">とじる</button>
+    </div>`;
+}
+
+/** 友達のQRを読むシート。映像は main.ts が video に流す */
+export function friendScanSheet(): string {
+  return `<div class="sheet-bg" data-act="friend-scan-close"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="友達のQRを読む">
+      <h3>友達のQRを読む</h3>
+      <p id="qr-msg">友達の画面のQRを、枠の中に入れる。</p>
+      <div class="qr-video-box"><video id="qr-video" playsinline muted></video></div>
+      <button class="btn paper" data-act="friend-scan-close">とじる</button>
+    </div>`;
+}
+
+/** 友達の駅をまとめて回す前の確認。週に1回しか回せない */
+export function friendConfirmSheet(count: number): string {
+  return `<div class="sheet-bg" data-act="friend-cancel"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="友達の駅を回す">
+      <h3>友達の駅を回す?</h3>
+      <p>候補の${count}駅を、まとめて回す。回せるのは週に1回で、次は来週の月曜から。</p>
+      <button class="btn" data-act="friend-spin-go">${icon('capsule')}${count}駅をまとめて回す</button>
+      <button class="btn paper" data-act="friend-cancel">やめる</button>
     </div>`;
 }
 

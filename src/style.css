@@ -277,6 +277,10 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .range-btn.center { margin-left: auto; background: var(--orange); color: var(--paper); }
 .map-bus-range { opacity: .22; }
 #map.leaflet-container { font-family: var(--maru); background: var(--cream); }
+/* 歩いた道: 背景・市の形・道路・駅・バス停・吹き出し・出典を隠し、線(trail の面)と現在地だけ残す */
+#map.trail-mode :is(.leaflet-overlay-pane, .leaflet-shadow-pane, .leaflet-tooltip-pane, .leaflet-popup-pane, .leaflet-city-pane, .leaflet-detail-pane, .leaflet-roads-pane, .leaflet-bus-pane, .leaflet-bus-range-pane, .leaflet-control-attribution) { display: none; }
+.map-screen.trail-mode :is(.range-btn.station, .range-btn.bus) { display: none; }
+.range-btn.trail[aria-pressed="true"] { background: var(--navy); color: var(--paper); }
 .map-city { filter: drop-shadow(6px 6px 0 var(--navy)); }
 .map-roads { opacity: .5; }
 .leaflet-container .leaflet-popup-content { font: 700 13px/1.6 var(--maru); }

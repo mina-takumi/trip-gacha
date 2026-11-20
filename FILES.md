@@ -1,6 +1,6 @@
 # フォルダとファイルの説明
 
-トリップガチャのプロジェクトフォルダに何が入っているかの一覧。2026-11-10 時点(枝 `feature/ios-app`、版 0.8.2)。
+トリップガチャのプロジェクトフォルダに何が入っているかの一覧。2026-11-20 時点(枝 `feature/ios-app`、版 0.12.0)。
 
 「公開」の列は、GitHub のリポジトリに入っている(人から見える)かどうか。「いいえ」は手元だけにあるもの。
 
@@ -57,7 +57,7 @@ flowchart TD
   build --> dist["dist/<br/>組み立てた結果"]
 
   dist -->|"deploy.yml<br/>main に送ったとき"| pages["GitHub Pages と<br/>Cloudflare Pages<br/>(PWA版)"]
-  dist -->|"build-ios.yml<br/>feature/ios-app に送ったとき"| ipa["trip-gacha.ipa<br/>(iPhoneアプリ版)"]
+  dist -->|"build-ios.yml<br/>feature/ios-app に送ったとき"| ipa["trip-gacha-版.ipa<br/>(iPhoneアプリ版)"]
   ipa -->|"Sideloadly"| iphone["iPhone"]
 ```
 
@@ -73,8 +73,8 @@ flowchart TD
 | `capacitor.config.json` | はい | iPhoneアプリ版の設定(アプリの名前・ID、どのフォルダを中身にするか) |
 | `.gitignore` | はい | GitHub に送らないファイルの一覧 |
 | `FILES.md` | — | このファイル |
-| `trip-gacha.ipa` | いいえ | iPhoneアプリ版の最新の本体(Sideloadly でiPhoneへ入れる) |
-| `trip-gacha-0.8.1.ipa` | いいえ | 1つ前(0.8.1)のiPhoneアプリ版 |
+| `trip-gacha-0.12.0.ipa` | いいえ | iPhoneアプリ版の最新の本体(Sideloadly でiPhoneへ入れる) |
+| `trip-gacha-0.8.3.ipa` 〜 `trip-gacha-0.11.1.ipa` | いいえ | 前の版のiPhoneアプリ版(0.8.3・0.9.0・0.10.0・0.11.0・0.11.1)。戻したいときに使う |
 
 ## フォルダ
 
@@ -107,12 +107,17 @@ flowchart TD
 | `items.ts` | カードの名前と絵のファイル名を、番号から決まった形で作る(同じ場所では毎回同じカード) |
 | `store.ts` | 記録(持っているカード・かけら・回す権利など)の形と、読み書き・書き出しの処理 |
 | `route.ts` | 閉じている間に通った道すじの推測(歩き・バス・電車)と、通過した駅・バス停の判定 |
+| `diary.ts` | 日記。回した場所を日ごとにまとめ、直近90日より古い分とコメントを消す |
+| `progress.ts` | 路線の達成率と市の開拓率。路線ごとの駅の表と、全部まわったときのかけら |
+| `friend.ts` | 友達のQR。自分のQRの文字の作り方と読み解き方、候補、週1回の回し方 |
 | `export-file.ts` | 書き出しの方法を選ぶ(パソコンはダウンロード、スマホのブラウザは共有画面) |
 | `native-location.ts` | iPhoneアプリ版での位置の受け取り(閉じている間も受け取れる) |
+| `trail.ts` | 歩いた道(アプリ版だけ)。線の点の決め方、線の切り方、月ごとの記録、書き出し・読み込み |
+| `native-trail.ts` | 歩いた道の月ごとのファイルを、アプリ専用のフォルダ(Filesystem)に読み書きする |
 | `native-storage.ts` | iPhoneアプリ版での記録の置き場所(Preferences)。初回に前の置き場所から写す |
 | `native-export.ts` | iPhoneアプリ版での書き出し(一時ファイルにして共有画面へ) |
 | `style.css` | 画面の見た目(色・書体・形) |
-| `ui/screens.ts` | ホーム・結果・図鑑・地図・設定・注意事項などの画面の中身 |
+| `ui/screens.ts` | ホーム・結果・図鑑・地図・日記・設定・注意事項などの画面の中身 |
 | `ui/card.ts` | カード1枚の見た目 |
 | `ui/map.ts` | 地図画面(市の形・道路・駅・バス停・範囲の輪) |
 | `ui/fx.ts` | 起動のスタンプや回すときのカプセルの演出 |
@@ -137,8 +142,12 @@ flowchart TD
 | `route.test.ts` | 道すじの推測 |
 | `pass.test.ts` | 閉じている間の通過で回す権利が付くか |
 | `roll.test.ts` | 距離の数字の回り方 |
+| `diary.test.ts` | 日記のまとめ方と、古い日の消え方 |
+| `progress.test.ts` | 路線・市の達成率と、かけらを二重に配らないか |
+| `friend.test.ts` | 友達のQRの作り方・読み解き方、候補、週1回の回し方 |
 | `export-file.test.ts` | 書き出しの方法の選び方 |
 | `native-location.test.ts` | アプリ版の位置の受け取り |
+| `trail.test.ts` | 歩いた道の点の決め方・線の切り方・月ごとのファイル・書き出しと読み込み |
 | `native-storage.test.ts` | アプリ版の記録の置き場所と写し方 |
 | `helpers.ts` | テスト用の道具(決まった順に出る乱数など) |
 
@@ -195,6 +204,7 @@ flowchart TD
 | `card-names.md` | はい | 駅カードとバス停カードの名前の一覧(確定版。手で直さない) |
 | `illustration-prompts.md` | はい | 八王子の駅カードとバス停カードの絵を作るときの指示書 |
 | `illustration-prompts-neighbors.md` | はい | 日野・町田・多摩の駅カードの絵の指示書 |
+| `illustration-prompts-bus-new.md` | まだ | バス停カードに足す新しい84枚の絵の指示書(ChatGPT 用)。まだコミットしていない |
 | `*-secret.md` | いいえ | 公開しない資料(`.gitignore` で外している) |
 
 ## ios/ iPhoneアプリ版
@@ -203,7 +213,7 @@ Capacitor(Webのアプリを iPhoneアプリに包む道具)が作ったXcodeの
 
 | ファイル | 説明 |
 |---|---|
-| `App/App/Info.plist` | アプリの設定。位置情報の許可を求めるときの文や、閉じている間も位置を受け取る設定 |
+| `App/App/Info.plist` | アプリの設定。位置情報とカメラ(友達のQRを読むとき)の許可を求めるときの文や、閉じている間も位置を受け取る設定 |
 
 `App/App/public/` には組み立てたアプリの中身が写される(GitHub の組み立てで作り直されるので、手で直さない)。
 

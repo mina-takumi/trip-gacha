@@ -25,12 +25,14 @@ import { allCardsSave } from './dev/all-cards.ts';
 import { claimRewards, progressOf } from './progress.ts';
 import { setBatch, applyFriendSpin, decodeQr, encodeQr, friendCandidates, friendStations, weekStart } from './friend.ts';
 import qrcode from 'qrcode-generator';
+import { cloudEnabled, openFirebase, POLICY_URL } from './cloud.ts';
+import { createCloudSync, type CloudSync } from './cloud-sync.ts';
 import {
-  busDetailScreen, chooserSheet, detailScreen, diaryScreen, friendConfirmSheet, friendScanSheet, friendShowSheet, passModeSheet, progressSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
-  type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
+  busDetailScreen, chooserSheet, cloudDeleteSheet, cloudLoginSheet, detailScreen, diaryScreen, friendConfirmSheet, friendScanSheet, friendShowSheet, passModeSheet, progressSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
+  type CloudView, type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.11.1';
+const VERSION = '0.12.0';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -73,6 +75,9 @@ const state = {
   friendShow: false,
   friendScan: false,
   friendConfirm: false,
+  /** ログインの前の注意書き・サーバーの記録を消す前の確認を出しているか */
+  cloudLogin: false,
+  cloudDelete: false,
   /** 達成率で押した路線・市(line:… / city:…) */
   progDetail: null as string | null,
   zukanTab: 'station' as ZukanTab,
@@ -166,11 +171,21 @@ function settleRewards(): void {
   showToast(claim.message);
 }
 
+// ---------- ログインとサーバーへの保存(任意。公開している場所だけ) ----------
+let cloud: CloudSync | null = null;
+const SAVED_AT_KEY = 'trip-gacha:saved-at';
+const cloudView = (): CloudView | null => {
+  if (!cloud) return null;
+  const v = cloud.view();
+  return { signedIn: !!v.user, email: v.user?.email ?? null, state: v.state, syncedAt: v.syncedAt, error: v.error };
+};
+
 function persist(): void {
   settleRewards();
   if (!storageOk || allCards) return;
   try {
     save(localStorage, state.save);
+    cloud?.changed();
   } catch {
     // 容量不足などで保存できなくても遊びは続ける(起動時の警告はできないので、ここでは黙る)
   }
@@ -294,7 +309,7 @@ function screenHtml(now: number): string {
     case 'settings': {
       if (state.showNotes) return notesScreen(ownedSecrets().length > 0);
       const cardCount = Object.keys(state.save.collection).filter((id) => id.startsWith('station:') || id.startsWith('common:')).length;
-      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines, passLogLines);
+      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines, passLogLines, cloudView());
     }
     case 'diary':
       return diaryScreen(diaryDays(state.save.diary, now), state.diaryDate, (id) => spotById.get(id), state.save.diaryNotes, state.diaryEditing);
@@ -349,7 +364,9 @@ function render(): void {
   toastEl.innerHTML = state.toast ? `<div class="toast" role="status">${state.toast}</div>` : '';
   const ask = state.passAsk;
   const detail = state.progDetail ? progressOf(state.save, stations).find((q) => q.key === state.progDetail) : undefined;
-  const sheet = state.friendScan ? friendScanSheet()
+  const sheet = state.cloudLogin ? cloudLoginSheet(POLICY_URL)
+    : state.cloudDelete ? cloudDeleteSheet()
+    : state.friendScan ? friendScanSheet()
     : state.friendShow ? friendShowSheet(myQrSvg())
     : state.friendConfirm ? friendConfirmSheet(friendCandidates(state.save).length)
     : detail ? progressSheet(detail)
@@ -690,6 +707,13 @@ app.addEventListener('click', (e) => {
       state.pendingImport = null;
       break;
     case 'import-cancel': state.pendingImport = null; break;
+    case 'cloud-login-ask': state.cloudLogin = true; break;
+    case 'cloud-login-cancel': state.cloudLogin = false; break;
+    case 'cloud-login-go': cloudLoginGo(); return;
+    case 'cloud-logout': void cloud?.signOut().catch(() => showToast('ログアウトできませんでした。')); return;
+    case 'cloud-delete-ask': state.cloudDelete = true; break;
+    case 'cloud-delete-cancel': state.cloudDelete = false; break;
+    case 'cloud-delete-go': cloudDeleteGo(); return;
     case 'map-center': refreshAndCenter(); return;
     case 'map-help': {
       // 地図の見方は、押したときだけ出す(地図を広く見せるため)
@@ -718,6 +742,63 @@ app.addEventListener('change', async (e) => {
   input.value = '';
   render();
 });
+
+/** ログインの小窓は、押した直後に開かないとブラウザに止められる。ここでは待たずに呼ぶ */
+function cloudLoginGo(): void {
+  if (!cloud) return;
+  const done = cloud.signIn();
+  state.cloudLogin = false;
+  render();
+  done.catch((e) => {
+    const code = (e as { code?: string }).code;
+    // 小窓を閉じただけなら、何も知らせない
+    if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return;
+    showToast(code === 'auth/popup-blocked' ? 'ログインの小窓を開けませんでした。ポップアップを許可してください。' : 'ログインできませんでした。もう一度試してください。');
+    render();
+  });
+}
+
+function cloudDeleteGo(): void {
+  if (!cloud) return;
+  const done = cloud.deleteAll();
+  state.cloudDelete = false;
+  render();
+  done.then(
+    () => { showToast('サーバーの記録を消しました。この端末の記録は残っています。'); render(); },
+    (e) => {
+      const code = (e as { code?: string }).code;
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') { showToast('消すのをやめました。'); render(); return; }
+      showToast('消せませんでした。もう一度試してください。');
+      render();
+    },
+  );
+}
+
+if (cloudEnabled && !allCards) {
+  openFirebase().then((api) => {
+    cloud = createCloudSync({
+      api,
+      getSave: () => state.save,
+      applySave: (s) => { state.save = s; persist(); showToast('サーバーの記録と合わせました。'); render(); },
+      getSavedAt: () => { try { return Number(localStorage.getItem(SAVED_AT_KEY)) || 0; } catch { return 0; } },
+      setSavedAt: (t) => { try { localStorage.setItem(SAVED_AT_KEY, String(t)); } catch { /* 覚えられなくても遊びは続ける */ } },
+      now: Date.now,
+      timer: { set: (fn, ms) => window.setTimeout(fn, ms), clear: (id) => window.clearTimeout(id) },
+      onChange: render,
+      debounceMs: CONFIG.cloudDebounceMs, minIntervalMs: CONFIG.cloudMinIntervalMs, refreshMs: CONFIG.cloudRefreshMs,
+    });
+    cloud.start();
+    render();
+  }).catch(() => {
+    // 読み込めなければ、ログインの欄を出さずに今までどおり遊べる
+  });
+  // 画面を閉じる・離れるときは今すぐ、戻ったときと通信が戻ったときは間が空いていれば取り直す
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') cloud?.flush();
+    else cloud?.refresh();
+  });
+  window.addEventListener('online', () => cloud?.refresh());
+}
 
 // ---------- 現在地 ----------
 let locationSource: LocationSource | null = null;

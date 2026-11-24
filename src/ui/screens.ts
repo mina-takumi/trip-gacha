@@ -439,9 +439,74 @@ function gpsModeLine(gpsMode: GpsMode | 'sim' | null): string {
   return `<p>位置の取り方: <b>${label}</b>(${pace})</p>`;
 }
 
+/** 設定のログインの欄に出す状態。null のときは欄ごと出さない(ログインを使えない場所) */
+export interface CloudView {
+  signedIn: boolean;
+  email: string | null;
+  state: 'idle' | 'syncing' | 'ok' | 'error';
+  /** 最後にサーバーと合わせ終えた時刻(epoch ミリ秒) */
+  syncedAt: number | null;
+  error: string | null;
+}
+
+const hhmm = (t: number) => `${String(new Date(t).getHours()).padStart(2, '0')}:${String(new Date(t).getMinutes()).padStart(2, '0')}`;
+
+function cloudPanel(c: CloudView): string {
+  if (!c.signedIn) {
+    return `<div class="panel">
+      <h4>ログイン(任意)</h4>
+      <p>Googleでログインすると、記録をサーバーに保存して、別の端末でも続きから遊べます。ログインしなくても、全部遊べます。</p>
+      <button class="btn mustard" data-act="cloud-login-ask">Googleでログインする</button>
+    </div>`;
+  }
+  const line = c.state === 'error' ? `保存できていません。${esc(c.error ?? '')}あとで自動でやり直します。`
+    : c.state === 'syncing' ? 'サーバーと合わせています。'
+    : c.syncedAt ? `サーバーに保存しています(最後に合わせた時刻 ${hhmm(c.syncedAt)})。` : '';
+  return `<div class="panel">
+    <h4>ログイン中</h4>
+    <p>${esc(c.email ?? 'Googleアカウント')}</p>
+    <p role="status">${line}</p>
+    <div class="pair">
+      <button class="btn paper" data-act="cloud-logout">ログアウト</button>
+      <button class="btn paper" data-act="cloud-delete-ask">サーバーの記録を消す</button>
+    </div>
+  </div>`;
+}
+
+/** ログインの前に、何を預かるかを知らせる。ここで押した「ログインする」が、そのままログインの小窓を開く */
+export function cloudLoginSheet(policyUrl: string): string {
+  return `<div class="sheet-bg" data-act="cloud-login-cancel"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="ログインの前に">
+      <h3>ログインの前に</h3>
+      <p>ログインすると、次の情報を、運営者(DropForge)のサーバーに預けます。</p>
+      <ul class="shard-uses">
+        <li>Googleアカウントのメールアドレス</li>
+        <li>集めたカード・かけら・回した回数、回した駅・バス停とその日時、日記とコメント</li>
+      </ul>
+      <p>今いる場所そのものは預けません。預けた記録は、別の端末で続きから遊ぶためだけに使います。設定の「サーバーの記録を消す」でいつでも消せます。</p>
+      <p>中学生・高校生の人は、保護者の人と相談してからログインしてください。ログインしなくても、全部遊べます。</p>
+      <p><a href="${esc(policyUrl)}" target="_blank" rel="noopener">プライバシーポリシーを読む</a></p>
+      <button class="btn mustard" data-act="cloud-login-go">ログインする</button>
+      <button class="btn paper" data-act="cloud-login-cancel" style="margin-top:12px">やめる</button>
+    </div>`;
+}
+
+/** サーバーの記録を消す前の確認。押すと、もう一度ログインの小窓が開く(アカウントを消すには直前のログインが要るため) */
+export function cloudDeleteSheet(): string {
+  return `<div class="sheet-bg" data-act="cloud-delete-cancel"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="サーバーの記録を消す">
+      <h3>サーバーの記録を消しますか</h3>
+      <p>サーバーに預けた記録と、このアプリのログインを消します。元に戻せません。</p>
+      <p>この端末の中の記録は消えません。続きはこの端末で遊べます。</p>
+      <p>確かめのため、もう一度Googleのログインの画面が開きます。</p>
+      <button class="btn" data-act="cloud-delete-go">消す</button>
+      <button class="btn paper" data-act="cloud-delete-cancel" style="margin-top:12px">やめる</button>
+    </div>`;
+}
+
 export function settingsScreen(
   save: SaveData, pendingImport: { data: SaveData; fileName: string } | null, cardCount: number, version: string, gpsMode: GpsMode | 'sim' | null,
-  drawPassLines: boolean, passLogLines: string[],
+  drawPassLines: boolean, passLogLines: string[], cloud: CloudView | null,
 ): string {
   const confirm = pendingImport
     ? `<div class="panel">
@@ -472,6 +537,7 @@ export function settingsScreen(
       </div>
     </div>
     ${confirm}
+    ${cloud ? cloudPanel(cloud) : ''}
     <div class="panel">
       <h4>ベータ版の確かめ用</h4>
       <p>アプリを閉じている間に通ったと推測した道を、地図に点線で描きます(今日の分)。</p>

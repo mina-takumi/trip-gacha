@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// 記録はログインした本人だけが読み書き・削除できる。ほかの人の記録は見えない。
+// 書けるのは決まった形だけ(json の文字・保存した時刻・版)で、大きさにも上限がある。
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['json', 'savedAt', 'v'])
+        && request.resource.data.json is string
+        && request.resource.data.json.size() < 400000
+        && request.resource.data.savedAt is number
+        && request.resource.data.v == 1;
+    }
+  }
+}

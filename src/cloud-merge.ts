@@ -30,7 +30,7 @@ function union<T>(a: Record<string, T>, b: Record<string, T>, pick: (x: T | unde
 /**
  * この端末の記録(local)とサーバーの記録(remote)を1つに合わせる。
  * - カード: 両方が持っているものを全部残す(数は多い方、初めて手に入れた日時は早い方)
- * - かけら・回した回数: 新しく保存した方(savedAt が大きい方)の値。何も遊んでいない記録は、いちばん古いものとして扱う
+ * - かけら・回した回数: 新しく保存した方(savedAt が大きい方。同じならサーバー)の値。何も遊んでいない記録は、いちばん古いものとして扱う
  * - 駅に寄った記録・回した記録・もらった報酬・友達の駅: 両方を足し合わせる
  * - 日記: 両方の1回ごとを足す(同じ時刻・同じ場所は1つ)。コメントは日付ごとに足し、同じ日が違えば新しい方
  * - 位置まわり(最後の位置・閉じている間の区間・今日の移動距離)は、この端末のもの
@@ -38,7 +38,8 @@ function union<T>(a: Record<string, T>, b: Record<string, T>, pick: (x: T | unde
 export function mergeSaves(local: SaveData, remote: SaveData, localSavedAt: number, remoteSavedAt: number, now: number): SaveData {
   const l = isPristine(local) ? 0 : localSavedAt;
   const r = isPristine(remote) ? 0 : remoteSavedAt;
-  const newer = l >= r ? local : remote;
+  // 同じ時刻ならサーバーを選ぶ(読み込みで保存時刻は進めないので、古い記録を読み込んでもサーバーのかけら・回数が戻る)
+  const newer = l > r ? local : remote;
 
   const collection = union(local.collection, remote.collection, (x, y) => ({
     count: maxOf(x?.count, y?.count),

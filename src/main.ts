@@ -32,7 +32,7 @@ import {
   type CloudView, type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.12.0';
+const VERSION = '0.12.1';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -180,12 +180,12 @@ const cloudView = (): CloudView | null => {
   return { signedIn: !!v.user, email: v.user?.email ?? null, state: v.state, syncedAt: v.syncedAt, error: v.error };
 };
 
-function persist(): void {
+function persist(fromImport = false): void {
   settleRewards();
   if (!storageOk || allCards) return;
   try {
     save(localStorage, state.save);
-    cloud?.changed();
+    cloud?.changed({ keepSavedAt: fromImport });
   } catch {
     // 容量不足などで保存できなくても遊びは続ける(起動時の警告はできないので、ここでは黙る)
   }
@@ -701,7 +701,7 @@ app.addEventListener('click', (e) => {
     case 'import-apply':
       if (state.pendingImport) {
         state.save = state.pendingImport.data;
-        persist();
+        persist(true);
         showToast('記録を読み込みました。');
       }
       state.pendingImport = null;

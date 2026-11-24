@@ -149,11 +149,12 @@ export function createCloudSync(deps: SyncDeps) {
       }
     },
     /** 端末の記録を保存するたびに呼ぶ。サーバーに置く部分が変わったときだけ、少し待ってから合わせる */
-    changed(): void {
+    changed(opts: { keepSavedAt?: boolean } = {}): void {
       const json = toRemoteJson(deps.getSave());
       if (json === lastJson) return;
       lastJson = json;
-      deps.setSavedAt(deps.now());
+      // ファイルの読み込みは「遊んで変わった」ではないので、保存時刻は進めない(古い記録で、サーバーの新しい記録を負かさないため)
+      if (!opts.keepSavedAt) deps.setSavedAt(deps.now());
       schedule();
     },
     /** 画面を閉じるとき・戻ったとき・通信が戻ったとき。変更があれば今すぐ、なければ間が空いていれば取り直す */

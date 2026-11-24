@@ -250,6 +250,49 @@ test('他の端末で増えたカードは、こちらの保存で消えない�
   assert.ok('b' in sent.collection && sent.shards === 5);
 });
 
+test('保存時刻が同じなら、かけら・回した回数はサーバーの値', () => {
+  const local = withCards({ a: [1, 1] }, { shards: 48, totalSpins: 92 });
+  const remote = withCards({ a: [1, 1] }, { shards: 455, totalSpins: 379 });
+  const m = mergeSaves(local, remote, NOW, NOW, NOW);
+  assert.equal(m.shards, 455);
+  assert.equal(m.totalSpins, 379);
+});
+
+test('ログアウト中に古い記録を読み込んでログインしても、サーバーのかけら・回した回数が戻る', async () => {
+  const server = withCards({ a: [1, 1], b: [2, 2] }, { shards: 455, totalSpins: 379 });
+  const old = withCards({ a: [1, 1] }, { shards: 48, totalSpins: 92 });
+  // この端末の保存時刻は、サーバーに送ったときのまま(読み込みでは進めない)
+  const t = setup({ local: server, savedAt: NOW - 1000, remote: { json: toRemoteJson(server), savedAt: NOW - 1000 } });
+  t.sync.start();
+  await t.login();
+  t.calls.length = 0;
+  await t.sync.signOut();
+  t.setNow(NOW);
+  t.save = old;
+  t.sync.changed({ keepSavedAt: true });
+  assert.equal(t.savedAt, NOW - 1000, '読み込みでは保存時刻が進まない');
+  await t.login();
+  assert.equal(t.save.shards, 455);
+  assert.equal(t.save.totalSpins, 379);
+  assert.ok('b' in t.save.collection);
+});
+
+test('読み込みのあとに遊んで変わったら、その端末の値が新しい方になる', async () => {
+  const server = withCards({ a: [1, 1] }, { shards: 455, totalSpins: 379 });
+  const t = setup({ local: server, savedAt: NOW - 1000, remote: { json: toRemoteJson(server), savedAt: NOW - 1000 } });
+  t.sync.start();
+  await t.login();
+  await t.sync.signOut();
+  t.save = withCards({ a: [1, 1] }, { shards: 48, totalSpins: 92 });
+  t.sync.changed({ keepSavedAt: true });
+  t.setNow(NOW);
+  t.save = { ...t.save, shards: 50 };
+  t.sync.changed();
+  assert.equal(t.savedAt, NOW);
+  await t.login();
+  assert.equal(t.save.shards, 50);
+});
+
 test('サーバーの記録が読めないときは、上書きも反映もしない', async () => {
   const t = setup({ local: withCards({ a: [1, 1] }), savedAt: 1, remote: { json: '{壊れている', savedAt: NOW } });
   t.sync.start();

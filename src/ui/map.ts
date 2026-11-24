@@ -140,11 +140,6 @@ export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[
   const me = L.marker([0, 0], { icon: L.divIcon({ className: '', html: '<div class="me-dot"></div>', iconSize: [18, 18] }), interactive: false });
   if (onTap) map.on('click', (e) => onTap(e.latlng.lat, e.latlng.lng));
 
-  // 歩いた道(アプリ版): 一番上に線だけを描く。「歩いた道」のときは、ほかの面を CSS で隠す
-  map.createPane('trail').style.zIndex = '290';
-  const trailLayer = L.polyline([], { renderer: L.canvas({ pane: 'trail' }), color: OWNED, weight: 4, opacity: .85, interactive: false, lineCap: 'round', lineJoin: 'round', smoothFactor: 1 });
-  let trailVersion = -1;
-
   let lastFix: Fix | null = null;
   return {
     /** 持っている駅はオレンジ、まだの駅は灰色。ポップアップには、持っていればカードの名前を出す */
@@ -172,17 +167,6 @@ export function createMapView(el: HTMLElement, stations: Spot[], busStops: Spot[
         if (on && !map.hasLayer(group)) group.addTo(map);
         if (!on && map.hasLayer(group)) group.remove();
       }
-    },
-    /** 歩いた道の線。点が増えたときだけ描き直す */
-    setTrail(lines: L.LatLngTuple[][], version: number) {
-      if (version === trailVersion) return;
-      trailVersion = version;
-      trailLayer.setLatLngs(lines);
-      if (!map.hasLayer(trailLayer)) trailLayer.addTo(map);
-    },
-    /** 「歩いた道」にすると、背景・市の形・道路・駅・バス停を隠し、線だけを見せる */
-    setTrailMode(on: boolean) {
-      map.getContainer().classList.toggle('trail-mode', on);
     },
     /** 非表示から表示に戻したときに、地図の大きさを測り直す */
     resize() {

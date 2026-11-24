@@ -21,8 +21,6 @@ import { createNativeLocation, type NativeWatcher } from './native-location.ts';
 import { exportOnNative } from './native-export.ts';
 import { openNativeStorage } from './native-storage.ts';
 import { exportOnWeb, isShareCanceled } from './export-file.ts';
-import { openTrailFiles } from './native-trail.ts';
-import { createTrailStore, readTrailExport, trailPoint, withTrail } from './trail.ts';
 import { createMapView, type MapRanges, type MapView } from './ui/map.ts';
 import { holdDistance, markLongRoll, playIntro, playSecretBurst, playSecretCard, playSpin, releaseDistance, syncDistance } from './ui/fx.ts';
 import { km } from './ui/html.ts';
@@ -36,7 +34,7 @@ import {
   type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.12.0';
+const VERSION = '0.11.1';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -94,9 +92,7 @@ const state = {
   /** 図鑑で開いているもの。駅なら spotId、バス停カード・裏カードなら itemId(common:... / secret:...) */
   detailId: null as string | null,
   showNotes: false,
-  pendingImport: null as { data: SaveData; fileName: string; trail: Record<string, string> } | null,
-  /** アプリ版の地図: いつもの地図か、歩いた道(線だけ)か */
-  mapMode: 'normal' as 'normal' | 'trail',
+  pendingImport: null as { data: SaveData; fileName: string } | null,
   toast: null as string | null,
   /** 閉じている間の移動で、乗り物を聞いている区間と、その候補 */
   passAsk: null as { seg: PassSegment; options: Candidate[] } | null,
@@ -207,7 +203,6 @@ app.innerHTML = `${ICON_DEFS}<div class="bar4" aria-hidden="true"><i></i><i></i>
       <button class="range-btn help" data-act="map-help" aria-expanded="false" aria-controls="map-msg" aria-label="地図の見方">?</button>
       <button class="range-btn station" data-act="map-range" data-kind="station" aria-pressed="${mapRanges.station}">駅の範囲</button>
       <button class="range-btn bus" data-act="map-range" data-kind="bus" aria-pressed="${mapRanges.bus}">バス停の範囲</button>
-      ${isApp ? `<button class="range-btn trail" data-act="map-trail" aria-pressed="false">歩いた道</button>` : ''}
       <button class="range-btn center" data-act="map-center">現在地へ</button>
       <div class="map-msg panel" id="map-msg" hidden></div>
     </div>
@@ -221,14 +216,6 @@ const tabbarEl = document.getElementById('tabbar')!;
 const toastEl = document.getElementById('toast')!;
 const sheetEl = document.getElementById('sheet')!;
 let mapView: MapView | null = null;
-/** 歩いた道の記録(アプリ版だけ。起動時に読み込む) */
-const trail = isApp ? createTrailStore({
-  months: async () => (await filesPromise).months(),
-  read: async (m) => (await filesPromise).read(m),
-  write: async (m, t) => (await filesPromise).write(m, t),
-  append: async (m, t) => (await filesPromise).append(m, t),
-}) : null;
-const filesPromise = isApp ? openTrailFiles() : new Promise<never>(() => {});
 let onMapTap: ((lat: number, lon: number) => void) | undefined;
 /** 図鑑でカードを開く前の位置。戻ったときに同じ場所を出す(結果画面から開いたときは null) */
 let zukanScrollY: number | null = null;
@@ -359,13 +346,7 @@ function render(): void {
     }
     mapView.resize();
     mapView.update(state.fix, ownedSpotIds());
-    const trailOn = !!trail && state.mapMode === 'trail';
-    mapView.setTrailMode(trailOn);
-    mapScreenEl.classList.toggle('trail-mode', trailOn);
-    if (trailOn) { const t = trail!.lines(); mapView.setTrail(t.lines, t.version); }
-    document.getElementById('map-msg')!.textContent = trailOn
-      ? '歩いた道。動いたところが線で残ります。止まっている間は増えません。'
-      : onMapTap
+    document.getElementById('map-msg')!.textContent = onMapTap
       ? '位置シミュレーター: 地図をタップした場所にいることにします'
       : `大きな丸は駅。オレンジは、カードを持っている駅。黄色の小さな点はバス停。点をタップすると、名前と回せるかどうかが出る。駅やバス停の${CONFIG.enterRadiusM}m以内に入ると、その日のうちは、どこでも回せる。`;
   }
@@ -612,7 +593,7 @@ function downloadFile(file: File): void {
 
 async function exportSave(): Promise<void> {
   const name = `trip-gacha-${localDate(Date.now())}.json`;
-  const text = trail ? withTrail(exportJson(state.save), trail.exportMonths()) : exportJson(state.save);
+  const text = exportJson(state.save);
   try {
     await (isNative ? exportOnNative(name, text) : exportOnWeb(name, text, navigator, downloadFile));
   } catch (e) {
@@ -724,16 +705,11 @@ app.addEventListener('click', (e) => {
       if (state.pendingImport) {
         state.save = state.pendingImport.data;
         persist();
-        if (trail) void trail.merge(state.pendingImport.trail).then(() => render());
         showToast('記録を読み込みました。');
       }
       state.pendingImport = null;
       break;
     case 'import-cancel': state.pendingImport = null; break;
-    case 'map-trail':
-      state.mapMode = state.mapMode === 'trail' ? 'normal' : 'trail';
-      el.setAttribute('aria-pressed', String(state.mapMode === 'trail'));
-      break;
     case 'map-center': refreshAndCenter(); return;
     case 'map-help': {
       // 地図の見方は、押したときだけ出す(地図を広く見せるため)
@@ -754,8 +730,7 @@ app.addEventListener('change', async (e) => {
   if (input.dataset.act !== 'import-file' || !input.files?.[0]) return;
   const file = input.files[0];
   try {
-    const text = await file.text();
-    state.pendingImport = { data: parseSave(text), fileName: file.name, trail: readTrailExport(text) };
+    state.pendingImport = { data: parseSave(await file.text()), fileName: file.name };
   } catch (err) {
     state.pendingImport = null;
     showToast(`読み込めませんでした: ${(err as Error).message}。今の記録はそのままです。`);
@@ -858,9 +833,6 @@ function onFix(fix: Fix): void {
   state.geo = accepted ? 'ok' : 'waiting-accuracy';
   const prevWalk = state.save.walk;
   const walk = addFix(prevWalk, fix);
-  // 歩いた道: 起点が進んだ場所を線の点にする(アプリ版だけ。閉じている間も)
-  const tp = trail && trailPoint(prevWalk, walk, fix);
-  if (tp) trail!.add(tp);
   // 範囲内にいた記録が、回す権利になる(この後は範囲の外でも回せる)。そのときの移動距離で、外で回すときの確率を決める
   const visited = accepted ? markVisited(state.save, geofence.insideStopIds(), fix.t, distanceToday(walk, fix.t)) : state.save;
   let next: SaveData = { ...visited, walk };
@@ -930,8 +902,7 @@ async function startLocation(): Promise<void> {
 persist();
 holdDistance('0.0');
 render();
-// 歩いた道を読み込んでから位置を受け取る(読む前に届いた点が、古い点と順番が合わなくなるのを避ける)
-(trail ? trail.load().catch(() => {}) : Promise.resolve()).then(startLocation);
+startLocation();
 playIntro().then(() => {
   releaseDistance();
   render();

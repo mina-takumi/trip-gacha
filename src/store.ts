@@ -11,6 +11,8 @@ export const SAVE_KEY = 'trip-gacha:save';
 export const BACKGROUND_KEY = 'trip-gacha:background';
 /** この端末の記録を最後に遊んで変えた時刻(サーバーと合わせるときに使う) */
 export const SAVED_AT_KEY = 'trip-gacha:saved-at';
+/** ログインで、どちらの記録を残すか聞く途中の印 */
+export const CLOUD_ASK_KEY = 'trip-gacha:cloud-ask';
 
 export interface SaveData {
   schemaVersion: number;

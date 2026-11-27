@@ -1,4 +1,4 @@
-import { isPristine, mergeSaves, toRemoteJson } from './cloud-merge.ts';
+import { isPristine, mergeSaves, needsChoice, toRemoteJson } from './cloud-merge.ts';
 import { parseSave, type SaveData } from './store.ts';
 
 export interface CloudUser { uid: string; email: string | null }
@@ -17,7 +17,11 @@ export interface CloudApi {
   deleteAccount(uid: string): Promise<void>;
 }
 
+/** どちらの記録を残すかを選んでもらうときの材料。保存時刻が分からなければ 0 */
+export interface Choice { local: SaveData; localSavedAt: number; remote: SaveData; remoteSavedAt: number }
+
 export interface SyncView {
+  choice: Choice | null;
   user: CloudUser | null;
   state: 'idle' | 'syncing' | 'ok' | 'error';
   /** 最後にサーバーと合わせ終えた時刻(epoch ミリ秒) */
@@ -33,6 +37,9 @@ export interface SyncDeps {
   /** この端末の記録を最後に変えた時刻。新しい方を選ぶのに使う。無ければ 0 */
   getSavedAt(): number;
   setSavedAt(t: number): void;
+  /** 「ログインするを押したので、記録が違えば聞く」の印。閉じても残るよう端末に置く */
+  getAsk(): boolean;
+  setAsk(on: boolean): void;
   now(): number;
   timer: { set(fn: () => void, ms: number): number; clear(id: number): void };
   onChange(): void;
@@ -60,6 +67,8 @@ export function createCloudSync(deps: SyncDeps) {
   let lastSyncAt = -Infinity;
   let queue: Promise<void> = Promise.resolve();
   let deleting = false;
+  /** 選んでもらっている間の、サーバー側の記録。null でなければサーバーには送らない */
+  let asking: { remote: SaveData; savedAt: number } | null = null;
 
   const set = (s: SyncView['state'], err: string | null = null) => { state = s; error = err; deps.onChange(); };
   const enqueue = (job: () => Promise<void>) => { queue = queue.then(job, job); return queue; };
@@ -82,12 +91,21 @@ export function createCloudSync(deps: SyncDeps) {
           // サーバーの記録が読めないときは、上書きしない
           throw new Error(`サーバーの記録を読めませんでした(${message(e)})`);
         }
+        if (deps.getAsk() && needsChoice(local, remoteSave)) {
+          asking = { remote: remoteSave, savedAt: remote.savedAt };
+          if (timerId) { deps.timer.clear(timerId); timerId = 0; }
+          lastSyncAt = deps.now();
+          set('idle');
+          return;
+        }
         merged = mergeSaves(local, remoteSave, savedAt, remote.savedAt, deps.now());
         savedAt = Math.max(savedAt, remote.savedAt);
         needPush = toRemoteJson(merged) !== remote.json;
       } else {
         needPush = !isPristine(local);
       }
+      asking = null;
+      deps.setAsk(false);
       if (savedAt === 0 && !isPristine(merged)) savedAt = deps.now();
       if (toRemoteJson(merged) !== toRemoteJson(local)) {
         // 反映のための保存で「変わった」と数えないよう、先に覚える
@@ -107,10 +125,45 @@ export function createCloudSync(deps: SyncDeps) {
   }
 
   function schedule(): void {
-    if (timerId || !user) return;
+    if (timerId || !user || asking) return;
     const wait = Math.max(deps.debounceMs, lastSyncAt + deps.minIntervalMs - deps.now());
     timerId = deps.timer.set(() => { timerId = 0; void enqueue(sync); }, wait);
   }
+
+  /** 選ばれた方だけを残す。選ばなかった方は消える */
+  async function keep(which: 'server' | 'device'): Promise<void> {
+    if (!user || !asking) return;
+    const uid = user.uid;
+    set('syncing');
+    try {
+      const remote = await api.pull(uid);
+      const local = deps.getSave();
+      if (which === 'server' && remote) {
+        // 位置まわりはサーバーに無いので、この端末のまま
+        const next: SaveData = { ...parseSave(remote.json), lastFix: local.lastFix, pending: local.pending, walk: local.walk };
+        asking = null;
+        deps.setAsk(false);
+        lastJson = toRemoteJson(next);
+        deps.setSavedAt(remote.savedAt);
+        deps.applySave(next);
+      } else {
+        const savedAt = deps.now();
+        await api.push(uid, { json: toRemoteJson(local), savedAt });
+        deps.setSavedAt(savedAt);
+        asking = null;
+        deps.setAsk(false);
+        lastJson = toRemoteJson(local);
+      }
+      lastSyncAt = deps.now();
+      syncedAt = lastSyncAt;
+      set('ok');
+    } catch (e) {
+      // 選ぶ途中のまま残して、もう一度押せるようにする
+      set('error', message(e));
+    }
+  }
+
+  const forget = () => { asking = null; deps.setAsk(false); };
 
   return {
     /** 起動時に呼ぶ。前回のログインが残っていれば、すぐ合わせる */
@@ -118,17 +171,25 @@ export function createCloudSync(deps: SyncDeps) {
       api.onAuth((u) => {
         user = u;
         if (u) void enqueue(sync);
-        else { syncedAt = null; set('idle'); }
+        else { syncedAt = null; asking = null; set('idle'); }
         deps.onChange();
       });
     },
-    view(): SyncView { return { user, state, syncedAt, error }; },
+    view(): SyncView {
+      const choice = asking && { local: deps.getSave(), localSavedAt: deps.getSavedAt(), remote: asking.remote, remoteSavedAt: asking.savedAt };
+      return { user, state, syncedAt, error, choice };
+    },
+    choose(which: 'server' | 'device'): Promise<void> {
+      return enqueue(() => keep(which));
+    },
     /** ログインの小窓を開く(最初の行で呼ぶこと) */
     signIn(): Promise<void> {
-      return api.signIn();
+      deps.setAsk(true);
+      return api.signIn().catch((e) => { deps.setAsk(false); throw e; });
     },
     async signOut(): Promise<void> {
       await api.signOut();
+      forget();
     },
     /** サーバーの記録とアカウントを消す。端末の中の記録は残る */
     async deleteAll(): Promise<void> {
@@ -138,6 +199,7 @@ export function createCloudSync(deps: SyncDeps) {
       if (timerId) { deps.timer.clear(timerId); timerId = 0; }
       try {
         await api.deleteAccount(uid);
+        forget();
         user = null;
         syncedAt = null;
         set('idle');
@@ -163,7 +225,7 @@ export function createCloudSync(deps: SyncDeps) {
       if (timerId) { deps.timer.clear(timerId); timerId = 0; void enqueue(sync); }
     },
     refresh(): void {
-      if (!user || timerId) return;
+      if (!user || timerId || asking) return;
       if (deps.now() - lastSyncAt >= deps.refreshMs) void enqueue(sync);
     },
     /** テスト用: 進行中の処理が終わるまで待つ */

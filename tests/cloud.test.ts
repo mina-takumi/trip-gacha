@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isPristine, mergeSaves, toRemoteJson } from '../src/cloud-merge.ts';
+import { isPristine, mergeSaves, needsChoice, toRemoteJson } from '../src/cloud-merge.ts';
 import { createCloudSync, type CloudApi, type CloudUser, type RemoteDoc } from '../src/cloud-sync.ts';
 import { emptySave, parseSave, type SaveData } from '../src/store.ts';
 
@@ -126,6 +126,7 @@ function setup(opts: { remote?: RemoteDoc | null; local?: SaveData; savedAt?: nu
   let save = opts.local ?? emptySave();
   let savedAt = opts.savedAt ?? 0;
   let changes = 0;
+  let ask = false;
   const timers = new Map<number, () => void>();
   const waits: number[] = [];
   let timerSeq = 0;
@@ -150,6 +151,8 @@ function setup(opts: { remote?: RemoteDoc | null; local?: SaveData; savedAt?: nu
     applySave: (s) => { save = s; applied.push(s); },
     getSavedAt: () => savedAt,
     setSavedAt: (t) => { savedAt = t; },
+    getAsk: () => ask,
+    setAsk: (on) => { ask = on; },
     now: () => now,
     timer: { set: (fn, ms) => { timers.set(++timerSeq, fn); waits.push(ms); return timerSeq; }, clear: (id) => { timers.delete(id); } },
     onChange: () => { changes++; },
@@ -158,6 +161,7 @@ function setup(opts: { remote?: RemoteDoc | null; local?: SaveData; savedAt?: nu
   return {
     sync, calls, pushed, applied, timers, waits,
     get save() { return save; }, set save(s: SaveData) { save = s; },
+    get ask() { return ask; }, set ask(on: boolean) { ask = on; },
     get savedAt() { return savedAt; }, get changes() { return changes; },
     setNow(t: number) { now = t; },
     login: async () => { authCb({ uid: 'u1', email: 'a@example.com' }); await sync.idle(); },
@@ -362,4 +366,111 @@ test('画面を離れるときは待たずに合わせる。戻ったときは�
   t.sync.refresh();
   await t.sync.idle();
   assert.deepEqual(t.calls, ['pull']);
+});
+
+// ---------- ログインしたときに、残す記録を選ぶ ----------
+
+const serverSave = withCards({ a: [1, 1], b: [1, 2] }, { shards: 455, totalSpins: 379 });
+const deviceSave = withCards({ a: [1, 1], c: [1, 3] }, { shards: 48, totalSpins: 92 });
+const differing = () => setup({ local: deviceSave, savedAt: NOW - 10, remote: { json: toRemoteJson(serverSave), savedAt: NOW - 1000 } });
+
+test('聞くのは、両方に遊んだ記録があって中身が違うときだけ', () => {
+  assert.ok(needsChoice(deviceSave, serverSave));
+  assert.ok(!needsChoice(emptySave(), serverSave));
+  assert.ok(!needsChoice(deviceSave, emptySave()));
+  // 並び順だけの違いや、駅に寄っただけの違いでは聞かない
+  const reordered = withCards({ b: [1, 2], a: [1, 1] }, { shards: 455, totalSpins: 379, visitedAt: { s: 1 } });
+  assert.ok(!needsChoice(reordered, serverSave));
+});
+
+test('ログインするを押して記録が違えば、送らず反映もせず、選ぶのを待つ', async () => {
+  const t = differing();
+  t.sync.start();
+  await t.sync.signIn();
+  await t.login();
+  assert.deepEqual(t.calls, ['signIn', 'pull']);
+  assert.equal(t.applied.length, 0);
+  assert.equal(t.sync.view().choice?.remote.shards, 455);
+  assert.equal(t.sync.view().choice?.local.shards, 48);
+  // 待っている間に記録が変わっても、画面を行き来しても送らない
+  t.save = { ...t.save, shards: 49 };
+  t.sync.changed();
+  t.sync.flush();
+  t.setNow(NOW + 600_000);
+  t.sync.refresh();
+  await t.sync.idle();
+  assert.equal(t.timers.size, 0);
+  assert.equal(t.pushed.length, 0);
+});
+
+test('サーバーを残すと、端末の記録はサーバーのものに置き換わる(位置は端末のまま)', async () => {
+  const t = differing();
+  t.save = { ...t.save, lastFix: { lat: 1, lon: 2, t: 3, distanceM: 4 } };
+  t.sync.start();
+  await t.sync.signIn();
+  await t.login();
+  await t.sync.choose('server');
+  assert.deepEqual(Object.keys(t.save.collection).sort(), ['a', 'b']);
+  assert.equal(t.save.shards, 455);
+  assert.equal(t.save.totalSpins, 379);
+  assert.deepEqual(t.save.lastFix, { lat: 1, lon: 2, t: 3, distanceM: 4 });
+  assert.equal(t.savedAt, NOW - 1000);
+  assert.equal(t.pushed.length, 0);
+  assert.equal(t.sync.view().choice, null);
+  assert.equal(t.ask, false);
+});
+
+test('端末を残すと、サーバーの記録は端末のもので上書きされる', async () => {
+  const t = differing();
+  t.sync.start();
+  await t.sync.signIn();
+  await t.login();
+  await t.sync.choose('device');
+  assert.equal(t.pushed.length, 1);
+  const sent = parseSave(t.pushed[0].json);
+  assert.deepEqual(Object.keys(sent.collection).sort(), ['a', 'c']);
+  assert.equal(sent.shards, 48);
+  assert.equal(t.pushed[0].savedAt, NOW);
+  assert.equal(t.applied.length, 0);
+  assert.equal(t.sync.view().choice, null);
+});
+
+test('やめるとログアウトして、どちらも変わらない', async () => {
+  const t = differing();
+  t.sync.start();
+  await t.sync.signIn();
+  await t.login();
+  await t.sync.signOut();
+  assert.equal(t.sync.view().choice, null);
+  assert.equal(t.ask, false);
+  assert.equal(t.pushed.length, 0);
+  assert.equal(t.applied.length, 0);
+});
+
+test('選ぶ途中で閉じたら、次に開いたときもまた聞く', async () => {
+  const t = differing();
+  t.ask = true;
+  t.sync.start();
+  await t.login();
+  assert.ok(t.sync.view().choice);
+  assert.equal(t.pushed.length, 0);
+});
+
+test('開き直してログインが戻っただけなら、聞かずに今までどおり合わせる', async () => {
+  const t = differing();
+  t.sync.start();
+  await t.login();
+  assert.equal(t.sync.view().choice, null);
+  assert.deepEqual(Object.keys(t.save.collection).sort(), ['a', 'b', 'c']);
+});
+
+test('選んで送れなかったら、選ぶ途中のままにする', async () => {
+  const t = setup({ local: deviceSave, savedAt: NOW - 10, remote: { json: toRemoteJson(serverSave), savedAt: NOW - 1000 }, pushFails: true });
+  t.sync.start();
+  await t.sync.signIn();
+  await t.login();
+  await t.sync.choose('device');
+  assert.equal(t.sync.view().state, 'error');
+  assert.ok(t.sync.view().choice);
+  assert.equal(t.ask, true);
 });

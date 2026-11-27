@@ -350,10 +350,12 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 /* ---------- まとめて回す ---------- */
 .sheet-bg { position: fixed; inset: 0; z-index: 1300; background: rgba(34, 48, 60, .45); }
 .sheet { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 12px); transform: translateX(-50%); z-index: 1301;
-  width: min(456px, calc(100% - 24px)); padding: 18px 18px 16px; display: grid; gap: 10px; }
+  width: min(456px, calc(100% - 24px)); padding: 18px 18px 16px; display: grid; gap: 10px;
+  max-height: calc(100dvh - 24px - env(safe-area-inset-bottom)); overflow-y: auto; }
 .sheet h3 { font: 400 24px var(--hand); }
 .sheet p { font-size: 13.5px; font-weight: 900; color: var(--ink-soft); margin-bottom: 4px; }
 .sheet .btn { height: 50px; font-size: 16px; }
+.sheet a { color: var(--navy); font-weight: 900; }
 .shard-uses { margin: 4px 0 8px 1.4em; font-size: 14px; font-weight: 900; line-height: 1.6; }
 .shard-uses li + li { margin-top: 6px; }
 .shard-gain { display: flex; gap: 8px; margin: 2px 0 12px; }

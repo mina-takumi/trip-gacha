@@ -89,6 +89,14 @@ export const CONFIG = {
   /** 道すじが出ないときは、バス停の回す権利を直線距離1kmあたりこの回数、1区間で passCountMax 回まで */
   passCountPerKm: 4,
   passCountMax: 10,
+
+  // ---- ログインとサーバーへの保存 ----
+  /** 記録が変わってから、サーバーと合わせるまでの待ち */
+  cloudDebounceMs: 10_000,
+  /** 続けて合わせる間隔の下限(範囲内にいる間は記録が毎回変わるので、書き込みを減らす) */
+  cloudMinIntervalMs: 2 * 60 * 1000,
+  /** アプリに戻ったとき、前に合わせてからこれ以上たっていれば取り直す */
+  cloudRefreshMs: 30_000,
 };
 
 export const RARITIES: Rarity[] = ['NORMAL', 'RARE', 'SUPER_RARE'];

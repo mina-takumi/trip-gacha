@@ -1,5 +1,25 @@
 {
   "appId": "com.minatakumi.tripgacha",
   "appName": "トリップガチャ",
-  "webDir": "dist"
+  "webDir": "dist",
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": [
+        "google.com"
+      ]
+    }
+  },
+  "experimental": {
+    "ios": {
+      "spm": {
+        "swiftToolsVersion": "6.1",
+        "packageTraits": {
+          "@capacitor-firebase/authentication": [
+            "Google"
+          ]
+        }
+      }
+    }
+  }
 }

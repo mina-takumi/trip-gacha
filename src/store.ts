@@ -9,6 +9,8 @@ export const SCHEMA_VERSION = 1;
 export const SAVE_KEY = 'trip-gacha:save';
 /** アプリ版の「閉じている間も記録する」。端末ごとの設定なので、書き出す記録には入れない */
 export const BACKGROUND_KEY = 'trip-gacha:background';
+/** この端末の記録を最後に遊んで変えた時刻(サーバーと合わせるときに使う) */
+export const SAVED_AT_KEY = 'trip-gacha:saved-at';
 
 export interface SaveData {
   schemaVersion: number;

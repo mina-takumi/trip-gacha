@@ -31,6 +31,11 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=""
+      # 設定ファイルが無いと、ログインを押しても何も起きないので、ここで止める
+      - name: Check login config
+        run: |
+          test -f build/Build/Products/Release-iphoneos/App.app/GoogleService-Info.plist
+          grep -q FirebaseAuthentication build/Build/Products/Release-iphoneos/App.app/capacitor.config.json
       - name: Package IPA
         run: |
           mkdir Payload

@@ -1,4 +1,4 @@
-import { BACKGROUND_KEY, parseSave, SAVE_KEY, type StorageLike } from './store.ts';
+import { BACKGROUND_KEY, parseSave, SAVE_KEY, SAVED_AT_KEY, type StorageLike } from './store.ts';
 
 export interface PreferencesLike {
   get(options: { key: string }): Promise<{ value: string | null }>;
@@ -23,6 +23,9 @@ export async function openNativeStorage(prefs: PreferencesLike, local: StorageLi
     }
     const background = (await prefs.get({ key: BACKGROUND_KEY })).value;
     if (background != null) memory.set(BACKGROUND_KEY, background);
+    // 記録と同じ場所に置く。保存時刻だけ消えると、端末の新しい記録がサーバーの古い値に負ける
+    const savedAt = (await prefs.get({ key: SAVED_AT_KEY })).value;
+    if (savedAt != null) memory.set(SAVED_AT_KEY, savedAt);
   } catch {
     return local;
   }

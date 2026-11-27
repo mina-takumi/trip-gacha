@@ -6,7 +6,7 @@
   --mustard: #F2B233;
   --teal: #2FA9A0;
   --navy: #22303C;
-  --ink-soft: #5B6670;
+  --ink-soft: #46515B;
   --mute: #B9AE9C;
   --line: var(--navy);
   --hand: "Yusei Magic", "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
@@ -60,7 +60,7 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
   height: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); padding: 8px 8px env(safe-area-inset-bottom);
   background: var(--paper); border-top: 2px solid var(--line); }
 .dark .tabbar { background: #2B3B49; border-color: var(--cream); }
-.tab { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; font-weight: 900; color: var(--ink-soft);
+.tab { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 900; color: var(--ink-soft);
   background: none; border: 0; }
 .dark .tab { color: #C9C2B4; }
 .tab .ic { border: 2px solid transparent; opacity: .45; }
@@ -72,28 +72,23 @@ button:focus-visible, label:focus-within { outline: 3px solid var(--teal); outli
 .top { display: flex; justify-content: space-between; align-items: center; }
 .logo { font: 400 22px var(--hand); }
 .top-r { display: flex; align-items: center; gap: 14px; }
-.reload { display: flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 12px; border: 2px solid var(--line); border-radius: 22px;
-  background: var(--paper); box-shadow: 2px 2px 0 var(--line); font-weight: 900; font-size: 13px; color: var(--navy); }
-.reload:active { transform: translate(2px, 2px); box-shadow: none; }
-.reload:disabled { opacity: .55; }
-.logo, .reload, .shard { white-space: nowrap; }
-.reload svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.logo, .shard { white-space: nowrap; }
 .shard { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 15px; }
-button.shard { padding: 0; border: 0; background: none; font-family: inherit; color: inherit; cursor: pointer; }
+button.shard { min-height: 44px; padding: 0; border: 0; background: none; font-family: inherit; color: inherit; cursor: pointer; }
 .shard .ic { width: 26px; height: 26px; border: 2px solid var(--line); background: var(--mustard); }
 .shard .ic svg { width: 13px; height: 13px; stroke: var(--navy); }
-/* 幅の狭いスマホ(iPhone SE 初代など)では、更新ボタンを絵だけにして1行に収める */
+/* 押すと説明が出ることを示す「?」 */
+.shard .q { width: 18px; height: 18px; border: 2px solid var(--line); border-radius: 50%; display: grid; place-items: center; font: 900 12px/1 var(--maru); }
+/* 幅の狭いスマホ(iPhone SE 初代など)では、小さめにして1行に収める */
 @media (max-width: 359px) {
   .logo { font-size: 19px; }
   .top-r { gap: 8px; }
-  .reload { width: 44px; padding: 0; justify-content: center; }
-  .reload-t { display: none; }
   .shard { font-size: 13px; gap: 4px; }
   .shard .ic { width: 22px; height: 22px; }
 }
 .lead { font-weight: 900; font-size: 14px; margin-top: 18px; color: var(--ink-soft); letter-spacing: .06em; }
-.huge { display: flex; align-items: flex-end; margin: -8px 0; font: 400 108px/1.1 var(--hand); color: var(--navy); text-shadow: 4px 4px 0 rgba(232, 85, 47, .55); }
-.huge small { font-size: 32px; line-height: 1.6; text-shadow: none; margin-left: 6px; }
+.huge { display: flex; align-items: flex-end; margin: -6px 0; font: 400 72px/1.1 var(--hand); color: var(--navy); text-shadow: 3px 3px 0 rgba(232, 85, 47, .55); }
+.huge small { font-size: 24px; line-height: 1.6; text-shadow: none; margin-left: 6px; }
 /* 桁ごとに同じ幅の箱へ入れる(回っている途中と止まったあとで幅が変わらないように)。箱の外は見せない */
 .huge-n { display: flex; }
 .huge-n .d { display: block; width: .6em; height: 1.1em; overflow: hidden; text-align: center; }
@@ -105,12 +100,12 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .feet svg:nth-child(odd) { transform: translateY(5px) rotate(-8deg); }
 .feet svg:nth-child(even) { transform: rotate(8deg); }
 .feet .on { fill: var(--orange); stroke: var(--line); }
-.feet .off { fill: none; stroke: var(--mute); stroke-dasharray: 2 2; }
+.feet .off { fill: none; stroke: #857A69; stroke-dasharray: 2 2; }
 .feet-cap { font-weight: 900; font-size: 14px; }
 /* 確率の表: 1列目が駅・バス停、残り3列が珍しさ。スーパーレアの列はマスタード */
-.odds-t { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)); margin-top: 18px; padding: 6px 8px; align-items: center; }
+.odds-t { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)); margin-top: 8px; padding: 6px 8px; align-items: center; }
 .odds-t > * { text-align: center; padding: 5px 2px; }
-.odds-t .oh { font-size: 11px; font-weight: 900; color: var(--ink-soft); white-space: nowrap; }
+.odds-t .oh { font-size: 12px; font-weight: 900; color: var(--ink-soft); white-space: nowrap; }
 .odds-t .ok { font-size: 12px; font-weight: 900; text-align: left; padding-right: 8px; white-space: nowrap; }
 .odds-t b { font: 400 26px/1 var(--hand); }
 .odds-t b small { font-size: 12px; }
@@ -127,7 +122,7 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .spot .name { font: 400 18px/1.25 var(--hand); flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .spot .d { font-weight: 900; font-size: 12px; color: var(--ink-soft); flex: none; }
 .spot .pass-tag { display: inline-block; margin-left: 6px; padding: 1px 6px; border: 1.5px solid var(--line); border-radius: 8px;
-  font: 900 10.5px var(--maru); vertical-align: 3px; background: var(--paper); color: var(--ink-soft); }
+  font: 900 12px var(--maru); vertical-align: 3px; background: var(--paper); color: var(--ink-soft); }
 .spin-btn { flex: none; display: flex; align-items: center; gap: 4px; height: 40px; padding: 0 14px; border: 2px solid var(--line); border-radius: 20px;
   background: var(--orange); color: var(--paper); box-shadow: 2px 2px 0 var(--line); font: 900 14px var(--maru); cursor: pointer; }
 .spin-btn:active { transform: translate(2px, 2px); box-shadow: none; }
@@ -145,6 +140,10 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .dot.NORMAL { background: #C58A5A; } .dot.RARE { background: #AEB8C2; } .dot.SUPER_RARE { background: #E2B23E; }
 .sec { font: 400 20px var(--hand); margin: 22px 0 10px; display: flex; align-items: center; justify-content: space-between; }
 .sec .deco { width: 40px; height: 40px; stroke: var(--navy); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* 押すと開いたり閉じたりする見出し */
+button.sec { width: 100%; min-height: 44px; padding: 0; border: 0; background: none; color: inherit; text-align: left; }
+.sec.fold i { font: 900 12px var(--maru); margin-left: 8px; vertical-align: 2px; }
+.odds-say { font-size: 13px; font-weight: 900; }
 .say { margin-top: 18px; font-size: 14px; font-weight: 900; line-height: 1.8; }
 .notice { margin-top: 18px; padding: 16px 18px; font-size: 13.5px; line-height: 1.75; }
 .notice b { display: block; font: 400 20px var(--hand); margin-bottom: 4px; }
@@ -198,7 +197,7 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 /* まだ持っていないカード: 地の色になじむ点線の枠 */
 .ph { aspect-ratio: 0.82; border-radius: 10px; display: grid; place-items: center; background: rgba(34, 48, 60, .05); }
 .ph b { width: 46px; height: 46px; border-radius: 50%; border: 2px dashed var(--mute); display: grid; place-items: center;
-  font: 400 16px var(--hand); color: #9C9282; }
+  font: 400 16px var(--hand); color: #6F665A; }
 .ph b.long { width: auto; min-width: 46px; padding: 0 6px; border-radius: 23px; font-size: 12px; }
 
 /* ---------- 結果(ネイビーで締める) ---------- */
@@ -235,30 +234,31 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .z-tabs.four { grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .z-tab { height: 52px; border: 2px solid var(--line); border-radius: 22px; background: var(--paper); color: var(--navy); box-shadow: 2px 2px 0 var(--line);
   font: 900 14px/1.25 var(--maru); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; cursor: pointer; padding: 0 2px; white-space: nowrap; }
-.z-tab small { font-size: 11px; color: var(--ink-soft); }
+.z-tab small { font-size: 12px; color: var(--ink-soft); }
 .z-tab[aria-pressed="true"] { background: var(--mustard); }
 .z-tab[aria-pressed="true"] small { color: var(--navy); }
-.ox .rl { color: var(--ink-soft); font-size: 10.5px; white-space: nowrap; }
+.ox .rl { color: var(--ink-soft); font-size: 12px; line-height: 1.25; text-align: center; }
 /* バス停カードの図鑑は4列。持っていない枠は小さめの丸 */
 .grid.grid4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 8px; }
 .grid4 .tile { padding: 5px 5px 6px; border-radius: 12px; box-shadow: 2px 2px 0 var(--line); }
 .grid4 .tile.none { box-shadow: none; }
 .grid4 .ph b { width: 32px; height: 32px; font-size: 12px; }
 .grid4 .ph b.long { min-width: 32px; padding: 0 4px; font-size: 9.5px; }
-.grid4 .ox .rl { font-size: 9px; }
-.grid4 .tile .sn { font-size: 10px; margin-top: 4px; }
+.grid4 .tile .sn { margin-top: 4px; }
 .grid4 .ox .dot { width: 7px; height: 7px; margin-right: 2px; }
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 12px; }
 .tile { background: var(--paper); border: 2px solid var(--line); border-radius: 16px; padding: 8px 8px 7px; box-shadow: 3px 3px 0 var(--line);
-  text-align: left; }
+  text-align: left; display: flex; flex-direction: column; justify-content: flex-start; }
 .tile.none { background: transparent; border: 2px dashed var(--mute); box-shadow: none; }
-.tile .sn { font-size: 11.5px; font-weight: 900; text-align: center; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .sn { font-size: 12px; line-height: 1.35; font-weight: 900; text-align: center; margin-top: 6px; overflow-wrap: anywhere; }
 .ox { display: flex; justify-content: center; gap: 5px; margin-top: 3px; font: 900 12px/1 var(--maru); }
-.ox .o { color: var(--orange); } .ox .x { color: var(--mute); }
+.ox .o { color: var(--orange); } .ox .x { color: var(--ink-soft); }
 .detail h2 { font: 400 26px/1.3 var(--hand); text-align: center; margin: 4px 0 18px; }
 .trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
 .trio .lbl { font-size: 12px; font-weight: 900; text-align: center; margin-top: 6px; }
-.trio .lbl .o { color: var(--orange); } .trio .lbl .x { color: var(--mute); }
+.trio .lbl .o { color: var(--orange); } .trio .lbl .x { color: var(--ink-soft); }
+.where { margin-top: 18px; text-align: center; font-size: 13px; font-weight: 900; color: var(--ink-soft); }
+.where + .say { margin-top: 4px; }
 
 /* ---------- 地図 ---------- */
 .map-screen { position: fixed; inset: 0 0 calc(var(--tabbar-h) + env(safe-area-inset-bottom)) 0; z-index: 1; }
@@ -288,13 +288,19 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .settings .panel h4 { font: 400 19px var(--hand); margin-bottom: 4px; }
 .settings .panel p { font-size: 13.5px; line-height: 1.75; color: var(--ink-soft); }
 .settings .panel .btn { margin-top: 12px; }
-.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
-.settings .panel .switch-row h4 { margin-bottom: 0; }
-.switch { flex: none; min-width: 72px; min-height: 44px; padding: 0 12px; border: 2px solid var(--line); border-radius: 22px; background: var(--paper); color: var(--ink-soft);
-  font: 900 14px var(--maru); box-shadow: 2px 2px 0 var(--line); cursor: pointer; }
-.switch:active { transform: translate(2px, 2px); box-shadow: none; }
-.switch[aria-checked="true"] { background: var(--teal); color: var(--paper); }
-.settings .pass-log { margin-top: 12px; font-size: 13px; }
+/* 設定: 見出しごとの一覧。1項目が1行 */
+.set-h { margin: 22px 0 0; font: 400 19px var(--hand); }
+.settings .panel.set-list { margin-top: 8px; padding: 2px 18px; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 52px; padding: 10px 0;
+  border: 0; background: none; text-align: left; font: 900 15px/1.5 var(--maru); color: var(--navy); }
+.set-row + .set-row { border-top: 1.5px dashed var(--mute); }
+.set-row > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.set-row small { display: block; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+.set-row small:empty { display: none; }
+.set-row > i { font: 900 22px/1 var(--maru); }
+.set-row > b { white-space: nowrap; font-size: 13px; }
+.set-row:disabled { opacity: .55; }
+label.set-row { cursor: pointer; }
 .settings .pass-log pre { margin-top: 8px; white-space: pre-wrap; font: 12px/1.6 ui-monospace, monospace; color: var(--ink-soft); max-height: 320px; overflow: auto; }
 .notes ul { margin: 6px 0 0; padding-left: 1.2em; }
 .notes li { font-size: 13.5px; line-height: 1.7; }
@@ -328,8 +334,7 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .file-label { position: relative; }
 .file-label input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.settings .panel .pair .btn { margin-top: 12px; }
-.foot { margin-top: 22px; text-align: center; font-size: 11px; line-height: 1.7; color: var(--ink-soft); }
+.foot { margin-top: 22px; text-align: center; font-size: 12px; line-height: 1.7; color: var(--ink-soft); }
 .foot p + p { margin-top: 6px; }
 .foot b { color: var(--navy); }
 .toast { position: fixed; left: 16px; right: 16px; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); z-index: 1100;
@@ -372,7 +377,7 @@ button.shard { padding: 0; border: 0; background: none; font-family: inherit; co
 .m-tile { display: block; width: 100%; padding: 4px; border: 0; border-radius: 10px; background: none; font: inherit; color: inherit; cursor: pointer; }
 .m-tile.on { box-shadow: 0 0 0 3px var(--mustard); }
 .m-tile.dup .card { opacity: .55; }
-.m-tag { margin-top: 4px; text-align: center; font: 900 10.5px var(--maru); color: var(--cream); white-space: nowrap; }
+.m-tag { margin-top: 4px; text-align: center; font: 900 12px var(--maru); color: var(--cream); white-space: nowrap; }
 .m-tag .new { display: inline-block; padding: 1px 6px; border-radius: 8px; background: var(--orange); color: var(--paper); }
 
 /* ---------- 全画面の演出(開いたとき・回す) ---------- */

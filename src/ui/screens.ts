@@ -449,6 +449,42 @@ export interface CloudView {
   error: string | null;
 }
 
+/** 残す記録を選ぶ窓に並べる、片方の中身。保存時刻が分からなければ 0 */
+export interface RecordSummary { cards: number; shards: number; spins: number; savedAt: number }
+
+const whenText = (t: number) => (t ? `${new Date(t).getMonth() + 1}月${new Date(t).getDate()}日 ${hhmm(t)}` : '不明');
+
+/** どちらの記録を残すか。step が null なら選ぶ画面、選んだあとは消える方を確かめる画面。背景を押しても閉じない */
+export function cloudChoiceSheet(server: RecordSummary, device: RecordSummary, step: 'server' | 'device' | null, busy: boolean): string {
+  const open = `<div class="sheet-bg"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="残す記録を選ぶ">`;
+  if (step) {
+    const lost = step === 'server' ? 'この端末' : 'サーバー';
+    return `${open}
+      <h3>${lost}の記録は消えます</h3>
+      <p>${step === 'server' ? 'サーバー' : 'この端末'}の記録を残します。${lost}の記録は元に戻せません。</p>
+      ${step === 'server' ? '<button class="btn mustard" data-act="export">先に書き出す</button>' : ''}
+      <button class="btn" data-act="cloud-choose-go" style="margin-top:12px"${busy ? ' disabled' : ''}>${lost}の記録を消して進む</button>
+      <button class="btn paper" data-act="cloud-choose-back" style="margin-top:12px">戻る</button>
+    </div>`;
+  }
+  const row = (label: string, a: string | number, b: string | number) => `<tr><th>${label}</th><td>${a}</td><td>${b}</td></tr>`;
+  return `${open}
+      <h3>どちらの記録を残しますか</h3>
+      <p>この端末とサーバーで、記録が違います。選ばなかった方は消えます。</p>
+      <table class="choice">
+        <tr><th></th><th>サーバー</th><th>この端末</th></tr>
+        ${row('カード', server.cards, device.cards)}
+        ${row('かけら', server.shards, device.shards)}
+        ${row('回した回数', server.spins, device.spins)}
+        ${row('最後の変化', whenText(server.savedAt), whenText(device.savedAt))}
+      </table>
+      <button class="btn mustard" data-act="cloud-choose" data-which="server">サーバーの記録を残す</button>
+      <button class="btn paper" data-act="cloud-choose" data-which="device" style="margin-top:12px">この端末の記録を残す</button>
+      <button class="btn paper" data-act="cloud-choose-cancel" style="margin-top:12px">やめる(ログアウト)</button>
+    </div>`;
+}
+
 const hhmm = (t: number) => `${String(new Date(t).getHours()).padStart(2, '0')}:${String(new Date(t).getMinutes()).padStart(2, '0')}`;
 
 function cloudPanel(c: CloudView): string {
@@ -485,6 +521,7 @@ export function cloudLoginSheet(policyUrl: string): string {
       </ul>
       <p>今いる場所そのものは預けません。預けた記録は、別の端末で続きから遊ぶためだけに使います。設定の「サーバーの記録を消す」でいつでも消せます。</p>
       <p>中学生・高校生の人は、保護者の人と相談してからログインしてください。ログインしなくても、全部遊べます。</p>
+      <p>この端末とサーバーに違う記録があるときは、どちらを残すかを選びます。選ばなかった記録は消えます。</p>
       <p><a href="${esc(policyUrl)}" target="_blank" rel="noopener">プライバシーポリシーを読む</a></p>
       <button class="btn mustard" data-act="cloud-login-go">ログインする</button>
       <button class="btn paper" data-act="cloud-login-cancel" style="margin-top:12px">やめる</button>
@@ -646,10 +683,20 @@ export function diaryScreen(days: DiaryDay[], date: string | null, spotOf: (id: 
   </div>`;
 }
 
-export function notesScreen(hasSecret: boolean): string {
+/** ログインできる場所では、記録の置き場所の説明が変わる */
+const CLOUD_RECORD_NOTES = [
+  '記録は、この端末のブラウザの中にある。Googleでログインすると、回した駅・バス停と日時を含む記録を、サーバーにも預ける(今いる場所は預けない)。',
+  'ログインしたとき、この端末とサーバーに違う記録があれば、どちらを残すかを選ぶ。選ばなかった方は消える。',
+  'ログインしていないと、ブラウザのデータを消すと記録も消える。機種変更のときは、ログインするか、書き出しと読み込みを使う。',
+];
+
+export function notesScreen(hasSecret: boolean, cloud = false): string {
   // 「カード」の次に入れる
   const at = NOTES.findIndex(([title]) => title === 'カード') + 1;
-  const notes = hasSecret ? [...NOTES.slice(0, at), SECRET_NOTE, ...NOTES.slice(at)] : NOTES;
+  const base: [string, string[]][] = cloud
+    ? NOTES.map(([title, items]) => (title === '記録' ? [title, [...CLOUD_RECORD_NOTES, ...items.slice(1)]] : [title, items]))
+    : NOTES;
+  const notes = hasSecret ? [...base.slice(0, at), SECRET_NOTE, ...base.slice(at)] : base;
   // 長い画面なので、戻るボタンは左上に固定する(スクロールしても押せる)
   return `<div class="settings notes">
     <button class="back-fixed" data-act="close-notes">← 設定に戻る</button>

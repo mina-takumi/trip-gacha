@@ -7,6 +7,8 @@ import { addDiary, parseDiary, parseNotes, pruneNotes, type DiaryEntry, type Dia
 
 export const SCHEMA_VERSION = 1;
 const KEY = 'trip-gacha:save';
+/** ログインで、どちらの記録を残すか聞く途中の印 */
+export const CLOUD_ASK_KEY = 'trip-gacha:cloud-ask';
 
 export interface SaveData {
   schemaVersion: number;

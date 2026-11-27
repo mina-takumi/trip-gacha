@@ -12,7 +12,7 @@ import { addFix, distanceToday, localDate } from './walk.ts';
 import { diaryDays, setNote } from './diary.ts';
 import {
   applyBusPassSpin, applyPassCount, applyPassRoute, applyShardSpin, applySpins, busPassToday, canShardSpin, cooldownRemainingMs, exportJson, hasTicket, isPassSegment, load, markVisited, parseSave, save, spinDistanceM, storageAvailable,
-  type PassSegment, type SaveData, type Spin, type SpinResult,
+  type PassSegment, type SaveData, type Spin, type SpinResult, CLOUD_ASK_KEY,
 } from './store.ts';
 import { buildNetwork, inferSegment, passCount, PASS_MODE_LABEL, type Candidate, type Inference, type LatLon, type Network } from './route.ts';
 import { browserLocation, type GpsMode, type LocationSource } from './location.ts';
@@ -28,11 +28,11 @@ import qrcode from 'qrcode-generator';
 import { cloudEnabled, openFirebase, POLICY_URL } from './cloud.ts';
 import { createCloudSync, type CloudSync } from './cloud-sync.ts';
 import {
-  busDetailScreen, chooserSheet, cloudDeleteSheet, cloudLoginSheet, detailScreen, diaryScreen, friendConfirmSheet, friendScanSheet, friendShowSheet, passModeSheet, progressSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
-  type CloudView, type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
+  busDetailScreen, chooserSheet, cloudChoiceSheet, cloudDeleteSheet, cloudLoginSheet, detailScreen, diaryScreen, friendConfirmSheet, friendScanSheet, friendShowSheet, passModeSheet, progressSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
+  type CloudView, type RecordSummary, type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.12.1';
+const VERSION = '0.13.0';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -78,6 +78,8 @@ const state = {
   /** ログインの前の注意書き・サーバーの記録を消す前の確認を出しているか */
   cloudLogin: false,
   cloudDelete: false,
+  /** 残す記録を選んで、消える方を確かめているときの選んだ側 */
+  cloudChoiceStep: null as 'server' | 'device' | null,
   /** 達成率で押した路線・市(line:… / city:…) */
   progDetail: null as string | null,
   zukanTab: 'station' as ZukanTab,
@@ -179,6 +181,17 @@ const cloudView = (): CloudView | null => {
   const v = cloud.view();
   return { signedIn: !!v.user, email: v.user?.email ?? null, state: v.state, syncedAt: v.syncedAt, error: v.error };
 };
+
+const cardTotal = (data: SaveData) => Object.keys(data.collection).filter((id) => id.startsWith('station:') || id.startsWith('common:')).length;
+
+/** ログインで記録が違ったときの、残す記録を選ぶ窓。出さないときは空 */
+function choiceSheet(): string {
+  const v = cloud?.view();
+  if (!v?.choice) return '';
+  const summary = (data: SaveData, savedAt: number): RecordSummary => ({ cards: cardTotal(data), shards: data.shards, spins: data.totalSpins, savedAt });
+  const c = v.choice;
+  return cloudChoiceSheet(summary(c.remote, c.remoteSavedAt), summary(c.local, c.localSavedAt), state.cloudChoiceStep, v.state === 'syncing');
+}
 
 function persist(fromImport = false): void {
   settleRewards();
@@ -307,8 +320,8 @@ function screenHtml(now: number): string {
       return zukanScreen(state.zukanTab, stations, cards, catalog.common, secrets, state.save.collection, progressOf(state.save, stations));
     }
     case 'settings': {
-      if (state.showNotes) return notesScreen(ownedSecrets().length > 0);
-      const cardCount = Object.keys(state.save.collection).filter((id) => id.startsWith('station:') || id.startsWith('common:')).length;
+      if (state.showNotes) return notesScreen(ownedSecrets().length > 0, cloudEnabled);
+      const cardCount = cardTotal(state.save);
       return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines, passLogLines, cloudView());
     }
     case 'diary':
@@ -364,7 +377,10 @@ function render(): void {
   toastEl.innerHTML = state.toast ? `<div class="toast" role="status">${state.toast}</div>` : '';
   const ask = state.passAsk;
   const detail = state.progDetail ? progressOf(state.save, stations).find((q) => q.key === state.progDetail) : undefined;
-  const sheet = state.cloudLogin ? cloudLoginSheet(POLICY_URL)
+  const choosing = choiceSheet();
+  if (!choosing) state.cloudChoiceStep = null;
+  const sheet = choosing ? choosing
+    : state.cloudLogin ? cloudLoginSheet(POLICY_URL)
     : state.cloudDelete ? cloudDeleteSheet()
     : state.friendScan ? friendScanSheet()
     : state.friendShow ? friendShowSheet(myQrSvg())
@@ -714,6 +730,18 @@ app.addEventListener('click', (e) => {
     case 'cloud-delete-ask': state.cloudDelete = true; break;
     case 'cloud-delete-cancel': state.cloudDelete = false; break;
     case 'cloud-delete-go': cloudDeleteGo(); return;
+    case 'cloud-choose': state.cloudChoiceStep = el.dataset.which as 'server' | 'device'; break;
+    case 'cloud-choose-back': state.cloudChoiceStep = null; break;
+    case 'cloud-choose-cancel': void cloud?.signOut().catch(() => showToast('ログアウトできませんでした。')); return;
+    case 'cloud-choose-go': {
+      const which = state.cloudChoiceStep;
+      if (!which || !cloud) return;
+      void cloud.choose(which).then(() => {
+        if (cloud?.view().state === 'error') showToast('できませんでした。通信を確かめて、もう一度試してください。');
+        render();
+      });
+      return;
+    }
     case 'map-center': refreshAndCenter(); return;
     case 'map-help': {
       // 地図の見方は、押したときだけ出す(地図を広く見せるため)
@@ -782,6 +810,8 @@ if (cloudEnabled && !allCards) {
       applySave: (s) => { state.save = s; persist(); showToast('サーバーの記録と合わせました。'); render(); },
       getSavedAt: () => { try { return Number(localStorage.getItem(SAVED_AT_KEY)) || 0; } catch { return 0; } },
       setSavedAt: (t) => { try { localStorage.setItem(SAVED_AT_KEY, String(t)); } catch { /* 覚えられなくても遊びは続ける */ } },
+      getAsk: () => { try { return localStorage.getItem(CLOUD_ASK_KEY) === '1'; } catch { return false; } },
+      setAsk: (on) => { try { if (on) localStorage.setItem(CLOUD_ASK_KEY, '1'); else localStorage.removeItem(CLOUD_ASK_KEY); } catch { /* 覚えられなくても遊びは続ける */ } },
       now: Date.now,
       timer: { set: (fn, ms) => window.setTimeout(fn, ms), clear: (id) => window.clearTimeout(id) },
       onChange: render,

@@ -18,6 +18,20 @@ export function isPristine(s: SaveData): boolean {
   return Object.keys(s.collection).length === 0 && s.totalSpins === 0 && s.shards === 0 && Object.keys(s.friendCards).length === 0;
 }
 
+/** キーの順番が違っても同じ文字になるようにする */
+const canonical = (v: unknown): string => JSON.stringify(v, (_, x) =>
+  x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : 1))) : x);
+
+/**
+ * ログインしたとき、どちらを残すか利用者に選んでもらうか。両方に遊んだ記録があって、中身が違うときだけ。
+ * 比べるのは利用者が作った中身だけ(駅に寄っただけの違いは、聞かずに合わせる)
+ */
+export function needsChoice(local: SaveData, remote: SaveData): boolean {
+  if (isPristine(local) || isPristine(remote)) return false;
+  const content = (s: SaveData) => canonical([s.collection, s.shards, s.totalSpins, s.friendCards, s.diaryNotes]);
+  return content(local) !== content(remote);
+}
+
 const maxOf = (a: number | undefined, b: number | undefined) => Math.max(a ?? -Infinity, b ?? -Infinity);
 const minOf = (a: number | undefined, b: number | undefined) => Math.min(a ?? Infinity, b ?? Infinity);
 

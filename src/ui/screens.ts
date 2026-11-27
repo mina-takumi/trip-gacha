@@ -4,7 +4,7 @@ import { stationItemId } from '../gacha.ts';
 import { NEIGHBOR_CITIES, type CardRarity, type CommonCard, type Rarity, type Spot, type StationCard } from '../items.ts';
 import type { GpsMode } from '../location.ts';
 import { BUS_PASS_SPOT, DIARY_NOTE_MAX, type DiaryDay, type DiaryNotes } from '../diary.ts';
-import type { Progress } from '../progress.ts';
+import { LINES, cityOf, type Progress } from '../progress.ts';
 import type { SaveData } from '../store.ts';
 import { cardHtml, placeholderHtml, type CardFace } from './card.ts';
 import { distanceLabel, esc, km } from './html.ts';
@@ -47,7 +47,11 @@ export interface MainView {
   busPass: number;
   /** 友達の駅。count は候補の数、doneThisWeek は今週もう回したか */
   friend: { count: number; doneThisWeek: boolean };
+  /** 確率の表と友達の駅を開いているか */
+  open: Folds;
 }
+
+export interface Folds { odds: boolean; friend: boolean }
 
 function geoNotice(v: MainView): string {
   switch (v.geo) {
@@ -109,23 +113,27 @@ export function mainScreen(v: MainView): string {
     <span class="ok">駅</span>${RARITIES.map((r) => cell(v.odds, r)).join('')}
     <span class="ok">バス停</span>${RARITIES.map((r) => cell(v.busOdds, r)).join('')}
   </div>`;
+  // 押すと開いたり閉じたりする見出し
+  const fold = (key: keyof Folds, title: string, extra = '') =>
+    `<button class="sec fold" data-act="fold" data-fold="${key}" aria-expanded="${v.open[key]}"><span>${title}<i aria-hidden="true">${v.open[key] ? '▲' : '▼'}</i></span>${extra}</button>`;
+  const odds = fold('odds', '今の確率') + (v.open.odds ? `<p class="odds-say">歩くほど、駅でスーパーレアが出やすくなる。</p>${oddsTable}` : '');
   const f = v.friend;
-  const friend = `<div class="sec"><span>友達の駅</span>${icon('gachapon', 'deco')}</div>
+  const friend = fold('friend', '友達の駅', icon('gachapon', 'deco')) + (!v.open.friend ? '' : `
     <div class="panel friend">
       <p class="friend-say">友達のQRを読むと、その友達が回した駅が候補になる。回せるのは、その候補からランダムに1駅だけ。週に1回。</p>
       ${f.count > 0 ? `<p class="friend-n">いまの候補 <b>${f.count}</b>駅</p>
       <button class="btn mustard" data-act="friend-spin" ${f.doneThisWeek ? 'disabled' : ''}>${icon('capsule')}友達の駅を1駅回す</button>
       ${f.doneThisWeek ? '<p class="friend-note">今週は回した。次は月曜から。</p>' : ''}` : ''}
       <div class="pair"><button class="btn paper" data-act="friend-show">自分のQRを出す</button><button class="btn paper" data-act="friend-scan">友達のQRを読む</button></div>
-    </div>`;
+    </div>`);
   return `
     ${v.storageOk ? '' : '<div class="notice panel warn"><b>記録が、残せません。</b>このブラウザでは端末に記録を保存できないため、閉じると集めたカードが消えます。プライベートブラウズなら、通常のモードで開いてください。</div>'}
-    <div class="top"><span class="logo">トリップガチャ</span><span class="top-r"><button class="reload" data-act="reload" aria-label="最新版に更新">${icon('reload')}<span class="reload-t">更新</span></button><button class="shard" data-act="shard-info" aria-label="かけら ${v.shards}。使い道を見る"><span class="ic">${icon('shard')}</span>かけら ${v.shards}</button></span></div>
+    <div class="top"><span class="logo">トリップガチャ</span><span class="top-r"><button class="shard" data-act="shard-info" aria-label="かけら ${v.shards}。使い道を見る"><span class="ic">${icon('shard')}</span>かけら ${v.shards}<span class="q" aria-hidden="true">?</span></button></span></div>
     <div class="lead">今日、歩いた。</div>
     <div class="huge" role="img" aria-label="${km(v.distanceM)}km"><span class="huge-n">${digitsHtml(km(v.distanceM))}</span><small>km</small></div>
     <div class="feet" role="img" aria-label="${km(MAX_M)}kmまでのうち${km(v.distanceM)}km">${feet}</div>
     <div class="feet-cap">${caption}</div>
-    ${oddsTable}
+    ${odds}
     ${geoNotice(v)}
     ${list}${empty}
     ${friend}`;
@@ -312,7 +320,7 @@ function busTiles(common: CommonCard[], collection: SaveData['collection'], owne
     const entry = collection[c.itemId];
     return `<button class="tile ${entry ? '' : 'none'}" data-act="detail" data-item="${esc(c.itemId)}" aria-label="${entry ? esc(c.name) : `${esc(c.number)} まだなし`}">
       ${entry ? cardHtml(c, c.rarity, 'sm', false) + `<div class="sn">${esc(c.name)}</div>` : placeholderHtml(c.number)}
-      <div class="ox"><span class="rl"><i class="dot ${c.rarity}"></i>${RARITY_LABEL[c.rarity]}</span></div>
+      <div class="ox"><span class="rl"><i class="dot ${c.rarity}"></i>${RARITY_LABEL[c.rarity].replace('スーパー', 'スーパー<wbr>')}</span></div>
     </button>`;
   }).join('');
   return `<div class="z-lead">どのバス停でも出る${common.length}枚。${zukanLead(owned, common.length, 'バス停')}</div>
@@ -340,7 +348,8 @@ export function detailScreen(spot: Spot, card: StationCard, collection: SaveData
   return `<div class="detail">
     <h2>${best ? esc(card.name) : `${esc(spot.name)}駅`}</h2>
     ${best ? cardHtml(card, best, 'big') : `<div class="big">${placeholderHtml(card.number)}</div>`}
-    ${best ? '' : `<p class="say" style="text-align:center">${esc(spot.name)}駅の近くで、回す。</p>`}
+    ${best ? '' : `<p class="where">${[cityOf(spot), LINES.filter((l) => l.stations.includes(spot.name)).map((l) => l.name).join('・')].filter(Boolean).map(esc).join(' / ')}</p>
+    <p class="say" style="text-align:center">${esc(spot.name)}駅の近くで、回す。</p>`}
     <div class="trio">${trio}</div>
     <div class="acts">
       ${shardSpin ? `<button class="btn mustard" data-act="shard-spin" data-spot="${esc(spot.id)}">${icon('shard')}かけら${CONFIG.shardSpinCost}個で回す</button>` : ''}
@@ -406,6 +415,20 @@ export function friendConfirmSheet(count: number): string {
       <p>候補の${count}駅から、ランダムに1駅を回す。回さなかった候補は消える。回せるのは週に1回で、次は来週の月曜から。</p>
       <button class="btn" data-act="friend-spin-go">${icon('capsule')}1駅を回す</button>
       <button class="btn paper" data-act="friend-cancel">やめる</button>
+    </div>`;
+}
+
+/** 初めて開いたときと、設定の「遊び方を見る」で出すシート */
+export function howtoSheet(): string {
+  return `<div class="sheet-bg" data-act="howto-close"></div>
+    <div class="sheet panel" role="dialog" aria-modal="true" aria-label="遊び方">
+      <h3>遊び方</h3>
+      <ol class="shard-uses">
+        <li>駅やバス停の${CONFIG.enterRadiusM}m以内に行く。行った場所は、その日のうちはどこからでも回せる。</li>
+        <li>立ち止まって、ホームの「回す」を押す。</li>
+        <li>出たカードは、図鑑に集まる。</li>
+      </ol>
+      <button class="btn mustard" data-act="howto-close">とじる</button>
     </div>`;
 }
 
@@ -487,26 +510,18 @@ export function cloudChoiceSheet(server: RecordSummary, device: RecordSummary, s
 
 const hhmm = (t: number) => `${String(new Date(t).getHours()).padStart(2, '0')}:${String(new Date(t).getMinutes()).padStart(2, '0')}`;
 
-function cloudPanel(c: CloudView): string {
-  if (!c.signedIn) {
-    return `<div class="panel">
-      <h4>ログイン(任意)</h4>
-      <p>Googleでログインすると、記録をサーバーに保存して、別の端末でも続きから遊べます。ログインしなくても、全部遊べます。</p>
-      <button class="btn mustard" data-act="cloud-login-ask">Googleでログインする</button>
-    </div>`;
-  }
+/** 設定の1行。act を押す行は右に「›」を出す */
+const setRow = (act: string, label: string, sub = '') =>
+  `<button class="set-row" data-act="${act}"><span>${label}${sub ? `<small>${sub}</small>` : ''}</span><i aria-hidden="true">›</i></button>`;
+
+function cloudRows(c: CloudView): string {
+  if (!c.signedIn) return setRow('cloud-login-ask', 'Googleでログインする', '任意。記録をサーバーに保存して、別の端末でも続けられる');
   const line = c.state === 'error' ? `保存できていません。${esc(c.error ?? '')}あとで自動でやり直します。`
     : c.state === 'syncing' ? 'サーバーと合わせています。'
     : c.syncedAt ? `サーバーに保存しています(最後に合わせた時刻 ${hhmm(c.syncedAt)})。` : '';
-  return `<div class="panel">
-    <h4>ログイン中</h4>
-    <p>${esc(c.email ?? 'Googleアカウント')}</p>
-    <p role="status">${line}</p>
-    <div class="pair">
-      <button class="btn paper" data-act="cloud-logout">ログアウト</button>
-      <button class="btn paper" data-act="cloud-delete-ask">サーバーの記録を消す</button>
-    </div>
-  </div>`;
+  return `<div class="set-row info"><span>ログイン中<small>${esc(c.email ?? 'Googleアカウント')}</small><small role="status">${line}</small></span></div>
+    ${setRow('cloud-logout', 'ログアウト')}
+    ${setRow('cloud-delete-ask', 'サーバーの記録を消す')}`;
 }
 
 /** ログインの前に、何を預かるかを知らせる。ここで押した「ログインする」が、そのままログインの小窓を開く */
@@ -543,7 +558,7 @@ export function cloudDeleteSheet(): string {
 
 export function settingsScreen(
   save: SaveData, pendingImport: { data: SaveData; fileName: string } | null, cardCount: number, version: string, gpsMode: GpsMode | 'sim' | null,
-  drawPassLines: boolean, passLogLines: string[], cloud: CloudView | null,
+  drawPassLines: boolean, passLogLines: string[], cloud: CloudView | null, moreOpen: boolean,
 ): string {
   const confirm = pendingImport
     ? `<div class="panel">
@@ -553,6 +568,16 @@ export function settingsScreen(
         <button class="btn paper" data-act="import-cancel" style="margin-top:12px">やめる</button>
       </div>`
     : '';
+  const group = (title: string, rows: string) => `<h3 class="set-h">${title}</h3><div class="panel set-list">${rows}</div>`;
+  const more = !moreOpen ? '' : `<div class="panel set-list">
+      <button class="set-row" data-act="toggle-pass-lines" aria-pressed="${drawPassLines}"><span>推測した道を地図に描く<small>閉じている間に通ったと推測した道を、点線で描く(今日の分)</small></span><b>${drawPassLines ? 'オン' : 'オフ'}</b></button>
+      <div class="set-row info pass-log"><span>閉じている間の通過の記録(新しい順)<pre>${passLogLines.length ? passLogLines.map(esc).join('\n') : 'まだありません'}</pre></span></div>
+    </div>
+    <div class="foot">
+      ${gpsModeLine(gpsMode)}
+      <p>駅・バス停の位置と地図: © OpenStreetMap contributors。駅・バス停の位置のデータは ODbL(Open Database License)のもとで提供しています。</p>
+      <p>書体: Yusei Magic、Zen Maru Gothic(SIL Open Font License 1.1)。</p>
+    </div>`;
   return `<div class="settings">
     <h2>設定</h2>
     <div class="panel"><div class="stats">
@@ -560,36 +585,15 @@ export function settingsScreen(
       <div><b>${save.shards}</b><span>かけら</span></div>
       <div><b>${save.totalSpins}</b><span>回した回数</span></div>
     </div></div>
-    <div class="panel">
-      <h4>注意事項</h4>
-      <p>回す権利・確率・記録のしくみで、まちがえやすいところをまとめました。</p>
-      <button class="btn paper" data-act="notes">注意事項を見る</button>
-    </div>
-    <div class="panel">
-      <h4>記録</h4>
-      <p>集めたカードなどの記録を、ファイルに保存したり戻したりします。機種変更や、念のための控えに。戻す前には確認が出ます。</p>
-      <div class="pair">
-        <button class="btn mustard" data-act="export">書き出す</button>
-        <label class="btn paper file-label">読み込む<input type="file" accept="application/json,.json" data-act="import-file"></label>
-      </div>
-    </div>
+    ${group('遊ぶ', setRow('howto', '遊び方を見る') + setRow('notes', '注意事項', 'まちがえやすいところのまとめ'))}
+    ${group('記録', `${cloud ? cloudRows(cloud) : ''}
+      ${setRow('export', '記録を書き出す', 'ファイルに保存する。機種変更や控えに')}
+      <label class="set-row file-label"><span>記録を読み込む<small>戻す前に確認が出る</small></span><i aria-hidden="true">›</i><input type="file" accept="application/json,.json" data-act="import-file"></label>`)}
     ${confirm}
-    ${cloud ? cloudPanel(cloud) : ''}
-    <div class="panel">
-      <h4>ベータ版の確かめ用</h4>
-      <p>アプリを閉じている間に通ったと推測した道を、地図に点線で描きます(今日の分)。</p>
-      <button class="btn paper" data-act="toggle-pass-lines" aria-pressed="${drawPassLines}">推測した道を地図に描く: ${drawPassLines ? 'オン' : 'オフ'}</button>
-      <details class="pass-log">
-        <summary>閉じている間の通過の記録(新しい順)</summary>
-        <pre>${passLogLines.length ? passLogLines.map(esc).join('\n') : 'まだありません'}</pre>
-      </details>
-    </div>
-    <div class="foot">
-      ${gpsModeLine(gpsMode)}
-      <p>駅・バス停の位置と地図: © OpenStreetMap contributors。駅・バス停の位置のデータは ODbL(Open Database License)のもとで提供しています。</p>
-      <p>書体: Yusei Magic、Zen Maru Gothic(SIL Open Font License 1.1)。</p>
-      <p>トリップガチャ ベータ版 ${esc(version)}</p>
-    </div>
+    ${group('アプリ', `${setRow('reload', '最新版にする', '新しい版が出ないときに。記録は消えない')}
+      <div class="set-row info"><span>版</span><b>ベータ版 ${esc(version)}</b></div>`)}
+    <button class="sec fold" data-act="more" aria-expanded="${moreOpen}"><span>その他<i aria-hidden="true">${moreOpen ? '▲' : '▼'}</i></span></button>
+    ${more}
   </div>`;
 }
 
@@ -621,7 +625,7 @@ const NOTES: [string, string[]][] = [
   ['記録', [
     '記録は、この端末のブラウザの中にだけある。ブラウザのデータを消すと、記録も消える。機種変更のときは、書き出しと読み込みを使う。',
     'iPhone では、Safari で開いたときと、ホーム画面に追加したアプリとで、記録が別々になる。',
-    '「更新」ボタンを押しても、記録は消えない。',
+    '設定の「最新版にする」を押しても、記録は消えない。',
   ]],
   ['安全', [
     '範囲の外でも回せる。歩きながら画面を見ず、立ち止まってから回す。',

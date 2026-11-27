@@ -28,11 +28,11 @@ import qrcode from 'qrcode-generator';
 import { cloudEnabled, openFirebase, POLICY_URL } from './cloud.ts';
 import { createCloudSync, type CloudSync } from './cloud-sync.ts';
 import {
-  busDetailScreen, chooserSheet, cloudChoiceSheet, cloudDeleteSheet, cloudLoginSheet, detailScreen, diaryScreen, friendConfirmSheet, friendScanSheet, friendShowSheet, passModeSheet, progressSheet, shardInfoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
-  type CloudView, type RecordSummary, type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
+  busDetailScreen, chooserSheet, cloudChoiceSheet, cloudDeleteSheet, cloudLoginSheet, detailScreen, diaryScreen, friendConfirmSheet, friendScanSheet, friendShowSheet, passModeSheet, progressSheet, shardInfoSheet, howtoSheet, shardSpinSheet, mainScreen, multiResultScreen, notesScreen, resultScreen, secretDetailScreen, settingsScreen, tabbar, zukanScreen,
+  type CloudView, type RecordSummary, type Folds, type GeoStatus, type NearSpot, type SecretFace, type Tab, type ZukanTab,
 } from './ui/screens.ts';
 
-const VERSION = '0.13.0';
+const VERSION = '0.14.0';
 
 // 駅では駅のカード、バス停では共通のカードと、ごくまれに裏カード(バス停ごとに出る物が決まっている)が出る
 const spots: Spot[] = spotsJson.spots.map(({ id, name, kind, lat, lon, city }) => ({ id, name, kind, lat, lon, city }));
@@ -71,6 +71,10 @@ const state = {
   shardSpot: null as string | null,
   /** かけらの使い道を見せているか */
   shardInfo: false,
+  /** 遊び方を見せているか */
+  howto: false,
+  /** 設定の「その他」を開いているか */
+  more: false,
   /** 自分のQRを見せているか・友達のQRを読んでいるか・友達の駅をまとめて回す前にたずねているか */
   friendShow: false,
   friendScan: false,
@@ -137,6 +141,12 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+// ホームの開け閉めと「遊び方を見たか」も見た目の話なので、記録とは別に置く
+const FOLDS_KEY = 'trip-gacha:folds';
+const HOWTO_KEY = 'trip-gacha:howto-seen';
+const folds: Folds = { odds: false, friend: true, ...readLocal<Partial<Folds>>(FOLDS_KEY, {}) };
+state.howto = !allCards && !readLocal<boolean>(HOWTO_KEY, false);
+
 // 地図の範囲の表示は見た目の好みなので、記録(書き出すJSON)とは別に置く
 const RANGES_KEY = 'trip-gacha:map-ranges';
 const mapRanges: MapRanges = (() => {
@@ -151,6 +161,8 @@ const mapRanges: MapRanges = (() => {
   return ranges;
 })();
 
+const rangeLabel = (kind: keyof MapRanges) => `${kind === 'station' ? '駅' : 'バス停'}の範囲 ${mapRanges[kind] ? 'オン' : 'オフ'}`;
+
 function toggleRange(kind: keyof MapRanges): void {
   mapRanges[kind] = !mapRanges[kind];
   try {
@@ -161,6 +173,7 @@ function toggleRange(kind: keyof MapRanges): void {
   mapView?.setRanges(mapRanges);
   for (const b of document.querySelectorAll<HTMLElement>('[data-act="map-range"]')) {
     b.setAttribute('aria-pressed', String(mapRanges[b.dataset.kind as keyof MapRanges]));
+    b.textContent = rangeLabel(b.dataset.kind as keyof MapRanges);
   }
 }
 
@@ -212,8 +225,8 @@ app.innerHTML = `${ICON_DEFS}<div class="bar4" aria-hidden="true"><i></i><i></i>
     <div id="map"></div>
     <div class="map-tools">
       <button class="range-btn help" data-act="map-help" aria-expanded="false" aria-controls="map-msg" aria-label="地図の見方">?</button>
-      <button class="range-btn station" data-act="map-range" data-kind="station" aria-pressed="${mapRanges.station}">駅の範囲</button>
-      <button class="range-btn bus" data-act="map-range" data-kind="bus" aria-pressed="${mapRanges.bus}">バス停の範囲</button>
+      <button class="range-btn station" data-act="map-range" data-kind="station" aria-pressed="${mapRanges.station}">${rangeLabel('station')}</button>
+      <button class="range-btn bus" data-act="map-range" data-kind="bus" aria-pressed="${mapRanges.bus}">${rangeLabel('bus')}</button>
       <button class="range-btn center" data-act="map-center">現在地へ</button>
       <div class="map-msg panel" id="map-msg" hidden></div>
     </div>
@@ -307,6 +320,7 @@ function screenHtml(now: number): string {
         distanceM, odds: spotOdds('station', distanceM), busOdds: spotOdds('bus_stop', distanceM), nextStepM: metersToNextStep(distanceM), shards: state.save.shards,
         geo: state.geo, accuracyM: state.accuracyM, near: ticketSpots(now), nearest: nearestSpot(), storageOk, busPass: busPassToday(state.save, now),
         friend: { count: friendCandidates(state.save).length, doneThisWeek: state.save.friendWeek === weekStart(now) },
+        open: folds,
       });
     }
     case 'zukan': {
@@ -322,7 +336,7 @@ function screenHtml(now: number): string {
     case 'settings': {
       if (state.showNotes) return notesScreen(ownedSecrets().length > 0, cloudEnabled);
       const cardCount = cardTotal(state.save);
-      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines, passLogLines, cloudView());
+      return settingsScreen(state.save, state.pendingImport, cardCount, VERSION, state.gpsMode, drawPassLines, passLogLines, cloudView(), state.more);
     }
     case 'diary':
       return diaryScreen(diaryDays(state.save.diary, now), state.diaryDate, (id) => spotById.get(id), state.save.diaryNotes, state.diaryEditing);
@@ -389,7 +403,8 @@ function render(): void {
     : ask ? passModeSheet(ask.options.map((c) => ({ label: PASS_MODE_LABEL[c.mode], count: c.passes.length })), Math.round((ask.seg.to.t - ask.seg.from.t) / 60000))
     : state.chooser ? chooserSheet(spotById.get(state.chooser.spotId)!.name, state.chooser.count)
     : state.shardSpot ? shardSpinSheet(spotById.get(state.shardSpot)!.name, state.save.shards)
-    : state.shardInfo ? shardInfoSheet() : '';
+    : state.shardInfo ? shardInfoSheet()
+    : state.howto ? howtoSheet() : '';
   // 中身が同じなら描き直さない(測位のたびに作り直すと、押している途中のボタンが消える)
   if (sheet !== lastSheet) {
     sheetEl.innerHTML = sheet;
@@ -659,6 +674,15 @@ app.addEventListener('click', (e) => {
     case 'shard-cancel': state.shardSpot = null; break;
     case 'shard-info': state.shardInfo = true; break;
     case 'shard-info-close': state.shardInfo = false; break;
+    case 'howto': state.howto = true; break;
+    case 'more': state.more = !state.more; break;
+    case 'howto-close': state.howto = false; writeLocal(HOWTO_KEY, true); break;
+    case 'fold': {
+      const key = el.dataset.fold as keyof Folds;
+      folds[key] = !folds[key];
+      writeLocal(FOLDS_KEY, folds);
+      break;
+    }
     case 'friend-show': state.friendShow = true; break;
     case 'friend-close': state.friendShow = false; break;
     case 'friend-scan': state.friendScan = true; render(); startFriendScan(); return;
